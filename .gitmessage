@@ -1,0 +1,29 @@
+<gitmoji> <type>: <imperative subject>
+
+# Optional body: explain why, constraints, or migration notes.
+# Optional issue reference: Refs #123
+#
+# Types:
+# feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+#
+# Common gitmojis:
+# ✨ feat      New feature
+# 🐛 fix       Bug fix
+# 📝 docs      Documentation
+# 🎨 style     Formatting or code style
+# ♻️ refactor  Internal restructure without behavior change
+# ⚡ perf      Performance improvement
+# ✅ test      Tests
+# 🔧 build     Build system or tooling
+# 🚀 ci        Automation and delivery
+# 📦 chore     Dependencies or repository maintenance
+# 🔒 fix       Security fix
+# 🗑️ chore     Remove code or files
+# 🔖 chore     Release version and tag
+# ⏪ revert    Revert a previous change
+#
+# Examples:
+# ✨ feat: add subject regex filters
+# 🐛 fix: preserve encoded verification links
+# 📝 docs: document Cypress usage
+# 🔖 chore: release v0.2.0

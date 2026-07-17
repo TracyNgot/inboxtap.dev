@@ -1,0 +1,40 @@
+name: Bug report
+description: Report reproducible behavior that is not working as expected.
+title: "🐛 "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve Local Mailflow.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the observed and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Include the smallest useful SMTP message, API request, or test snippet.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Local Mailflow version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: macOS, Bun 1.x, Node 20
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      render: shell

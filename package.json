@@ -1,0 +1,72 @@
+{
+  "name": "inboxtap",
+  "version": "0.1.0",
+  "description": "A local SMTP inbox for deterministic email-flow tests.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "inboxtap": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "bun --watch src/cli.ts",
+    "start": "bun src/cli.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test",
+    "test:package": "bun scripts/test-package.ts",
+    "verify": "bun run check && bun run build && bun run test:package",
+    "release:check": "bun run verify && bun pm pack --dry-run",
+    "release:pack": "bun run release:check && bun pm pack",
+    "release:patch": "bun scripts/prepare-release.ts patch",
+    "release:minor": "bun scripts/prepare-release.ts minor",
+    "release:major": "bun scripts/prepare-release.ts major",
+    "release:publish": "bun scripts/publish-release.ts",
+    "prepare": "lefthook install",
+    "prepublishOnly": "bun run verify"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "mailparser": "^3.9.14",
+    "smtp-server": "^3.19.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.4",
+    "@types/bun": "^1.3.14",
+    "@types/mailparser": "^3.4.6",
+    "@types/node": "^26.1.1",
+    "@types/smtp-server": "^3.5.13",
+    "lefthook": "^2.1.10",
+    "tsup": "^8.5.1",
+    "typescript": "5.7.3"
+  }
+}
