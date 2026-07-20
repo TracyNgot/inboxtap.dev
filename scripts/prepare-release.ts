@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { assertCleanMain, run } from "./release-helpers.js";
+import { bumpVersion } from "./release-policy.js";
 
 const level = process.argv[2];
 if (level !== "patch" && level !== "minor" && level !== "major") {
@@ -23,23 +24,3 @@ run("git", ["tag", tag]);
 
 console.log("Release commit and tag created. Review them, then push with:");
 console.log("git push origin main --follow-tags");
-
-function bumpVersion(current: string, bump: "patch" | "minor" | "major"): string {
-  const match = current.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  if (!match) throw new Error(`Expected a stable semantic version, received ${current}`);
-
-  let major = Number(match[1]);
-  let minor = Number(match[2]);
-  let patch = Number(match[3]);
-  if (bump === "major") {
-    major += 1;
-    minor = 0;
-    patch = 0;
-  } else if (bump === "minor") {
-    minor += 1;
-    patch = 0;
-  } else {
-    patch += 1;
-  }
-  return `${major}.${minor}.${patch}`;
-}

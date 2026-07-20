@@ -6,12 +6,16 @@
   ],
   "description": "A local SMTP inbox for deterministic email-flow tests.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TracyNgot/inboxtap.dev.git"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "inboxtap": "./dist/cli.js"
+    "inboxtap": "dist/cli.js"
   },
   "exports": {
     ".": {

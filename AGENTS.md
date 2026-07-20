@@ -40,8 +40,10 @@ ESM/CJS imports, and the compiled Node CLI. Never bypass Lefthook with
 
 ## GitHub workflow
 
-- Work from `main` on semantic branches such as `feat/...`, `fix/...`,
-  `docs/...`, `refactor/...`, `test/...`, or `chore/...`.
+- Work from `main` on semantic branches. Use `breaking/...` or `major/...` for
+  major releases, `feat/...` for minor releases, and `fix/...`, `docs/...`,
+  `refactor/...`, `test/...`, or `chore/...` for patch releases. Unrecognized
+  prefixes also produce a patch release.
 - Use the gitmoji conventional-commit format in `.gitmessage`.
 - GitHub issue references are optional in commits. Use `Refs #123` in the body
   when useful and `Closes #123` in the pull request.
@@ -54,6 +56,11 @@ ESM/CJS imports, and the compiled Node CLI. Never bypass Lefthook with
 
 - npm is the canonical package registry. Do not publish this unscoped package to
   GitHub Packages.
-- Release only from a clean `main` branch after `bun run verify` passes.
+- Merging a pull request into `main` runs the serialized npm release workflow.
+  It derives the semantic version bump from the source branch, verifies the
+  package, pushes the release commit and tag, publishes to npm, and creates the
+  GitHub release.
+- Release only from a clean `main` branch after `bun run verify` passes, whether
+  the release is automated or manual.
 - Follow [RELEASING.md](./RELEASING.md). Do not publish, push tags, or create a
   GitHub release unless the user explicitly requests that external action.
