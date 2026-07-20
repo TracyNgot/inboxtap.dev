@@ -110,6 +110,10 @@ InboxTap binds to `127.0.0.1` by default and intentionally disables SMTP authent
 
 Version 0.1 is in-memory only. It does not include persistence, a dashboard, attachments, webhooks, Docker, or configurable extraction files.
 
+## Support
+
+InboxTap is free and open source. If it saves you time, you can [support its ongoing maintenance](https://buymeacoffee.com/yolaine). Your support helps fund documentation, bug fixes, and new releases.
+
 ## Contributing
 
 ```bash
