@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { docGroups, docs, getAdjacentDocs, getDocBySegments } from "@/lib/docs-config";
+import { docGroups, docs, getAdjacentDocs, getDocBySegments, getDocGroup } from "@/lib/docs-config";
 
 describe("documentation registry", () => {
   test("defines unique static slugs and paths", () => {
@@ -13,6 +13,7 @@ describe("documentation registry", () => {
     const groupKeys = new Set(docGroups.map((group) => group.key));
     expect(docs.every((doc) => groupKeys.has(doc.group))).toBe(true);
     expect(docGroups.every((group) => docs.some((doc) => doc.group === group.key))).toBe(true);
+    for (const group of docGroups) expect(getDocGroup(group.key)).toBe(group);
   });
 
   test("resolves route segments and adjacent navigation", () => {

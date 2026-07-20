@@ -131,6 +131,12 @@ export const docs = [
 
 export type DocSlug = (typeof docs)[number]["slug"];
 
+export function getDocGroup(group: DocGroup) {
+  const definition = docGroups.find((candidate) => candidate.key === group);
+  if (!definition) throw new Error(`Unknown documentation group: ${group}`);
+  return definition;
+}
+
 export function getDocBySlug(slug: string): (typeof docs)[number] | undefined {
   return docs.find((doc) => doc.slug === slug);
 }

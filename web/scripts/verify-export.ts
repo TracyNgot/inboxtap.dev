@@ -1,6 +1,7 @@
 import { docs } from "../lib/docs-config";
 
 const outputRoot = new URL("../out/", import.meta.url);
+const siteOrigin = "https://inboxtap.dev";
 const routeFiles = [
   { path: "/", file: "index.html" },
   ...docs.map((doc) => ({
@@ -21,11 +22,21 @@ for (const relativePath of requiredFiles) {
   if (!(await file.exists())) throw new Error(`Missing static export file: ${relativePath}`);
 }
 
+const openGraphImage = Bun.file(new URL("opengraph-image", outputRoot));
+const openGraphSignature = new Uint8Array(await openGraphImage.slice(0, 8).arrayBuffer());
+const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+if (!pngSignature.every((byte, index) => openGraphSignature[index] === byte)) {
+  throw new Error("Static Open Graph image is not a PNG");
+}
+
+function absoluteRouteUrl(path: string): string {
+  return path === "/" ? `${siteOrigin}/` : `${siteOrigin}${path}/`;
+}
+
 const routePaths = new Set(routeFiles.map((route) => route.path));
 for (const route of routeFiles) {
   const html = await Bun.file(new URL(route.file, outputRoot)).text();
-  const expectedCanonical =
-    route.path === "/" ? "https://inboxtap.dev/" : `https://inboxtap.dev${route.path}/`;
+  const expectedCanonical = absoluteRouteUrl(route.path);
   if (!html.includes(`rel="canonical" href="${expectedCanonical}"`)) {
     throw new Error(`Missing canonical URL for ${route.path}`);
   }
@@ -42,8 +53,8 @@ for (const route of routeFiles) {
 
 const sitemap = await Bun.file(new URL("sitemap.xml", outputRoot)).text();
 for (const route of routeFiles) {
-  const url = route.path === "/" ? "https://inboxtap.dev" : `https://inboxtap.dev${route.path}`;
-  if (!sitemap.includes(url)) throw new Error(`Sitemap is missing ${url}`);
+  const url = absoluteRouteUrl(route.path);
+  if (!sitemap.includes(`<loc>${url}</loc>`)) throw new Error(`Sitemap is missing ${url}`);
 }
 
 console.log(`Verified ${routeFiles.length} static routes and their internal documentation links.`);

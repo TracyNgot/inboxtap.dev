@@ -10,13 +10,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       lastModified: updatedAt,
       priority: 1,
-      url: "https://inboxtap.dev",
+      url: "https://inboxtap.dev/",
     },
     ...docs.map((doc) => ({
       changeFrequency: "monthly" as const,
       lastModified: updatedAt,
       priority: doc.slug ? 0.7 : 0.9,
-      url: `https://inboxtap.dev${doc.path}`,
+      url: `https://inboxtap.dev${doc.path}/`,
     })),
   ];
 }

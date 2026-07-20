@@ -10,7 +10,7 @@ function currentTheme(): Theme {
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme | null>(null);
 
   useEffect(() => setTheme(currentTheme()), []);
 
@@ -24,7 +24,9 @@ export function ThemeToggle() {
 
   return (
     <button
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+      aria-label={
+        theme ? `Switch to ${theme === "dark" ? "light" : "dark"} theme` : "Toggle color theme"
+      }
       className="theme-toggle"
       onClick={toggleTheme}
       type="button"
