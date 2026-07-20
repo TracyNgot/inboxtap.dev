@@ -1,6 +1,9 @@
 {
   "name": "inboxtap",
   "version": "0.1.0",
+  "workspaces": [
+    "web"
+  ],
   "description": "A local SMTP inbox for deterministic email-flow tests.",
   "license": "MIT",
   "type": "module",
@@ -42,7 +45,8 @@
     "lint": "biome lint .",
     "check": "bun run format:check && bun run lint && bun run typecheck && bun run test",
     "test:package": "bun scripts/test-package.ts",
-    "verify": "bun run check && bun run build && bun run test:package",
+    "verify:package": "bun run check && bun run build && bun run test:package",
+    "verify": "bun run verify:package && bun run --cwd web verify",
     "release:check": "bun run verify && bun pm pack --dry-run",
     "release:pack": "bun run release:check && bun pm pack",
     "release:patch": "bun scripts/prepare-release.ts patch",

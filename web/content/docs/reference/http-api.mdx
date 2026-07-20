@@ -1,0 +1,80 @@
+The local HTTP API returns JSON and is available at `http://127.0.0.1:8025` by default.
+
+## Request conventions
+
+Query values must be URL encoded. List, latest, and wait requests accept these filters:
+
+| Query | Meaning |
+| --- | --- |
+| `to` | Match any recipient address, case-insensitively |
+| `subject` | Case-insensitive subject substring |
+| `subjectPattern` | JavaScript regular-expression source for the subject |
+| `subjectFlags` | Flags used with `subjectPattern` |
+| `afterId` | Return only messages received after this stored message |
+
+`limit` is supported by the list route and must be from 1–100. `timeoutMs` is supported by the wait
+route and must be from 1–60,000. Errors return `{ "error": "..." }` with an appropriate status.
+
+## Health
+
+<Endpoint method="GET" path="/health">
+Returns the bound SMTP and HTTP addresses plus the recipient domain.
+
+```json
+{
+  "ok": true,
+  "api": { "host": "127.0.0.1", "port": 8025 },
+  "smtp": { "host": "127.0.0.1", "port": 1025 },
+  "domain": "local.test"
+}
+```
+</Endpoint>
+
+## List emails
+
+<Endpoint method="GET" path="/api/emails">
+Returns matching messages in receive order. The response is `{ "emails": CapturedEmail[] }`.
+
+```bash
+curl "http://127.0.0.1:8025/api/emails?to=signup%40local.test&limit=10"
+```
+</Endpoint>
+
+## Latest email
+
+<Endpoint method="GET" path="/api/emails/latest">
+Returns `{ "email": CapturedEmail }` for the newest matching message. Returns `404` when no match
+exists.
+
+```bash
+curl "http://127.0.0.1:8025/api/emails/latest?subject=verify"
+```
+</Endpoint>
+
+## Wait for email
+
+<Endpoint method="GET" path="/api/emails/wait">
+Long-polls until a matching message is available. The default wait is 10 seconds and the maximum is
+60 seconds. Returns `{ "email": CapturedEmail }` on success or `408` on timeout.
+
+```bash
+curl "http://127.0.0.1:8025/api/emails/wait?to=signup%40local.test&timeoutMs=30000"
+```
+</Endpoint>
+
+## Get email by ID
+
+<Endpoint method="GET" path="/api/emails/:id">
+Returns `{ "email": CapturedEmail }` for one stored identifier, or `404` when it is not present.
+</Endpoint>
+
+## Clear emails
+
+<Endpoint method="DELETE" path="/api/emails">
+Deletes every stored message and returns `{ "deleted": number }`. Add a `to` query to delete only
+messages addressed to one recipient.
+
+```bash
+curl -X DELETE "http://127.0.0.1:8025/api/emails?to=signup%40local.test"
+```
+</Endpoint>
