@@ -1,0 +1,66 @@
+InboxTap has explicit CLI flags and programmatic server options. It does not read a configuration
+file in v0.1.
+
+## Defaults
+
+| Setting | Default |
+| --- | --- |
+| SMTP host | `127.0.0.1` |
+| SMTP port | `1025` |
+| HTTP API host | `127.0.0.1` |
+| HTTP API port | `8025` |
+| Recipient domain | `local.test` |
+| Retained messages | `100` |
+| Maximum message size | `5242880` bytes (5 MiB) |
+
+## CLI options
+
+```text
+--smtp-host <host>          SMTP host
+--smtp-port <port>          SMTP port, 0–65535
+--api-host <host>           HTTP API host
+--api-port <port>           HTTP API port, 0–65535
+--domain <domain>           Test recipient domain
+--max-messages <count>      Messages retained in memory
+--max-message-size <bytes>  Maximum accepted SMTP message size
+```
+
+The optional `start` word is accepted, so `inboxtap` and `inboxtap start` are equivalent.
+
+<Callout title="Network boundary">
+  Changing either host away from `127.0.0.1` exposes an unauthenticated test service. Do so only in
+  an isolated environment you control.
+</Callout>
+
+## Run multiple instances
+
+Choose distinct ports and, optionally, a distinct recipient domain:
+
+```bash
+inboxtap --smtp-port 2025 --api-port 9025 --domain mail.local.test
+```
+
+Point the application at SMTP port `2025` and create the client with the matching API base URL:
+
+```ts
+const inboxTap = new InboxTapClient({ baseUrl: "http://127.0.0.1:9025" });
+```
+
+## Programmatic server
+
+Tests can import the server and request ephemeral ports with `0`:
+
+```ts
+import { InboxTapServer } from "inboxtap";
+
+const server = await new InboxTapServer({
+  apiPort: 0,
+  smtpPort: 0,
+  maxMessages: 50,
+}).start();
+
+console.log(server.apiUrl);
+await server.stop();
+```
+
+The bound ports are available on `server.apiPort` and `server.smtpPort` after `start()` resolves.

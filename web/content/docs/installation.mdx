@@ -1,0 +1,58 @@
+InboxTap can run directly from the npm package or be installed as a development dependency in the
+project that owns your tests.
+
+## Requirements
+
+- Node.js 20 or later for the published CLI and package.
+- Bun can run the package and is the package manager used by the InboxTap repository.
+- Two available local ports: SMTP `1025` and HTTP `8025` by default.
+
+## Run the server
+
+Run without adding a dependency:
+
+```bash
+bunx inboxtap
+```
+
+or:
+
+```bash
+npx inboxtap
+```
+
+The command stays in the foreground and prints the local SMTP and HTTP addresses. Press `Ctrl+C` to
+stop it.
+
+## Install the SDK
+
+Add InboxTap to the project that contains your test suite:
+
+```bash
+bun add --dev inboxtap
+```
+
+or:
+
+```bash
+npm install --save-dev inboxtap
+```
+
+Import the client from the public client subpath:
+
+```ts
+import { InboxTapClient } from "inboxtap/client";
+```
+
+## Point your app at InboxTap
+
+Configure the application under test to use the local SMTP listener:
+
+```env
+SMTP_HOST=127.0.0.1
+SMTP_PORT=1025
+SMTP_SECURE=false
+```
+
+Keep these values in a development or test environment. InboxTap deliberately does not implement
+authentication or TLS and should not be exposed to a network.

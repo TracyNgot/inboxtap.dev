@@ -14,6 +14,8 @@ npx inboxtap
 
 It captures all local SMTP recipients in a bounded in-memory store. No message is delivered externally.
 
+Read the complete guides and API reference at [inboxtap.dev/docs](https://inboxtap.dev/docs).
+
 ## Quick start
 
 Start the server:

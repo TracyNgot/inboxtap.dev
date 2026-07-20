@@ -1,0 +1,61 @@
+This walkthrough captures a sign-up email and follows its verification link from a browser test.
+
+## Start InboxTap
+
+Run the server in a separate terminal:
+
+```bash
+npx inboxtap
+```
+
+The defaults are SMTP `127.0.0.1:1025`, HTTP `http://127.0.0.1:8025`, and recipient domain
+`local.test`.
+
+## Create an isolated inbox
+
+Create one address for the current test. The client discovers the server domain and adds a random
+suffix to the alias, so parallel tests do not read one another's messages.
+
+```ts
+import { InboxTapClient } from "inboxtap/client";
+
+const inboxTap = new InboxTapClient();
+const inbox = await inboxTap.createInbox({ alias: "signup" });
+```
+
+An address looks like `signup-f2a737d0-d1e@local.test`. It does not need to be registered with the
+server before use.
+
+## Trigger the email
+
+Pass `inbox.address` through the same application flow a user follows:
+
+```ts
+await page.getByLabel("Email").fill(inbox.address);
+await page.getByRole("button", { name: "Create account" }).click();
+```
+
+Your application must be configured to deliver SMTP mail to InboxTap.
+
+## Await the result
+
+Wait for a matching link and continue the browser flow:
+
+```ts
+const verificationUrl = await inbox.waitForLink({
+  subject: /verify your email/i,
+  contains: "/verify",
+});
+
+await page.goto(verificationUrl);
+```
+
+The extraction helpers return strings. Use `waitForMessage()` when the assertion needs the complete
+captured email, or `messages()` to inspect everything already received by the address.
+
+```ts
+const code = await inbox.waitForCode({ subject: /security code/i });
+const key = await inbox.waitForMatch({ pattern: /api_key=([A-Za-z0-9_-]+)/ });
+
+await inbox.clear();
+```

@@ -1,0 +1,48 @@
+The SDK has no dependency on a particular test runner. It works anywhere the published package can
+use Node 20's `fetch`, including Bun test, Vitest, and Jest.
+
+## Runner-agnostic setup
+
+You can start the CLI as a separate service, or own the server lifecycle directly from a global test
+setup. Programmatic startup is useful when the runner needs isolated, automatically selected ports.
+
+## Start and stop in tests
+
+Adapt the lifecycle hooks to your runner:
+
+```ts
+import { afterAll, beforeAll } from "vitest";
+import { InboxTapServer } from "inboxtap";
+import { InboxTapClient } from "inboxtap/client";
+
+let server: InboxTapServer;
+let inboxTap: InboxTapClient;
+
+beforeAll(async () => {
+  server = await new InboxTapServer({ apiPort: 0, smtpPort: 0 }).start();
+  inboxTap = new InboxTapClient({
+    baseUrl: server.apiUrl,
+    domain: server.domain,
+  });
+
+  // Configure the application under test with server.smtpHost and server.smtpPort.
+});
+
+afterAll(async () => {
+  await server.stop();
+});
+```
+
+For Bun test, import the hooks from `bun:test`. For Jest, use its global `beforeAll` and `afterAll`.
+The InboxTap calls remain the same.
+
+## Choose the right helper
+
+- Use `waitForLink()` for verification, password-reset, and magic-link URLs.
+- Use `waitForCode()` for numeric OTPs; pass `pattern` for a non-default format.
+- Use `waitForMatch()` for an API key or another value embedded in the body.
+- Use `waitForMessage()` when the assertion needs headers, recipients, HTML, or raw source.
+- Use `messages()` when the email may already have arrived and you need to inspect the current set.
+
+All wait helpers are bounded. Set `timeoutMs` high enough for the application flow, but keep it below
+the test runner's own timeout so failures report the InboxTap context first.
