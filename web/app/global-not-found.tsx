@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { RootDocument } from "@/components/shared/root-document";
 import { getDictionary } from "@/lib/i18n";
 import { docPath, homePath, withTrailingSlash } from "@/lib/i18n/config";
+import { siteViewport } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
   robots: { index: false },
   title: "404 · InboxTap",
 };
+
+export const viewport = siteViewport;
 
 export default function GlobalNotFound() {
   const en = getDictionary("en").notFound;

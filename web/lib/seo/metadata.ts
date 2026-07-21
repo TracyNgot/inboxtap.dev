@@ -5,10 +5,12 @@ import { homePath, type Locale, locales, ogLocales } from "../i18n/config";
 import { SITE_NAME, SITE_ORIGIN } from "../site-config";
 
 export const siteViewport: Viewport = {
+  initialScale: 1,
   themeColor: [
     { color: "#050505", media: "(prefers-color-scheme: dark)" },
     { color: "#ffffff", media: "(prefers-color-scheme: light)" },
   ],
+  width: "device-width",
 };
 
 function languageAlternates(paths: Record<Locale, string>) {

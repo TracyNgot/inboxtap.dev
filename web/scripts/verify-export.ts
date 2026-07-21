@@ -46,6 +46,12 @@ for (const route of routes) {
   const html = await Bun.file(new URL(route.file, outputRoot)).text();
 
   requireTag(html, `<html lang="${route.htmlLang}"`, route.path, "html lang");
+  requireTag(
+    html,
+    '<meta name="viewport" content="width=device-width, initial-scale=1"/>',
+    route.path,
+    "viewport meta",
+  );
   requireTag(html, `rel="canonical" href="${route.canonical}"`, route.path, "canonical");
   for (const [hreflang, href] of Object.entries(route.hreflangs)) {
     requireTag(
@@ -101,6 +107,12 @@ if (xDefaultLinks < routes.length) {
 }
 
 const notFoundHtml = await Bun.file(new URL("404.html", outputRoot)).text();
+requireTag(
+  notFoundHtml,
+  '<meta name="viewport" content="width=device-width, initial-scale=1"/>',
+  "/404",
+  "viewport meta",
+);
 for (const marker of ["not in the inbox", "boîte de réception", "bandeja de entrada"]) {
   if (!notFoundHtml.includes(marker)) {
     throw new Error(`404.html is missing the "${marker}" copy`);
