@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/shared/site-header";
 import { getDictionary, getLocalizedDoc } from "@/lib/i18n";
 import { docPath, type Locale } from "@/lib/i18n/config";
 import { homeJsonLd } from "@/lib/seo/json-ld";
-import { GITHUB_URL } from "@/lib/site-config";
+import { BUY_ME_A_COFFEE_URL, GITHUB_URL } from "@/lib/site-config";
 import { Reveal } from "./reveal";
 
 export function LandingPage({ locale }: { locale: Locale }) {
@@ -148,9 +148,20 @@ await page.goto(verificationUrl);`}</code>
             <p className="eyebrow">{t.closingEyebrow}</p>
             <h2>{t.closingHeading}</h2>
             <p>{t.closingLede}</p>
-            <a className="button button-ghost" href={GITHUB_URL}>
-              {t.closingCta}
-            </a>
+            <div className="closing-actions">
+              <a className="button button-ghost" href={GITHUB_URL}>
+                {t.closingCta}
+              </a>
+              <a className="bmc-button" href={BUY_ME_A_COFFEE_URL}>
+                {/* biome-ignore lint/performance/noImgElement: Static export serves this local SVG as-is; next/image adds nothing here. */}
+                <img
+                  alt={dictionary.chrome.supportLabel}
+                  height={44}
+                  src="/buy-me-a-coffee-button.svg"
+                  width={157}
+                />
+              </a>
+            </div>
           </Reveal>
         </section>
       </main>

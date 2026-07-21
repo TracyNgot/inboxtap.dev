@@ -32,6 +32,7 @@ export interface Dictionary {
     navDocs: string;
     footerTagline: string;
     footerGitHubAria: string;
+    supportLabel: string;
     languageSwitcherAria: string;
     themeToggleAria: string;
     themeSwitchToLight: string;

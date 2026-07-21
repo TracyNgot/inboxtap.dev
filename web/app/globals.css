@@ -539,6 +539,30 @@ a {
   margin-top: 12px;
 }
 
+.closing-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.closing-actions .button {
+  margin-top: 0;
+}
+
+.bmc-button img {
+  display: block;
+  height: 44px;
+  width: auto;
+}
+
+.site-footer-links {
+  display: flex;
+  gap: 20px;
+}
+
 .site-footer {
   border-top: 1px solid var(--border);
 }

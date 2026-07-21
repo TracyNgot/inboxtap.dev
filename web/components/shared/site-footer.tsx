@@ -1,5 +1,5 @@
 import type { Dictionary } from "@/lib/i18n/types";
-import { GITHUB_URL } from "@/lib/site-config";
+import { BUY_ME_A_COFFEE_URL, GITHUB_URL } from "@/lib/site-config";
 
 export function SiteFooter({ t }: { t: Dictionary["chrome"] }) {
   return (
@@ -9,9 +9,12 @@ export function SiteFooter({ t }: { t: Dictionary["chrome"] }) {
           Inbox<span>Tap</span>
         </span>
         <span>{t.footerTagline}</span>
-        <a aria-label={t.footerGitHubAria} href={GITHUB_URL}>
-          GitHub ↗
-        </a>
+        <span className="site-footer-links">
+          <a href={BUY_ME_A_COFFEE_URL}>{t.supportLabel} ☕</a>
+          <a aria-label={t.footerGitHubAria} href={GITHUB_URL}>
+            GitHub ↗
+          </a>
+        </span>
       </div>
     </footer>
   );

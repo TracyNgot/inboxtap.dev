@@ -8,6 +8,7 @@ export const en: Dictionary = {
     navAria: "Primary navigation",
     navDocs: "Docs",
     navFeatures: "Features",
+    supportLabel: "Buy me a coffee",
     themeSwitchToDark: "Switch to dark theme",
     themeSwitchToLight: "Switch to light theme",
     themeToggleAria: "Toggle color theme",
