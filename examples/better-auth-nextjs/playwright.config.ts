@@ -8,7 +8,7 @@ export default defineConfig({
   webServer: [
     {
       command: "npx inboxtap",
-      url: "http://127.0.0.1:8025/health",
+      url: "http://localhost:8025/health",
       reuseExistingServer: !process.env.CI,
     },
     {

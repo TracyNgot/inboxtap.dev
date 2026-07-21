@@ -145,6 +145,25 @@ a {
   color: var(--accent-text);
 }
 
+.language-switcher {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.language-switcher a {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: color 180ms ease;
+}
+
+.language-switcher a:hover,
+.language-switcher a[aria-current] {
+  color: var(--accent-text);
+}
+
 .theme-toggle {
   align-items: center;
   background: var(--glass);

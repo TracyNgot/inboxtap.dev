@@ -1,0 +1,120 @@
+import type { Dictionary } from "../types";
+
+export const es: Dictionary = {
+  chrome: {
+    footerGitHubAria: "InboxTap en GitHub",
+    footerTagline: "Licencia MIT · Local por diseño",
+    languageSwitcherAria: "Idioma",
+    navAria: "Navegación principal",
+    navDocs: "Docs",
+    navFeatures: "Funciones",
+    themeSwitchToDark: "Cambiar al tema oscuro",
+    themeSwitchToLight: "Cambiar al tema claro",
+    themeToggleAria: "Cambiar tema de color",
+    wordmarkAria: "Inicio de InboxTap",
+  },
+  docsChrome: {
+    browse: "Explorar la documentación",
+    changelogFull: "Changelog completo",
+    changelogRelease: "Release en GitHub",
+    closeAria: "Cerrar la navegación",
+    closeOverlayAria: "Cerrar la navegación de la documentación",
+    copied: "Copiado",
+    copy: "Copiar",
+    copyAria: "Copiar código",
+    heading: "Documentación",
+    navAria: "Navegación de la documentación",
+    next: "Siguiente",
+    pagerAria: "Documentación adyacente",
+    previous: "Anterior",
+    tocHeading: "En esta página",
+  },
+  landing: {
+    closingCta: "Explorar el repositorio",
+    closingEyebrow: "Gratis · Open source · Licencia MIT",
+    closingHeading: "Mantén el email de test local y observable.",
+    closingLede: "Úsalo, inspecciona el código fuente o ayuda a dar forma a la próxima versión.",
+    codeEyebrow: "De la acción en el navegador a la aserción en el buzón",
+    codeHeading: "Testea el flujo de emails que tus usuarios reciben de verdad",
+    codeLede:
+      "Crea una dirección aislada, envíala a través de tu app y espera el valor esperado. InboxTap funciona con Playwright, Vitest, Jest y otros runners de Bun o Node.",
+    ctaPrimary: "Empezar",
+    ctaSecondary: "Ver en GitHub",
+    eyebrow: "Captura SMTP local para tests automatizados",
+    featuresHeading: "Diseñado para suites de tests deterministas",
+    features: [
+      ["Local por defecto", "SMTP y HTTP escuchan en localhost. InboxTap nunca reenvía correo."],
+      [
+        "Buzones seguros en paralelo",
+        "Direcciones únicas generadas por el cliente aíslan los workers de test concurrentes.",
+      ],
+      ["API REST", "Lista, recupera, espera y limpia los mensajes capturados por HTTP local."],
+      [
+        "Extracción automática",
+        "Detecta enlaces HTTP(S) y códigos únicos de 4 a 8 dígitos en el correo parseado.",
+      ],
+      [
+        "SDK de test",
+        "Espera mensajes, enlaces, códigos y coincidencias regex desde tests en Bun o Node.",
+      ],
+      [
+        "Recursos acotados",
+        "Almacenamiento, tamaño de mensaje y esperas largas tienen límites predecibles.",
+      ],
+    ],
+    headline1: "Captura cada email",
+    headline2: "Extrae cada código",
+    installEyebrow: "Node 20+ · Bun o npm",
+    installLink: "Leer la guía de instalación →",
+    installReady: "SMTP en localhost:1025. API en localhost:8025. Listo.",
+    lede: "Ejecuta un servidor SMTP local, dispara el flujo real de emails de tu aplicación y espera los enlaces de verificación o códigos OTP directamente desde el test que los necesita.",
+    steps: [
+      {
+        code: "SMTP_HOST=localhost\nSMTP_PORT=1025",
+        description: "La misma ruta SMTP que en producción, dirigida a una dirección local segura.",
+        number: "01",
+        title: "Apunta tu app a InboxTap",
+      },
+      {
+        code: "verify@app.dev → signup-…@local.test\n✓ capturado en local",
+        description: "Cada destinatario se acepta y cada mensaje se queda en tu máquina.",
+        number: "02",
+        title: "Dispara el flujo real de emails",
+      },
+      {
+        code: "await inbox.waitForCode()\n→ 482910",
+        description:
+          "Espera el enlace, código, mensaje o coincidencia exacta que tu test necesita.",
+        number: "03",
+        title: "Comprueba desde el SDK de test",
+      },
+    ],
+    stepsHeading: "Tres pasos. Sin cuenta en la nube.",
+  },
+  meta: {
+    breadcrumbDocs: "Documentación",
+    breadcrumbHome: "Inicio",
+    description:
+      "Servidor SMTP 100 % local y SDK de test para probar emails de principio a fin: espera enlaces de verificación, códigos OTP y aserciones desde tus tests.",
+    docsTitle: "Documentación",
+    docsTitleTemplate: "%s · Docs de InboxTap",
+    ogDescription:
+      "Captura mensajes SMTP locales y espera enlaces de verificación, códigos y coincidencias directamente desde tus tests.",
+    ogImage: {
+      alt: "InboxTap — captura cada email, extrae cada código",
+      line1: "Captura cada email",
+      line2: "Extrae cada código",
+      tagline: "Captura SMTP local para tests de email deterministas.",
+    },
+    title: "InboxTap — tests de flujos de email deterministas",
+    titleTemplate: "%s · InboxTap",
+    twitterDescription: "Captura SMTP local para tests de flujos de email deterministas.",
+  },
+  notFound: {
+    eyebrow: "404 · Mensaje no capturado",
+    goHome: "Ir al inicio",
+    readDocs: "Leer la documentación",
+    text: "La ruta puede haberse movido o la dirección está incompleta.",
+    title: "Esta página no está en la bandeja de entrada.",
+  },
+};

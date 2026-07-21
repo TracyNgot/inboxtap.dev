@@ -1,0 +1,67 @@
+InboxTap est un simple processus Node 20+ : pas d’image Docker, pas de conteneur de service, rien
+à mettre en cache. Chaque fournisseur CI le lance de la même façon — installer, démarrer, attendre
+le health check, lancer les tests.
+
+## Deux façons de le lancer
+
+- **Étape en arrière-plan.** Démarrez le CLI avant l’étape de test. Cela reflète le développement
+  local et donne à tous les tests du job un serveur partagé sur les ports par défaut.
+- **Serveur programmatique.** Démarrez `InboxTapServer` avec `apiPort: 0` et `smtpPort: 0` depuis
+  le setup global du runner, comme montré dans le
+  [guide des runners de test](/fr/docs/guides/lanceurs-de-tests). Aucune étape CI supplémentaire,
+  et des ports assignés automatiquement ne peuvent jamais entrer en collision.
+
+Le reste de cette page montre le motif de l’étape en arrière-plan.
+
+## Attendre le health check
+
+Interrogez `/health` avant de passer la main à l’étape de test. Échouer vite ici vaut mieux que
+déboguer le timeout du premier test :
+
+```bash
+npx inboxtap &
+timeout 10 bash -c 'until curl -fsS http://localhost:8025/health > /dev/null; do sleep 0.1; done'
+```
+
+`/health` répond une fois les écouteurs SMTP et HTTP liés, et rapporte les adresses et le domaine
+destinataire en usage.
+
+## Workflow GitHub Actions
+
+```yaml
+name: e2e
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Start InboxTap
+        run: |
+          npx inboxtap &
+          timeout 10 bash -c 'until curl -fsS http://localhost:8025/health > /dev/null; do sleep 0.1; done'
+      - name: Run tests
+        run: npm test
+        env:
+          SMTP_HOST: localhost
+          SMTP_PORT: "1025"
+```
+
+Le processus en arrière-plan vit pour le reste du job, et le runner le récupère à la fin du job —
+aucune étape de teardown n’est nécessaire.
+
+## Ports et autres fournisseurs
+
+Les ports par défaut `1025` et `8025` sont libres sur les runners hébergés de GitHub, GitLab et
+CircleCI. Gardez InboxTap sur l’interface de loopback en CI ; il n’y a aucune raison d’élargir
+`--smtp-host` ou `--api-host` pour une exécution de tests. Sur des runners auto-hébergés partagés
+où des jobs concurrents peuvent entrer en collision, passez des valeurs `--smtp-port` et
+`--api-port` explicites par job, ou basculez sur le serveur programmatique avec le port `0`. Quel
+que soit le fournisseur, la séquence tient en trois étapes : installer, démarrer avec un health
+check, tester.

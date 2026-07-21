@@ -1,0 +1,82 @@
+Importa el cliente de test desde `inboxtap/client`. Se comunica con la API HTTP local y crea
+direcciones de destinatario únicas en el proceso de test.
+
+## Crear un cliente
+
+```ts
+import { InboxTapClient } from "inboxtap/client";
+
+const inboxTap = new InboxTapClient({
+  baseUrl: "http://localhost:8025",
+});
+```
+
+`baseUrl` tiene como valor por defecto `http://localhost:8025`. Un `domain` opcional evita la
+petición inicial de health cuando el test ya conoce el dominio de destinatarios configurado.
+
+## Crear un buzón
+
+```ts
+const inbox = await inboxTap.createInbox({ alias: "password-reset" });
+console.log(inbox.address);
+```
+
+El alias se normaliza a letras minúsculas, dígitos y guiones, y después se añade un sufijo
+aleatorio de 12 caracteres. El alias por defecto es `test`.
+
+## Métodos de TestInbox
+
+| Método | Se resuelve a | Propósito |
+| --- | --- | --- |
+| `messages()` | `CapturedEmail[]` | Lista los mensajes de esta dirección |
+| `clear()` | `number` | Borra los mensajes de esta dirección |
+| `waitForMessage(options)` | `CapturedEmail` | Espera el mensaje coincidente completo |
+| `waitForLink(options)` | `string` | Espera el primer enlace, opcionalmente filtrado por texto contenido |
+| `waitForCode(options)` | `string` | Espera un código que coincida con un patrón; por defecto seis dígitos |
+| `waitForMatch(options)` | `string` | Espera una coincidencia obligatoria de string o expresión regular |
+
+Las opciones de espera aceptan `subject`, `timeoutMs` y `afterId`. `subject` puede ser una
+subcadena de string sin distinguir mayúsculas o una expresión regular. Las esperas de extracción
+tienen un valor por defecto de 10 segundos.
+
+```ts
+const code = await inbox.waitForCode({
+  pattern: /\b\d{4}\b/,
+  subject: /sign in/i,
+  timeoutMs: 20_000,
+});
+```
+
+## Métodos de bajo nivel
+
+`InboxTapClient` también expone `health`, `listEmails`, `latestEmail`, `waitForEmail`,
+`clearEmails` y el método genérico `request`. Prefiere `TestInbox` dentro de tests en paralelo
+porque aplica automáticamente el filtro de destinatario único.
+
+## CapturedEmail
+
+```ts
+interface CapturedEmail {
+  id: string;
+  receivedAt: string;
+  envelope: { from: string | null; to: string[] };
+  from: string;
+  to: string[];
+  subject: string;
+  headers: Record<string, string>;
+  text: string;
+  html: string;
+  links: string[];
+  codes: string[];
+  raw: string;
+}
+```
+
+`links` y `codes` son arrays. InboxTap no asigna nombres semánticos como `magic` o `verification`
+a los valores extraídos.
+
+## Errores
+
+Las peticiones fallidas y los timeouts de extracción lanzan `InboxTapError`. Su propiedad `status`
+contiene el estado al estilo HTTP, incluido `408` para un timeout y `404` para un mensaje
+inexistente.

@@ -1,0 +1,45 @@
+InboxTap est un serveur de capture SMTP strictement local et un SDK de test. Votre application
+envoie un vrai email à InboxTap, puis votre test attend le message, le lien de vérification, le code
+à usage unique ou la correspondance personnalisée dont il a besoin pour continuer.
+
+<Callout title="API pré-1.0">
+  InboxTap est actuellement en v0.1. Le comportement public peut changer entre versions mineures
+  jusqu’à la v1.0.0.
+</Callout>
+
+## Pourquoi InboxTap
+
+Les flux d’email se situent à une frontière inconfortable des tests de bout en bout. Mocker
+l’expéditeur de mail escamote la sortie que votre utilisateur recevrait, tandis qu’un service de
+mail hébergé ajoute des comptes, de la latence réseau et de vraies boîtes de réception à un test qui
+devrait être déterministe.
+
+InboxTap garde cette frontière en local. Il accepte des destinataires arbitraires, parse le message
+délivré et expose le résultat au test même qui a déclenché l’email.
+
+## Comment ça marche
+
+```text
+Your application ──SMTP──▶ InboxTap ──HTTP / SDK──▶ Your test
+                         localhost
+```
+
+1. Démarrez InboxTap en local ou aux côtés de votre processus de test.
+2. Pointez l’application testée vers `localhost:1025`.
+3. Donnez à l’application une adresse unique créée par `InboxTapClient`.
+4. Attendez la valeur attendue via le SDK ou interrogez l’API HTTP locale.
+
+Les messages capturés incluent l’enveloppe SMTP, les en-têtes normalisés, le texte et le HTML
+décodés, les liens HTTP(S) découverts, les codes uniques de 4 à 8 chiffres et la source RFC 822
+brute.
+
+## Sécurité et périmètre
+
+Par défaut, InboxTap ne lie SMTP et HTTP qu’aux adresses de loopback (`127.0.0.1` et `::1`) et ne
+relaie jamais un message vers l’extérieur. Il est destiné au développement et aux tests
+automatisés, pas à la livraison de mail en production.
+
+Le serveur v0.1 stocke les messages en mémoire, conserve les 100 plus récents par défaut, rejette
+par défaut les messages de plus de 5 Mio et plafonne les attentes HTTP en long-poll à 60 secondes.
+Il ne fournit ni persistance, ni boîte de réception dans le navigateur, ni gestion des pièces
+jointes, ni webhooks, ni authentification SMTP, ni STARTTLS.

@@ -49,7 +49,7 @@ curl http://localhost:8025/api/emails/latest
 
 ## How it works
 
-- `lib/mailer.ts` is the single SMTP wiring point: Nodemailer pointed at `127.0.0.1:1025`
+- `lib/mailer.ts` is the single SMTP wiring point: Nodemailer pointed at `localhost:1025`
   (`secure: false`, `ignoreTLS: true` — InboxTap speaks plain SMTP, no auth).
 - Every Better Auth email callback (`sendVerificationEmail`, `sendMagicLink`,
   `sendVerificationOTP`) funnels through that one `sendMail` helper. Each email is plain text
@@ -66,7 +66,7 @@ the repo root (`bun run build && bun pm pack`) and `npm install` the generated `
 ## Troubleshooting
 
 - **`waitForLink`/`waitForCode` times out** — check the app logs for SMTP errors and confirm
-  InboxTap is listening: `curl http://127.0.0.1:8025/health`.
+  InboxTap is listening: `curl http://localhost:8025/health`.
 - **Port already in use** — something else owns `:1025`, `:8025`, or `:3000`. Locally the
   config reuses existing servers, so a stale `next dev` from another project also counts.
 - **Schema errors after upgrading Better Auth** — delete `auth.db` and rerun

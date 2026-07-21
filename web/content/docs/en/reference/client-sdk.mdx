@@ -1,0 +1,80 @@
+Import the test client from `inboxtap/client`. It communicates with the local HTTP API and creates
+unique recipient addresses in the test process.
+
+## Create a client
+
+```ts
+import { InboxTapClient } from "inboxtap/client";
+
+const inboxTap = new InboxTapClient({
+  baseUrl: "http://localhost:8025",
+});
+```
+
+`baseUrl` defaults to `http://localhost:8025`. An optional `domain` skips the initial health request
+when the test already knows the configured recipient domain.
+
+## Create an inbox
+
+```ts
+const inbox = await inboxTap.createInbox({ alias: "password-reset" });
+console.log(inbox.address);
+```
+
+The alias is normalized to lowercase letters, digits, and hyphens, then a random 12-character suffix
+is added. The default alias is `test`.
+
+## TestInbox methods
+
+| Method | Resolves to | Purpose |
+| --- | --- | --- |
+| `messages()` | `CapturedEmail[]` | List messages for this address |
+| `clear()` | `number` | Delete messages for this address |
+| `waitForMessage(options)` | `CapturedEmail` | Await the full matching message |
+| `waitForLink(options)` | `string` | Await the first link, optionally containing text |
+| `waitForCode(options)` | `string` | Await a code matching a pattern; defaults to six digits |
+| `waitForMatch(options)` | `string` | Await a required string or regular-expression match |
+
+Wait options accept `subject`, `timeoutMs`, and `afterId`. `subject` can be a case-insensitive string
+substring or a regular expression. Extraction waits default to 10 seconds.
+
+```ts
+const code = await inbox.waitForCode({
+  pattern: /\b\d{4}\b/,
+  subject: /sign in/i,
+  timeoutMs: 20_000,
+});
+```
+
+## Low-level client methods
+
+`InboxTapClient` also exposes `health`, `listEmails`, `latestEmail`, `waitForEmail`, `clearEmails`,
+and the generic `request` method. Prefer `TestInbox` inside parallel tests because it applies the
+unique recipient filter automatically.
+
+## CapturedEmail
+
+```ts
+interface CapturedEmail {
+  id: string;
+  receivedAt: string;
+  envelope: { from: string | null; to: string[] };
+  from: string;
+  to: string[];
+  subject: string;
+  headers: Record<string, string>;
+  text: string;
+  html: string;
+  links: string[];
+  codes: string[];
+  raw: string;
+}
+```
+
+`links` and `codes` are arrays. InboxTap does not assign semantic names such as `magic` or
+`verification` to extracted values.
+
+## Errors
+
+Failed requests and extraction timeouts throw `InboxTapError`. Its `status` property contains the
+HTTP-style status, including `408` for a timeout and `404` for a missing message.

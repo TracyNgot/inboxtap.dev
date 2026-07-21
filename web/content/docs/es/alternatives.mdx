@@ -1,0 +1,48 @@
+InboxTap es una de varias formas de capturar email durante el desarrollo y los tests. Todas las
+herramientas de abajo responden a la misma pregunta — tu aplicación envió un email, ¿y ahora qué?
+— pero difieren en la interfaz que exponen y en si el mensaje sale o no de tu máquina.
+
+## De un vistazo
+
+| Herramienta         | Interfaz            | Se ejecuta como        | Ideal para                                      |
+| ------------------- | ------------------- | ---------------------- | ----------------------------------------------- |
+| InboxTap            | SDK tipado y API HTTP | CLI de npm o dentro del proceso | Tests automatizados deterministas       |
+| Mailpit             | UI web y API REST   | Binario Go o Docker    | Inspeccionar correo renderizado en desarrollo   |
+| MailHog             | UI web y API        | Binario Go o Docker    | Configuraciones existentes; casi sin mantenimiento |
+| smtp4dev            | UI web e IMAP       | Binario .NET o Docker  | Inspección manual multiplataforma               |
+| Ethereal y Mailtrap | Buzón web alojado   | SaaS                   | Previsualizar la entrega real                   |
+
+## Mailpit y MailHog
+
+Ambos son servidores SMTP locales construidos alrededor de un buzón en el navegador: envías
+correo, abres la UI y lo lees. Mailpit es el sucesor con mantenimiento activo de MailHog y añade
+una API REST que los tests pueden consultar.
+
+Ninguno incluye un SDK de testing. Hacer aserciones implica programar a mano el polling HTTP, la
+extracción de enlaces y códigos y el aislamiento de destinatarios por test — las piezas que aporta
+el `TestInbox` de InboxTap. Además se ejecutan como binario o contenedor aparte, mientras que
+InboxTap se instala desde npm y puede arrancar dentro del proceso de tests. Si el objetivo es
+mirar los emails en lugar de hacer aserciones sobre ellos, son la mejor herramienta.
+
+## smtp4dev
+
+smtp4dev es una herramienta .NET multiplataforma con UI web y acceso IMAP, de modo que un cliente
+de correo de escritorio puede navegar por los mensajes capturados. Como los visores en Go, está
+pensada para inspección: útil para observar lo que envía una aplicación, mientras que los tests
+siguen necesitando código propio de polling y parseo.
+
+## Servicios alojados
+
+Los sandboxes tipo Ethereal y Mailtrap aceptan correo a través de la red en un buzón alojado. Son
+lo más parecido a la entrega en producción, lo que los hace útiles para QA manual y comprobaciones
+de renderizado HTML en clientes reales. Ese mismo salto de red añade cuentas, credenciales,
+latencia y rate limits a una suite de tests — y los mensajes salen de la máquina, algo que la
+captura local nunca hace.
+
+## Cuándo no usar InboxTap
+
+InboxTap no tiene buzón en el navegador, ni persistencia entre reinicios, ni flujo de adjuntos.
+Elige un visor cuando un equipo quiera un buzón compartido y navegable, o un servicio alojado
+cuando el trabajo sea comprobar la entregabilidad y el renderizado en clientes reales. El carril
+de InboxTap es estrecho a propósito: aserciones de email deterministas y seguras en paralelo,
+ejecutándose junto al test que las disparó.

@@ -1,0 +1,115 @@
+Better Auth delivers verification links, magic links, and one-time codes over plain SMTP, so a
+Next.js app can point it at InboxTap and test every authentication flow end to end. The complete
+runnable project lives in
+[`examples/better-auth-nextjs`](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/better-auth-nextjs).
+
+## Wire Better Auth to InboxTap
+
+Create one Nodemailer helper pointed at InboxTap's SMTP port. InboxTap speaks plain SMTP, so the
+transport disables TLS and sends no credentials:
+
+```ts
+import { createTransport } from "nodemailer";
+
+const transport = createTransport({
+  host: process.env.SMTP_HOST ?? "localhost",
+  port: Number(process.env.SMTP_PORT ?? 1025),
+  secure: false,
+  ignoreTLS: true,
+});
+```
+
+Funnel every Better Auth email callback through that helper, keeping each email plain text with
+exactly one link or one six-digit code so extraction stays deterministic:
+
+```ts
+export const auth = betterAuth({
+  database: new Database("./auth.db"),
+  emailAndPassword: { enabled: true, requireEmailVerification: true },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendMail({ to: user.email, subject: "Verify your email", text: `Open: ${url}` });
+    },
+  },
+  plugins: [
+    magicLink({
+      sendMagicLink: async ({ email, url }) => {
+        await sendMail({ to: email, subject: "Your sign-in link", text: `Sign in: ${url}` });
+      },
+    }),
+    emailOTP({
+      sendVerificationOTP: async ({ email, otp }) => {
+        await sendMail({ to: email, subject: "Your sign-in code", text: `Your code is ${otp}` });
+      },
+    }),
+  ],
+});
+```
+
+## Drive the flows with Playwright
+
+Let Playwright own both processes: `webServer` starts `npx inboxtap`, waits for its health
+endpoint, then starts the app. Locally it reuses servers you already have running.
+
+```ts
+export default defineConfig({
+  testDir: "./tests",
+  use: { baseURL: "http://localhost:3000" },
+  webServer: [
+    {
+      command: "npx inboxtap",
+      url: "http://localhost:8025/health",
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: "npm run db:migrate && npm run dev",
+      url: "http://localhost:3000",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
+});
+```
+
+Each test creates its own inbox, signs up through the real form, and follows the captured link:
+
+```ts
+test("signs up, verifies via the emailed link, and lands signed in", async ({ page }) => {
+  const inbox = await inboxTap.createInbox({ alias: "signup" });
+
+  await page.goto("/signup");
+  await page.getByLabel("Email").fill(inbox.address);
+  await page.getByLabel("Password").fill(password);
+  await page.getByRole("button", { name: "Create account" }).click();
+
+  const verificationUrl = await inbox.waitForLink({
+    subject: /verify your email/i,
+    timeoutMs: 20_000,
+  });
+  await page.goto(verificationUrl);
+
+  await page.goto("/");
+  await expect(page.getByText(`Signed in as ${inbox.address} (verified: true)`)).toBeVisible();
+});
+```
+
+The magic-link test works the same way with a different subject filter, and the OTP test swaps
+`waitForLink()` for `waitForCode()` — Better Auth's default OTP is six digits, which matches
+InboxTap's default code pattern exactly.
+
+## Run the example
+
+```bash
+cd examples/better-auth-nextjs
+npm install
+npx playwright install chromium
+npm test
+```
+
+The suite covers sign-up verification, blocked sign-in before verification, magic-link
+auto-signup, OTP sign-in, and code resend — with no terminal juggling, because the tests start
+InboxTap and the app themselves. The example's README also documents an interactive flow:
+`npx inboxtap` in one terminal, `npm run dev` in another, then sign up and read the captured
+email with `curl http://localhost:8025/api/emails/latest`.

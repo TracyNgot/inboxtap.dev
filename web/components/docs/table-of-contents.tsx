@@ -7,7 +7,13 @@ interface TocItem {
   label: string;
 }
 
-export function TableOfContents({ items }: { items: readonly TocItem[] }) {
+export function TableOfContents({
+  heading,
+  items,
+}: {
+  heading: string;
+  items: readonly TocItem[];
+}) {
   const [active, setActive] = useState(items[0]?.id ?? "");
 
   useEffect(() => {
@@ -29,8 +35,8 @@ export function TableOfContents({ items }: { items: readonly TocItem[] }) {
 
   return (
     <aside className="docs-toc">
-      <p>On this page</p>
-      <nav aria-label="On this page">
+      <p>{heading}</p>
+      <nav aria-label={heading}>
         {items.map((item) => (
           <a
             className={active === item.id ? "active" : undefined}

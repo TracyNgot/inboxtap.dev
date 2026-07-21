@@ -1,30 +1,38 @@
 import Link from "next/link";
-import { getDocContent } from "@/lib/docs-content";
-import { getAdjacentDocs, type DocSlug, getDocBySlug, getDocGroup } from "@/lib/docs-config";
+import type { ComponentPropsWithoutRef } from "react";
+import { JsonLd } from "@/components/shared/json-ld";
+import { getDocContent } from "@/lib/content";
+import type { DocKey } from "@/lib/docs-config";
+import { getAdjacentDocs, getDictionary, getLocalizedDoc } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
+import { docJsonLd } from "@/lib/seo/json-ld";
+import { CodeBlock } from "./code-block";
 import { TableOfContents } from "./table-of-contents";
 
-export function DocPage({ slug }: { slug: DocSlug }) {
-  const doc = getDocBySlug(slug);
-  if (!doc) return null;
-  const Content = getDocContent(slug);
-  const adjacent = getAdjacentDocs(slug);
-  const group = getDocGroup(doc.group);
+export function DocPage({ docKey, locale }: { docKey: DocKey; locale: Locale }) {
+  const doc = getLocalizedDoc(locale, docKey);
+  const t = getDictionary(locale).docsChrome;
+  const Content = getDocContent(locale, docKey);
+  const adjacent = getAdjacentDocs(locale, docKey);
+  const labels = { copied: t.copied, copy: t.copy, copyAria: t.copyAria };
+  const pre = (props: ComponentPropsWithoutRef<"pre">) => <CodeBlock {...props} labels={labels} />;
 
   return (
     <div className="docs-page-grid">
+      <JsonLd data={docJsonLd(locale, docKey)} />
       <article className="docs-article">
         <header className="docs-article-header">
-          <p>{group.label}</p>
+          <p>{doc.groupLabel}</p>
           <h1>{doc.title}</h1>
           <span>{doc.description}</span>
         </header>
         <div className="docs-prose">
-          <Content />
+          <Content components={{ pre }} />
         </div>
-        <nav aria-label="Adjacent documentation" className="docs-pager">
+        <nav aria-label={t.pagerAria} className="docs-pager">
           {adjacent.previous ? (
             <Link href={adjacent.previous.path}>
-              <span>Previous</span>
+              <span>{t.previous}</span>
               {adjacent.previous.title}
             </Link>
           ) : (
@@ -32,7 +40,7 @@ export function DocPage({ slug }: { slug: DocSlug }) {
           )}
           {adjacent.next ? (
             <Link href={adjacent.next.path}>
-              <span>Next</span>
+              <span>{t.next}</span>
               {adjacent.next.title} →
             </Link>
           ) : (
@@ -40,7 +48,7 @@ export function DocPage({ slug }: { slug: DocSlug }) {
           )}
         </nav>
       </article>
-      {doc.toc.length > 0 ? <TableOfContents items={doc.toc} /> : null}
+      {doc.toc.length > 0 ? <TableOfContents heading={t.tocHeading} items={doc.toc} /> : null}
     </div>
   );
 }

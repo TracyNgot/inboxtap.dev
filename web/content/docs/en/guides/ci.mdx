@@ -1,0 +1,64 @@
+InboxTap is a plain Node 20+ process: no Docker image, no service container, nothing to cache. Every
+CI provider runs it the same way — install, start, wait for health, run the tests.
+
+## Two ways to run it
+
+- **Background step.** Start the CLI before the test step. This mirrors local development and gives
+  every test in the job one shared server on the default ports.
+- **Programmatic server.** Start `InboxTapServer` with `apiPort: 0` and `smtpPort: 0` from the
+  runner's global setup, as shown in the [test runners guide](/docs/guides/test-runners). There is
+  no extra CI step, and automatically assigned ports can never collide.
+
+The rest of this page shows the background-step pattern.
+
+## Wait for health
+
+Poll `/health` before handing control to the test step. Failing fast here beats debugging a
+first-test timeout:
+
+```bash
+npx inboxtap &
+timeout 10 bash -c 'until curl -fsS http://localhost:8025/health > /dev/null; do sleep 0.1; done'
+```
+
+`/health` responds once both the SMTP and HTTP listeners are bound, and reports the addresses and
+recipient domain in use.
+
+## GitHub Actions workflow
+
+```yaml
+name: e2e
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Start InboxTap
+        run: |
+          npx inboxtap &
+          timeout 10 bash -c 'until curl -fsS http://localhost:8025/health > /dev/null; do sleep 0.1; done'
+      - name: Run tests
+        run: npm test
+        env:
+          SMTP_HOST: localhost
+          SMTP_PORT: "1025"
+```
+
+The backgrounded process lives for the rest of the job, and the runner reaps it when the job ends —
+no teardown step is needed.
+
+## Ports and other providers
+
+The defaults `1025` and `8025` are free on hosted GitHub, GitLab, and CircleCI runners. Keep
+InboxTap on the loopback interface in CI; there is no reason to widen `--smtp-host` or `--api-host`
+for a test run. On shared self-hosted runners where concurrent jobs may collide, pass explicit
+`--smtp-port` and `--api-port` values per job, or switch to the programmatic server with port `0`.
+Whatever the provider, the sequence is the same three steps: install, start with a health check,
+test.

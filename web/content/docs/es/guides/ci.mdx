@@ -1,0 +1,66 @@
+InboxTap es un proceso Node 20+ normal: sin imagen Docker, sin contenedor de servicio, nada que
+cachear. Todos los proveedores de CI lo ejecutan igual — instalar, iniciar, esperar al health,
+ejecutar los tests.
+
+## Dos formas de ejecutarlo
+
+- **Paso en segundo plano.** Inicia la CLI antes del paso de tests. Esto replica el desarrollo
+  local y da a todos los tests del job un servidor compartido en los puertos por defecto.
+- **Servidor programático.** Inicia `InboxTapServer` con `apiPort: 0` y `smtpPort: 0` desde el
+  setup global del runner, como se muestra en la
+  [guía de runners de tests](/es/docs/guias/ejecutores-de-tests). No hay paso extra de CI y los
+  puertos asignados automáticamente nunca pueden colisionar.
+
+El resto de esta página muestra el patrón del paso en segundo plano.
+
+## Esperar al health check
+
+Consulta `/health` antes de ceder el control al paso de tests. Fallar rápido aquí es mejor que
+depurar el timeout del primer test:
+
+```bash
+npx inboxtap &
+timeout 10 bash -c 'until curl -fsS http://localhost:8025/health > /dev/null; do sleep 0.1; done'
+```
+
+`/health` responde una vez que los listeners SMTP y HTTP están ambos enlazados, e informa de las
+direcciones y del dominio de destinatarios en uso.
+
+## Workflow de GitHub Actions
+
+```yaml
+name: e2e
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Start InboxTap
+        run: |
+          npx inboxtap &
+          timeout 10 bash -c 'until curl -fsS http://localhost:8025/health > /dev/null; do sleep 0.1; done'
+      - name: Run tests
+        run: npm test
+        env:
+          SMTP_HOST: localhost
+          SMTP_PORT: "1025"
+```
+
+El proceso en segundo plano vive durante el resto del job y el runner lo recoge cuando el job
+termina — no hace falta ningún paso de teardown.
+
+## Puertos y otros proveedores
+
+Los puertos por defecto `1025` y `8025` están libres en los runners alojados de GitHub, GitLab y
+CircleCI. Mantén InboxTap en la interfaz de loopback en CI; no hay motivo para ampliar
+`--smtp-host` ni `--api-host` en una ejecución de tests. En runners self-hosted compartidos donde
+jobs concurrentes puedan colisionar, pasa valores explícitos de `--smtp-port` y `--api-port` por
+job, o cambia al servidor programático con puerto `0`. Sea cual sea el proveedor, la secuencia es
+la misma de tres pasos: instalar, iniciar con un health check, probar.

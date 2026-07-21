@@ -1,0 +1,44 @@
+InboxTap es un servidor de captura SMTP solo local y un SDK de testing. Tu aplicación envía un
+email real a InboxTap y tu test espera el mensaje, el enlace de verificación, el código de un solo
+uso o la coincidencia personalizada que necesita para continuar.
+
+<Callout title="API pre-1.0">
+  InboxTap está actualmente en v0.1. El comportamiento público puede cambiar entre versiones
+  menores hasta la v1.0.0.
+</Callout>
+
+## Por qué InboxTap
+
+Los flujos de email se sitúan en una frontera incómoda de los tests end-to-end. Mockear el emisor
+de correo omite la salida que recibiría tu usuario, mientras que un servicio de correo alojado
+añade cuentas, latencia de red y buzones reales a un test que debería ser determinista.
+
+InboxTap mantiene esa frontera en local. Acepta destinatarios arbitrarios, parsea el mensaje
+entregado y expone el resultado al mismo test que disparó el email.
+
+## Cómo funciona
+
+```text
+Your application ──SMTP──▶ InboxTap ──HTTP / SDK──▶ Your test
+                         localhost
+```
+
+1. Inicia InboxTap en local o junto a tu proceso de tests.
+2. Apunta la aplicación bajo test a `localhost:1025`.
+3. Dale a la aplicación una dirección única creada por `InboxTapClient`.
+4. Espera el valor que necesitas a través del SDK o consulta la API HTTP local.
+
+Los mensajes capturados incluyen el sobre SMTP, las cabeceras normalizadas, el texto y el HTML
+decodificados, los enlaces HTTP(S) descubiertos, los códigos únicos de 4–8 dígitos y la fuente
+RFC 822 en bruto.
+
+## Seguridad y alcance
+
+Por defecto, InboxTap enlaza SMTP y HTTP solo a las direcciones de loopback (`127.0.0.1` y `::1`)
+y nunca reenvía un mensaje al exterior. Es para desarrollo y tests automatizados, no para la
+entrega de correo en producción.
+
+El servidor v0.1 almacena los mensajes en memoria, retiene los 100 más recientes por defecto,
+rechaza los mensajes de más de 5 MiB por defecto y limita las esperas HTTP de long-poll a 60
+segundos. No ofrece persistencia, buzón en el navegador, flujo de adjuntos, webhooks,
+autenticación SMTP ni STARTTLS.

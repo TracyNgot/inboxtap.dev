@@ -1,0 +1,53 @@
+Le SDK ne dépend d’aucun runner de test particulier. Il fonctionne partout où le paquet publié
+peut utiliser le `fetch` de Node 20, y compris Bun test, Vitest et Jest.
+
+## Configuration indépendante du runner
+
+Vous pouvez démarrer le CLI comme service séparé, ou gérer le cycle de vie du serveur directement
+depuis un setup global de test. Le démarrage programmatique est utile quand le runner a besoin de
+ports isolés, sélectionnés automatiquement.
+
+## Démarrer et arrêter dans les tests
+
+Adaptez les hooks de cycle de vie à votre runner :
+
+```ts
+import { afterAll, beforeAll } from "vitest";
+import { InboxTapServer } from "inboxtap";
+import { InboxTapClient } from "inboxtap/client";
+
+let server: InboxTapServer;
+let inboxTap: InboxTapClient;
+
+beforeAll(async () => {
+  server = await new InboxTapServer({ apiPort: 0, smtpPort: 0 }).start();
+  inboxTap = new InboxTapClient({
+    baseUrl: server.apiUrl,
+    domain: server.domain,
+  });
+
+  // Configure the application under test with server.smtpHost and server.smtpPort.
+});
+
+afterAll(async () => {
+  await server.stop();
+});
+```
+
+Pour Bun test, importez les hooks depuis `bun:test`. Pour Jest, utilisez ses `beforeAll` et
+`afterAll` globaux. Les appels InboxTap restent les mêmes.
+
+## Choisir le bon helper
+
+- Utilisez `waitForLink()` pour les URL de vérification, de réinitialisation de mot de passe et de
+  lien magique.
+- Utilisez `waitForCode()` pour les OTP numériques ; passez `pattern` pour un format non standard.
+- Utilisez `waitForMatch()` pour une clé d’API ou une autre valeur intégrée dans le corps.
+- Utilisez `waitForMessage()` quand l’assertion a besoin des en-têtes, des destinataires, du HTML
+  ou de la source brute.
+- Utilisez `messages()` quand l’email est peut-être déjà arrivé et que vous devez inspecter
+  l’ensemble courant.
+
+Tous les helpers d’attente sont bornés. Réglez `timeoutMs` assez haut pour le parcours applicatif,
+mais gardez-le sous le timeout propre du runner pour que les échecs remontent d’abord le contexte
+InboxTap.

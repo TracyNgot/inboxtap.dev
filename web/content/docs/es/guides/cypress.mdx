@@ -1,0 +1,111 @@
+Cypress ejecuta el código de las specs dentro del navegador, así que el SDK de Node no puede
+importarse en un archivo de spec. Registra en su lugar unos cuantos handlers `cy.task` en
+`setupNodeEvents`: las tasks son las dueñas del SDK en el proceso Node de la configuración y las
+specs las llaman con valores planos.
+
+## Iniciar los servicios
+
+Inicia InboxTap y la aplicación antes de la ejecución de Cypress, en local y en CI:
+
+```bash
+npx inboxtap &
+npm run dev &
+npx cypress run
+```
+
+Configura la aplicación bajo test para enviar SMTP a `localhost:1025`.
+
+## Registrar las tasks
+
+```ts
+// cypress.config.ts
+import { defineConfig } from "cypress";
+import { InboxTapClient, TestInbox } from "inboxtap/client";
+
+const inboxTap = new InboxTapClient();
+
+interface WaitArgs {
+  to: string;
+  subject?: string;
+  contains?: string;
+  pattern?: string;
+  timeoutMs?: number;
+}
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on) {
+      on("task", {
+        "inboxtap:createInbox": async (alias: string) =>
+          (await inboxTap.createInbox({ alias })).address,
+        "inboxtap:waitForLink": ({ to, ...options }: WaitArgs) =>
+          new TestInbox(inboxTap, to).waitForLink(options),
+        "inboxtap:waitForCode": ({ to, ...options }: WaitArgs) =>
+          new TestInbox(inboxTap, to).waitForCode(options),
+      });
+    },
+  },
+});
+```
+
+La task de creación devuelve la dirección del buzón como string, y cada task de espera reconstruye
+un `TestInbox` a partir de la dirección que recibe.
+
+<Callout title="Frontera JSON">
+  Los argumentos y resultados de las tasks deben ser serializables a JSON. Pasa los asuntos y los
+  patrones de código como strings — un asunto string coincide como subcadena sin distinguir
+  mayúsculas, y un patrón string se compila a una expresión regular — pero nunca pases un objeto
+  RegExp a través de la frontera.
+</Callout>
+
+## Escribir el test
+
+```ts
+describe("sign up", () => {
+  it("verifies a new account", () => {
+    cy.task<string>("inboxtap:createInbox", "signup").then((address) => {
+      cy.visit("/signup");
+      cy.get("input[name=email]").type(address);
+      cy.contains("button", "Create account").click();
+
+      cy.task<string>(
+        "inboxtap:waitForLink",
+        { to: address, subject: "verify your email", contains: "/verify", timeoutMs: 20_000 },
+        { timeout: 30_000 },
+      ).then((url) => {
+        cy.visit(url);
+        cy.contains("Email verified").should("be.visible");
+      });
+    });
+  });
+});
+```
+
+Da a la opción `timeout` de Cypress más tiempo que a `timeoutMs`, para que un email lento falle
+dentro de la task con el mensaje de error de InboxTap y no como un timeout genérico de task. Usa
+la task `inboxtap:waitForCode` cuando la aplicación pida un OTP en lugar de un enlace.
+
+## Aislamiento en paralelo
+
+Crea el buzón dentro de cada test, nunca una sola vez para toda la suite. Cada llamada a una task
+genera una dirección de destinatario nueva, así que las specs en paralelo pueden compartir un
+único servidor InboxTap sin leer los mensajes de otras. El almacén acotado desaloja los mensajes
+antiguos por sí solo; añade una task de limpieza solo si la limpieza inmediata ayuda a depurar en
+local.
+
+## Acceso HTTP directo
+
+`cy.request` se ejecuta desde el proxy del lado Node de Cypress, así que puede alcanzar la API de
+loopback directamente sin registrar ninguna task:
+
+```ts
+cy.request(
+  "http://localhost:8025/api/emails/wait?to=signup-1@local.test&timeoutMs=20000",
+)
+  .its("body.email.links")
+  .should("not.be.empty");
+```
+
+Esto renuncia al escaneo multi-mensaje y a la extracción de valores del SDK, así que prefiere las
+tasks para cualquier cosa más allá de una comprobación puntual. La lista completa de endpoints
+está en la [referencia de la API HTTP](/es/docs/referencia/api-http).

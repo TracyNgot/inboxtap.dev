@@ -21,7 +21,7 @@ export class InboxTapClient {
   #domain?: string;
 
   constructor(options: InboxTapClientOptions = {}) {
-    this.baseUrl = (options.baseUrl ?? "http://127.0.0.1:8025").replace(/\/$/, "");
+    this.baseUrl = (options.baseUrl ?? "http://localhost:8025").replace(/\/$/, "");
     this.#domain = options.domain;
   }
 

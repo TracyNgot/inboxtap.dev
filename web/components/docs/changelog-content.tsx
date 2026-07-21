@@ -1,14 +1,24 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Fragment } from "react";
+import { type ComponentType, Fragment } from "react";
 import { type ChangelogRelease, parseChangelog } from "@/lib/changelog";
-
-const repoUrl = "https://github.com/TracyNgot/inboxtap.dev";
+import { GITHUB_URL } from "@/lib/site-config";
 
 // next build runs from web/, so the workspace-root changelog is one level up.
 const changelogPath = join(process.cwd(), "..", "CHANGELOG.md");
 
-export function ChangelogContent() {
+export interface ChangelogLabels {
+  release: string;
+  full: string;
+}
+
+export function localizedChangelog(labels: ChangelogLabels): ComponentType {
+  return function LocalizedChangelog() {
+    return <ChangelogContent labels={labels} />;
+  };
+}
+
+export function ChangelogContent({ labels }: { labels: ChangelogLabels }) {
   const releases = parseChangelog(readFileSync(changelogPath, "utf8"));
   return (
     <>
@@ -21,13 +31,19 @@ export function ChangelogContent() {
         ))}
       </p>
       {releases.map((release) => (
-        <ReleaseSection key={release.version} release={release} />
+        <ReleaseSection key={release.version} labels={labels} release={release} />
       ))}
     </>
   );
 }
 
-function ReleaseSection({ release }: { release: ChangelogRelease }) {
+function ReleaseSection({
+  labels,
+  release,
+}: {
+  labels: ChangelogLabels;
+  release: ChangelogRelease;
+}) {
   return (
     <>
       <h2 id={release.version}>
@@ -67,11 +83,11 @@ function ReleaseSection({ release }: { release: ChangelogRelease }) {
         <p key={extra}>{extra}</p>
       ))}
       <p>
-        <a href={`${repoUrl}/releases/tag/${release.version}`}>GitHub release</a>
+        <a href={`${GITHUB_URL}/releases/tag/${release.version}`}>{labels.release}</a>
         {release.fullChangelogUrl ? (
           <>
             {" · "}
-            <a href={release.fullChangelogUrl}>Full changelog</a>
+            <a href={release.fullChangelogUrl}>{labels.full}</a>
           </>
         ) : null}
       </p>

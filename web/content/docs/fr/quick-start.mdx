@@ -1,0 +1,64 @@
+Ce pas-à-pas capture un email d’inscription et suit son lien de vérification depuis un test
+navigateur.
+
+## Démarrer InboxTap
+
+Lancez le serveur dans un terminal séparé :
+
+```bash
+npx inboxtap
+```
+
+Les valeurs par défaut sont SMTP `localhost:1025`, HTTP `http://localhost:8025` et le domaine
+destinataire `local.test`.
+
+## Créer une boîte isolée
+
+Créez une adresse pour le test en cours. Le client découvre le domaine du serveur et ajoute un
+suffixe aléatoire à l’alias, si bien que les tests parallèles ne lisent pas les messages des
+autres.
+
+```ts
+import { InboxTapClient } from "inboxtap/client";
+
+const inboxTap = new InboxTapClient();
+const inbox = await inboxTap.createInbox({ alias: "signup" });
+```
+
+Une adresse ressemble à `signup-f2a737d0-d1e@local.test`. Elle n’a pas besoin d’être enregistrée
+auprès du serveur avant usage.
+
+## Déclencher un email
+
+Passez `inbox.address` dans le même parcours applicatif qu’un utilisateur :
+
+```ts
+await page.getByLabel("Email").fill(inbox.address);
+await page.getByRole("button", { name: "Create account" }).click();
+```
+
+Votre application doit être configurée pour livrer le mail SMTP à InboxTap.
+
+## Attendre le résultat
+
+Attendez un lien correspondant, puis poursuivez le parcours navigateur :
+
+```ts
+const verificationUrl = await inbox.waitForLink({
+  subject: /verify your email/i,
+  contains: "/verify",
+});
+
+await page.goto(verificationUrl);
+```
+
+Les helpers d’extraction renvoient des chaînes. Utilisez `waitForMessage()` quand l’assertion a
+besoin de l’email capturé complet, ou `messages()` pour inspecter tout ce que l’adresse a déjà
+reçu.
+
+```ts
+const code = await inbox.waitForCode({ subject: /security code/i });
+const key = await inbox.waitForMatch({ pattern: /api_key=([A-Za-z0-9_-]+)/ });
+
+await inbox.clear();
+```
