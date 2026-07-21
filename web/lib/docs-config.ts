@@ -73,6 +73,20 @@ export const docs = [
     ],
   },
   {
+    description: "How InboxTap compares to Mailpit, MailHog, smtp4dev, and hosted mail testing.",
+    group: "getting-started",
+    path: "/docs/alternatives",
+    slug: "alternatives",
+    title: "Alternatives",
+    toc: [
+      { id: "at-a-glance", label: "At a glance" },
+      { id: "mailpit-and-mailhog", label: "Mailpit and MailHog" },
+      { id: "smtp4dev", label: "smtp4dev" },
+      { id: "hosted-services", label: "Hosted services" },
+      { id: "when-not-to-use-inboxtap", label: "When not to use InboxTap" },
+    ],
+  },
+  {
     description: "Complete local HTTP API reference, including filters and response shapes.",
     group: "reference",
     path: "/docs/reference/http-api",
@@ -116,6 +130,20 @@ export const docs = [
     ],
   },
   {
+    description: "Drive email verification flows from Cypress specs with cy.task and the SDK.",
+    group: "guides",
+    path: "/docs/guides/cypress",
+    slug: "guides/cypress",
+    title: "Cypress",
+    toc: [
+      { id: "start-the-services", label: "Start the services" },
+      { id: "register-the-tasks", label: "Register the tasks" },
+      { id: "write-the-test", label: "Write the test" },
+      { id: "parallel-isolation", label: "Parallel isolation" },
+      { id: "direct-http-access", label: "Direct HTTP access" },
+    ],
+  },
+  {
     description: "Run InboxTap programmatically with Bun test, Vitest, Jest, or another runner.",
     group: "guides",
     path: "/docs/guides/test-runners",
@@ -125,6 +153,37 @@ export const docs = [
       { id: "runner-agnostic-setup", label: "Runner-agnostic setup" },
       { id: "start-and-stop-in-tests", label: "Test lifecycle" },
       { id: "choose-the-right-helper", label: "Choose a helper" },
+    ],
+  },
+  {
+    description:
+      "Run InboxTap in CI with a health-checked background step or a programmatic server.",
+    group: "guides",
+    path: "/docs/guides/ci",
+    slug: "guides/ci",
+    title: "CI and GitHub Actions",
+    toc: [
+      { id: "two-ways-to-run-it", label: "Two ways to run it" },
+      { id: "wait-for-health", label: "Wait for health" },
+      { id: "github-actions-workflow", label: "GitHub Actions workflow" },
+      { id: "ports-and-other-providers", label: "Ports and other providers" },
+    ],
+  },
+  {
+    description:
+      "Diagnose connection failures, missing emails, wait timeouts, and cross-test reads.",
+    group: "guides",
+    path: "/docs/guides/troubleshooting",
+    slug: "guides/troubleshooting",
+    title: "Troubleshooting",
+    toc: [
+      { id: "connection-refused", label: "Connection refused" },
+      { id: "port-already-in-use", label: "Port already in use" },
+      { id: "the-email-never-arrives", label: "The email never arrives" },
+      { id: "waits-time-out", label: "Waits time out" },
+      { id: "tests-read-each-others-messages", label: "Cross-test reads" },
+      { id: "messages-disappear", label: "Messages disappear" },
+      { id: "message-rejected-as-too-large", label: "Message too large" },
     ],
   },
 ] as const satisfies readonly DocDefinition[];

@@ -1,7 +1,11 @@
 import type { ComponentType } from "react";
+import Alternatives from "@/content/docs/alternatives.mdx";
 import Configuration from "@/content/docs/configuration.mdx";
+import Ci from "@/content/docs/guides/ci.mdx";
+import Cypress from "@/content/docs/guides/cypress.mdx";
 import Playwright from "@/content/docs/guides/playwright.mdx";
 import TestRunners from "@/content/docs/guides/test-runners.mdx";
+import Troubleshooting from "@/content/docs/guides/troubleshooting.mdx";
 import Installation from "@/content/docs/installation.mdx";
 import Introduction from "@/content/docs/introduction.mdx";
 import QuickStart from "@/content/docs/quick-start.mdx";
@@ -11,9 +15,13 @@ import type { DocSlug } from "./docs-config";
 
 const contentBySlug = {
   "": Introduction,
+  alternatives: Alternatives,
   configuration: Configuration,
+  "guides/ci": Ci,
+  "guides/cypress": Cypress,
   "guides/playwright": Playwright,
   "guides/test-runners": TestRunners,
+  "guides/troubleshooting": Troubleshooting,
   installation: Installation,
   "quick-start": QuickStart,
   "reference/client-sdk": ClientSdk,
