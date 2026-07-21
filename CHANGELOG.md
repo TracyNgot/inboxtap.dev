@@ -4,6 +4,13 @@ Release history for the `inboxtap` npm package. Sections are generated from
 merged pull requests by the release workflow; each version also appears on
 [GitHub Releases](https://github.com/TracyNgot/inboxtap.dev/releases).
 
+## v1.0.4 — 2026-07-21
+
+### 🐛 Fixes
+* 🔒 fix: update vulnerable example dependencies by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/21
+
+**Full Changelog**: https://github.com/TracyNgot/inboxtap.dev/compare/v1.0.3...v1.0.4
+
 ## v1.0.3 — 2026-07-21
 
 ### 📦 Maintenance
