@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import {
+  ensureChangelogItem,
   formatChangelogSection,
   generateReleaseNotes,
   prependChangelogSection,
@@ -24,7 +25,11 @@ writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 const tag = `v${manifest.version}`;
 const date = new Date().toISOString().slice(0, 10);
 prependChangelogSection(
-  formatChangelogSection(tag, date, generateReleaseNotes({ previousTag, tag })),
+  formatChangelogSection(
+    tag,
+    date,
+    ensureChangelogItem(generateReleaseNotes({ previousTag, tag }), previousTag),
+  ),
 );
 
 run("bun", ["install", "--lockfile-only"]);
