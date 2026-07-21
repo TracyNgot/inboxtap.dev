@@ -8,3 +8,10 @@ out/
 .idea/
 *.tgz
 .DS_Store
+playwright-report/
+test-results/
+blob-report/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
