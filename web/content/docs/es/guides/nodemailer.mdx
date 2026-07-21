@@ -1,0 +1,69 @@
+Cualquier backend que envíe email transaccional a través de Nodemailer puede entregarlo a InboxTap
+en lugar de a un proveedor real, haciendo que los emails de bienvenida, los tokens de invitación y
+los OTPs sean comprobables en tests de integración. El proyecto ejecutable completo — una API
+Express probada con Vitest — vive en
+[`examples/express-nodemailer`](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/express-nodemailer).
+
+## Apuntar Nodemailer a InboxTap
+
+InboxTap acepta SMTP plano sin autenticación y sin STARTTLS, así que el transporte necesita
+exactamente tres opciones no predeterminadas y ningún campo `auth`:
+
+```ts
+import { createTransport } from "nodemailer";
+
+const transport = createTransport({
+  host: process.env.SMTP_HOST ?? "localhost",
+  port: Number(process.env.SMTP_PORT ?? 1025),
+  secure: false,
+  ignoreTLS: true,
+});
+```
+
+Todo lo demás del código de envío mantiene su forma de producción: `from`, `to`, `subject`, `text`
+y `html` pasan sin cambios y se capturan tal cual.
+
+## Probar con Vitest
+
+Inicia InboxTap de forma programática en puertos efímeros en cada archivo de spec, y después
+entrega el host y el puerto SMTP asignados a la aplicación bajo test. Los archivos de spec en
+paralelo obtienen cada uno un stack aislado:
+
+```ts
+const server = await new InboxTapServer({ apiPort: 0, smtpPort: 0 }).start();
+const inboxTap = new InboxTapClient({ baseUrl: server.apiUrl, domain: server.domain });
+const mailer = createMailer({ host: server.smtpHost, port: server.smtpPort });
+```
+
+Cada test crea su propio buzón y elige el helper de espera que corresponde a lo que lleva el
+email:
+
+```ts
+it("verifies a new user through the emailed link", async () => {
+  const inbox = await inboxTap.createInbox({ alias: "signup" });
+
+  await postJson(`${baseUrl}/signup`, { email: inbox.address });
+
+  const link = await inbox.waitForLink({ subject: /welcome/i, contains: "/verify?token=" });
+  const verify = await fetch(link);
+  expect(verify.status).toBe(200);
+});
+```
+
+Las otras specs del ejemplo muestran el resto del toolkit: `waitForMatch()` extrae un token de
+invitación personalizado con `pattern: /invite_[a-f0-9]{12}/`, `waitForCode()` obtiene un OTP de
+seis dígitos con su patrón por defecto y `waitForMessage()` devuelve el email capturado completo
+para aserciones de forma sobre destinatarios, HTML y enlaces extraídos.
+
+## Ejecutar el ejemplo
+
+```bash
+cd examples/express-nodemailer
+npm install
+npm test
+```
+
+Los tests arrancan InboxTap y la app Express por sí mismos en puertos efímeros — sin otra terminal
+y sin conflictos de puertos con nada que ya esté en ejecución. Para una exploración interactiva,
+ejecuta `npx inboxtap` en una terminal y `npm run dev` en otra, dispara un email con `curl` y
+léelo desde `http://localhost:8025/api/emails/latest`.

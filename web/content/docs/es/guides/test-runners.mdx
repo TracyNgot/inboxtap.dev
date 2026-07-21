@@ -1,0 +1,52 @@
+El SDK no depende de ningún runner de tests concreto. Funciona en cualquier lugar donde el paquete
+publicado pueda usar el `fetch` de Node 20, incluidos Bun test, Vitest y Jest.
+
+## Configuración independiente del runner
+
+Puedes iniciar la CLI como servicio aparte o gestionar el ciclo de vida del servidor directamente
+desde un setup global de tests. El arranque programático es útil cuando el runner necesita puertos
+aislados y seleccionados automáticamente.
+
+## Arrancar y parar en los tests
+
+Adapta los hooks de ciclo de vida a tu runner:
+
+```ts
+import { afterAll, beforeAll } from "vitest";
+import { InboxTapServer } from "inboxtap";
+import { InboxTapClient } from "inboxtap/client";
+
+let server: InboxTapServer;
+let inboxTap: InboxTapClient;
+
+beforeAll(async () => {
+  server = await new InboxTapServer({ apiPort: 0, smtpPort: 0 }).start();
+  inboxTap = new InboxTapClient({
+    baseUrl: server.apiUrl,
+    domain: server.domain,
+  });
+
+  // Configure the application under test with server.smtpHost and server.smtpPort.
+});
+
+afterAll(async () => {
+  await server.stop();
+});
+```
+
+Para Bun test, importa los hooks desde `bun:test`. Para Jest, usa sus `beforeAll` y `afterAll`
+globales. Las llamadas a InboxTap no cambian.
+
+## Elegir el helper adecuado
+
+- Usa `waitForLink()` para URLs de verificación, restablecimiento de contraseña y magic links.
+- Usa `waitForCode()` para OTPs numéricos; pasa `pattern` para un formato no predeterminado.
+- Usa `waitForMatch()` para una API key u otro valor incrustado en el cuerpo.
+- Usa `waitForMessage()` cuando la aserción necesite cabeceras, destinatarios, HTML o la fuente en
+  bruto.
+- Usa `messages()` cuando el email pueda haber llegado ya y necesites inspeccionar el conjunto
+  actual.
+
+Todos los helpers de espera están acotados. Configura `timeoutMs` lo bastante alto para el flujo
+de la aplicación, pero mantenlo por debajo del timeout propio del runner para que los fallos
+informen primero del contexto de InboxTap.

@@ -145,6 +145,25 @@ a {
   color: var(--accent-text);
 }
 
+.language-switcher {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.language-switcher a {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: color 180ms ease;
+}
+
+.language-switcher a:hover,
+.language-switcher a[aria-current] {
+  color: var(--accent-text);
+}
+
 .theme-toggle {
   align-items: center;
   background: var(--glass);
@@ -324,8 +343,7 @@ a {
   font-size: 0.72rem;
 }
 
-.terminal-body pre,
-.step-card pre {
+.terminal-body pre {
   background: var(--code-background);
   border: 1px solid var(--border);
   color: var(--code-text);
@@ -349,6 +367,230 @@ a {
   padding-top: clamp(80px, 10vw, 140px);
 }
 
+.story-track {
+  display: none;
+  height: 300vh;
+}
+
+.story-sticky {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100vh - 64px);
+  /* biome-ignore lint/suspicious/noDuplicateProperties: svh with a vh fallback for browsers without small-viewport units. */
+  height: calc(100svh - 64px);
+  padding: 28px clamp(32px, 5vw, 72px) 20px;
+  position: sticky;
+  top: 64px;
+}
+
+.story-captions {
+  display: grid;
+  min-height: 168px;
+}
+
+.story-caption {
+  grid-area: 1 / 1;
+  max-width: 640px;
+}
+
+.story-caption h3 {
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  margin: 0 0 12px;
+}
+
+.story-caption p {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 56ch;
+}
+
+.story-stage-wrap {
+  align-items: center;
+  container-type: size;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-height: 0;
+}
+
+.story-stage {
+  aspect-ratio: 1200 / 560;
+  position: relative;
+  width: 100%;
+  /* biome-ignore lint/suspicious/noDuplicateProperties: cqh sizing keeps the stage at the exact viewBox ratio; plain width is the fallback for browsers without container-query units. */
+  width: min(100%, calc(100cqh * (1200 / 560)));
+}
+
+.story-progress {
+  background: var(--accent);
+  height: 2px;
+  margin-top: 14px;
+  transform-origin: left;
+  width: 132px;
+}
+
+.story-svg {
+  color: var(--border-strong);
+  inset: 0;
+  position: absolute;
+}
+
+.story-svg .story-route {
+  stroke-dasharray: 6 8;
+}
+
+.story-svg .story-accent {
+  color: var(--accent);
+}
+
+.story-svg .story-chip-box {
+  fill: var(--background-elevated);
+  stroke: var(--border-strong);
+}
+
+.story-svg .story-envelope rect {
+  fill: var(--background-elevated);
+  stroke: currentColor;
+}
+
+.story-svg .story-envelope path {
+  stroke: currentColor;
+}
+
+.story-svg text {
+  fill: var(--text);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 15px;
+}
+
+.story-anchor {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.story-node {
+  align-items: center;
+  background: var(--background-elevated);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-jetbrains-mono), monospace;
+  gap: 2px;
+  padding: 10px 18px;
+  white-space: nowrap;
+}
+
+.story-node strong {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.story-node span {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.story-node-accent {
+  border-color: var(--accent);
+}
+
+.story-node-accent strong {
+  color: var(--accent-text);
+}
+
+.story-tag {
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.story-tag-accent {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.story-pulse {
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  height: 96px;
+  width: 96px;
+}
+
+.story-mover {
+  will-change: transform, opacity;
+}
+
+.story-stacked {
+  display: grid;
+}
+
+.story-stacked .story-stacked-heading {
+  margin-bottom: 48px;
+}
+
+.story-panel {
+  padding: 30px;
+}
+
+.story-panel svg {
+  color: var(--muted);
+  display: block;
+  margin-bottom: 18px;
+}
+
+.story-panel svg .story-accent {
+  color: var(--accent);
+}
+
+.story-panel h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+
+.story-panel p {
+  color: var(--muted);
+  font-size: 0.925rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.story-panel .eyebrow {
+  margin-bottom: 14px;
+}
+
+@media (min-width: 901px) and (min-height: 641px) and (prefers-reduced-motion: no-preference) {
+  .story-track {
+    display: block;
+  }
+
+  .story-stacked {
+    display: none;
+  }
+}
+
+@media (scripting: none) {
+  .story-track {
+    display: none;
+  }
+
+  .story-stacked {
+    display: grid;
+  }
+}
+
 .landing-section h2,
 .closing-section h2 {
   font-size: clamp(2.1rem, 4.1vw, 3.5rem);
@@ -368,7 +610,6 @@ a {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.step-card,
 .feature-card {
   display: flex;
   flex-direction: column;
@@ -379,41 +620,23 @@ a {
     transform 200ms ease;
 }
 
-.step-card:hover,
 .feature-card:hover {
   border-color: rgba(0, 230, 118, 0.45);
   transform: translateY(-5px);
 }
 
-.step-number {
-  color: var(--accent-text);
-  font-size: 2.8rem;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 26px;
-}
-
-.step-card h3,
 .feature-card h3 {
   font-size: 1.08rem;
   font-weight: 700;
   margin: 0 0 10px;
 }
 
-.step-card p,
 .feature-card p {
   color: var(--muted);
   flex: 1;
   font-size: 0.94rem;
   line-height: 1.62;
   margin: 0 0 24px;
-}
-
-.step-card pre {
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 0.72rem;
-  line-height: 1.6;
-  white-space: pre-wrap;
 }
 
 .feature-mark {
@@ -518,6 +741,30 @@ a {
 
 .closing-card .button {
   margin-top: 12px;
+}
+
+.closing-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.closing-actions .button {
+  margin-top: 0;
+}
+
+.bmc-button img {
+  display: block;
+  height: 44px;
+  width: auto;
+}
+
+.site-footer-links {
+  display: flex;
+  gap: 20px;
 }
 
 .site-footer {
@@ -729,6 +976,89 @@ a {
   color: var(--muted);
 }
 
+.flow-diagram {
+  align-items: center;
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin: 0 0 28px;
+  padding: 34px 24px;
+}
+
+.flow-node {
+  align-items: center;
+  background: var(--glass);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 20px;
+  text-align: center;
+}
+
+.flow-node strong,
+.flow-node span,
+.flow-connector span {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+.flow-node strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.flow-node > span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.flow-node-accent {
+  border-color: var(--accent);
+}
+
+.flow-node-accent strong {
+  color: var(--accent-text);
+}
+
+.flow-connector {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.flow-connector span {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.flow-connector svg {
+  color: var(--border-strong);
+  width: 48px;
+}
+
+@media (max-width: 640px) {
+  .flow-diagram {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .flow-connector {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .flow-connector svg {
+    transform: rotate(90deg);
+    width: 26px;
+  }
+}
+
 .docs-code-block {
   background: var(--code-background);
   border: 1px solid var(--border);
@@ -769,13 +1099,20 @@ a {
   font-family: inherit;
 }
 
-.docs-code-block .shiki span {
+.docs-code-block .shiki span,
+.code-highlight .shiki span {
   color: var(--shiki-light, inherit);
 }
 
 [data-theme="dark"] .docs-code-block .shiki,
-[data-theme="dark"] .docs-code-block .shiki span {
+[data-theme="dark"] .docs-code-block .shiki span,
+[data-theme="dark"] .code-highlight .shiki,
+[data-theme="dark"] .code-highlight .shiki span {
   color: var(--shiki-dark, inherit);
+}
+
+.code-highlight pre code {
+  font-family: inherit;
 }
 
 .docs-callout {
@@ -1138,8 +1475,8 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .step-card,
-  .feature-card {
+  .feature-card,
+  .story-panel {
     padding: 24px;
   }
 

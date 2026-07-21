@@ -1,0 +1,55 @@
+InboxTap da a cada test de Playwright su propia dirección de destinatario mientras el navegador
+ejercita el flujo real de registro, restablecimiento de contraseña o inicio de sesión.
+
+## Iniciar los servicios
+
+Inicia InboxTap junto a la aplicación en la configuración `webServer` de Playwright o en el setup
+de servicios de tu CI. Una opción es ejecutar ambos comandos antes del proceso de tests:
+
+```bash
+npx inboxtap &
+npm run dev &
+npx playwright test
+```
+
+Configura la aplicación lanzada por el test para que use SMTP `localhost:1025`. Mantén InboxTap en
+la interfaz de loopback incluso en CI.
+
+## Escribir el test
+
+```ts
+import { test, expect } from "@playwright/test";
+import { InboxTapClient } from "inboxtap/client";
+
+const inboxTap = new InboxTapClient();
+
+test("verifies a new account", async ({ page }) => {
+  const inbox = await inboxTap.createInbox({ alias: "signup" });
+
+  await page.goto("/signup");
+  await page.getByLabel("Email").fill(inbox.address);
+  await page.getByRole("button", { name: "Create account" }).click();
+
+  const verificationUrl = await inbox.waitForLink({
+    subject: /verify your email/i,
+    contains: "/verify",
+    timeoutMs: 20_000,
+  });
+
+  await page.goto(verificationUrl);
+  await expect(page.getByText("Email verified")).toBeVisible();
+});
+```
+
+Usa `waitForCode()` cuando la aplicación pida al usuario copiar un OTP en lugar de seguir un
+enlace.
+
+## Workers en paralelo
+
+Crea el buzón dentro del test o del fixture, nunca una sola vez a nivel de módulo para toda la
+suite. Cada llamada genera una dirección de destinatario nueva, así que los workers de Playwright
+pueden compartir un único servidor InboxTap sin leer los mensajes de otros.
+
+Llama a `await inbox.clear()` después de un test cuando la limpieza inmediata ayude a depurar en
+local. El servidor también desaloja mensajes antiguos cuando su almacén acotado alcanza
+`maxMessages`.

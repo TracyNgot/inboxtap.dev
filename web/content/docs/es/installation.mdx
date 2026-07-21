@@ -1,0 +1,58 @@
+InboxTap puede ejecutarse directamente desde el paquete npm o instalarse como dependencia de
+desarrollo en el proyecto que contiene tus tests.
+
+## Requisitos
+
+- Node.js 20 o posterior para la CLI y el paquete publicados.
+- Bun puede ejecutar el paquete y es el gestor de paquetes que usa el repositorio de InboxTap.
+- Dos puertos locales disponibles: SMTP `1025` y HTTP `8025` por defecto.
+
+## Ejecutar el servidor
+
+Ejecuta sin añadir una dependencia:
+
+```bash
+bunx inboxtap
+```
+
+o:
+
+```bash
+npx inboxtap
+```
+
+El comando permanece en primer plano e imprime las direcciones SMTP y HTTP locales. Pulsa `Ctrl+C`
+para detenerlo.
+
+## Instalar el SDK
+
+Añade InboxTap al proyecto que contiene tu suite de tests:
+
+```bash
+bun add --dev inboxtap
+```
+
+o:
+
+```bash
+npm install --save-dev inboxtap
+```
+
+Importa el cliente desde su subpath público:
+
+```ts
+import { InboxTapClient } from "inboxtap/client";
+```
+
+## Configurar tu aplicación
+
+Configura la aplicación bajo test para que use el listener SMTP local:
+
+```env
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_SECURE=false
+```
+
+Mantén estos valores en un entorno de desarrollo o de test. InboxTap deliberadamente no implementa
+autenticación ni TLS y no debe exponerse a una red.

@@ -1,0 +1,69 @@
+InboxTap tiene flags de CLI explícitos y opciones de servidor programáticas. No lee ningún archivo
+de configuración en v0.1.
+
+## Valores por defecto
+
+| Ajuste | Valor por defecto |
+| --- | --- |
+| Host SMTP | `localhost` (enlaza `127.0.0.1` y `::1`) |
+| Puerto SMTP | `1025` |
+| Host de la API HTTP | `localhost` (enlaza `127.0.0.1` y `::1`) |
+| Puerto de la API HTTP | `8025` |
+| Dominio de destinatarios | `local.test` |
+| Mensajes retenidos | `100` |
+| Tamaño máximo de mensaje | `5242880` bytes (5 MiB) |
+
+## Opciones de la CLI
+
+```text
+--smtp-host <host>          SMTP host
+--smtp-port <port>          SMTP port, 0–65535
+--api-host <host>           HTTP API host
+--api-port <port>           HTTP API port, 0–65535
+--domain <domain>           Test recipient domain
+--max-messages <count>      Messages retained in memory
+--max-message-size <bytes>  Maximum accepted SMTP message size
+```
+
+La palabra opcional `start` se acepta, así que `inboxtap` e `inboxtap start` son equivalentes.
+
+<Callout title="Frontera de red">
+  Por defecto ambos listeners enlazan solo las direcciones de loopback; si IPv6 no está disponible,
+  el servidor recurre únicamente a `127.0.0.1`. Cambiar cualquiera de los hosts fuera de loopback
+  expone un servicio de test sin autenticación. Hazlo solo en un entorno aislado que controles.
+</Callout>
+
+## Varias instancias
+
+Elige puertos distintos y, opcionalmente, un dominio de destinatarios distinto:
+
+```bash
+inboxtap --smtp-port 2025 --api-port 9025 --domain mail.local.test
+```
+
+Apunta la aplicación al puerto SMTP `2025` y crea el cliente con la URL base de la API
+correspondiente:
+
+```ts
+const inboxTap = new InboxTapClient({ baseUrl: "http://localhost:9025" });
+```
+
+## Servidor programático
+
+Los tests pueden importar el servidor y solicitar puertos efímeros con `0`:
+
+```ts
+import { InboxTapServer } from "inboxtap";
+
+const server = await new InboxTapServer({
+  apiPort: 0,
+  smtpPort: 0,
+  maxMessages: 50,
+}).start();
+
+console.log(server.apiUrl);
+await server.stop();
+```
+
+Los puertos enlazados están disponibles en `server.apiPort` y `server.smtpPort` después de que
+`start()` se resuelva.

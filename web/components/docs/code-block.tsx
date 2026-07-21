@@ -3,7 +3,18 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { useRef, useState } from "react";
 
-export function CodeBlock(props: ComponentPropsWithoutRef<"pre">) {
+export interface CodeBlockLabels {
+  copy: string;
+  copied: string;
+  copyAria: string;
+}
+
+const defaultLabels: CodeBlockLabels = { copied: "Copied", copy: "Copy", copyAria: "Copy code" };
+
+export function CodeBlock({
+  labels = defaultLabels,
+  ...props
+}: ComponentPropsWithoutRef<"pre"> & { labels?: CodeBlockLabels }) {
   const codeRef = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
   const { style, ...preProps } = props;
@@ -28,8 +39,8 @@ export function CodeBlock(props: ComponentPropsWithoutRef<"pre">) {
 
   return (
     <div className="docs-code-block">
-      <button aria-label="Copy code" onClick={copyCode} type="button">
-        {copied ? "Copied" : "Copy"}
+      <button aria-label={labels.copyAria} onClick={copyCode} type="button">
+        {copied ? labels.copied : labels.copy}
       </button>
       <pre {...preProps} ref={codeRef} style={{ ...style, background: "transparent" }} />
     </div>

@@ -1,7 +1,7 @@
 import { createTransport } from "nodemailer";
 
 const transport = createTransport({
-  host: process.env.SMTP_HOST ?? "127.0.0.1",
+  host: process.env.SMTP_HOST ?? "localhost",
   port: Number(process.env.SMTP_PORT ?? 1025),
   secure: false,
   ignoreTLS: true,

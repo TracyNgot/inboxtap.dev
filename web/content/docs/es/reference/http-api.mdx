@@ -1,0 +1,85 @@
+La API HTTP local devuelve JSON y está disponible en `http://localhost:8025` por defecto.
+
+## Convenciones de las peticiones
+
+Los valores de query deben ir codificados como URL. Las peticiones de listado, último y espera
+aceptan estos filtros:
+
+| Query | Significado |
+| --- | --- |
+| `to` | Coincide con cualquier dirección de destinatario, sin distinguir mayúsculas |
+| `subject` | Subcadena del asunto, sin distinguir mayúsculas |
+| `subjectPattern` | Fuente de expresión regular de JavaScript para el asunto |
+| `subjectFlags` | Flags usados con `subjectPattern` |
+| `afterId` | Devuelve solo mensajes recibidos después de este mensaje almacenado |
+
+`limit` está soportado por la ruta de listado y debe estar entre 1 y 100. `timeoutMs` está
+soportado por la ruta de espera y debe estar entre 1 y 60 000. Los errores devuelven
+`{ "error": "..." }` con un estado apropiado.
+
+## Health
+
+<Endpoint method="GET" path="/health">
+Devuelve las direcciones SMTP y HTTP enlazadas más el dominio de destinatarios.
+
+```json
+{
+  "ok": true,
+  "api": { "host": "localhost", "port": 8025 },
+  "smtp": { "host": "localhost", "port": 1025 },
+  "domain": "local.test"
+}
+```
+</Endpoint>
+
+## Listar emails
+
+<Endpoint method="GET" path="/api/emails">
+Devuelve los mensajes coincidentes en orden de recepción. La respuesta es
+`{ "emails": CapturedEmail[] }`.
+
+```bash
+curl "http://localhost:8025/api/emails?to=signup%40local.test&limit=10"
+```
+</Endpoint>
+
+## Último email
+
+<Endpoint method="GET" path="/api/emails/latest">
+Devuelve `{ "email": CapturedEmail }` para el mensaje coincidente más reciente. Devuelve `404`
+cuando no existe ninguna coincidencia.
+
+```bash
+curl "http://localhost:8025/api/emails/latest?subject=verify"
+```
+</Endpoint>
+
+## Esperar un email
+
+<Endpoint method="GET" path="/api/emails/wait">
+Hace long-poll hasta que haya un mensaje coincidente disponible. La espera por defecto es de 10
+segundos y el máximo de 60 segundos. Devuelve `{ "email": CapturedEmail }` si tiene éxito o `408`
+si agota el tiempo.
+
+```bash
+curl "http://localhost:8025/api/emails/wait?to=signup%40local.test&timeoutMs=30000"
+```
+</Endpoint>
+
+## Obtener por ID
+
+<Endpoint method="GET" path="/api/emails/:id">
+Devuelve `{ "email": CapturedEmail }` para un identificador almacenado, o `404` cuando no está
+presente.
+</Endpoint>
+
+## Limpiar emails
+
+<Endpoint method="DELETE" path="/api/emails">
+Borra todos los mensajes almacenados y devuelve `{ "deleted": number }`. Añade una query `to` para
+borrar solo los mensajes dirigidos a un destinatario.
+
+```bash
+curl -X DELETE "http://localhost:8025/api/emails?to=signup%40local.test"
+```
+</Endpoint>

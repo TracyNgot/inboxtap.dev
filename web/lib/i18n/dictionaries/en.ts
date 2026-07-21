@@ -1,0 +1,128 @@
+import type { Dictionary } from "../types";
+
+export const en: Dictionary = {
+  chrome: {
+    footerGitHubAria: "InboxTap on GitHub",
+    footerTagline: "MIT License · Local by design",
+    languageSwitcherAria: "Language",
+    navAria: "Primary navigation",
+    navDocs: "Docs",
+    navFeatures: "Features",
+    supportLabel: "Buy me a coffee",
+    themeSwitchToDark: "Switch to dark theme",
+    themeSwitchToLight: "Switch to light theme",
+    themeToggleAria: "Toggle color theme",
+    wordmarkAria: "InboxTap home",
+  },
+  docsChrome: {
+    browse: "Browse documentation",
+    changelogFull: "Full changelog",
+    changelogRelease: "GitHub release",
+    closeAria: "Close navigation",
+    closeOverlayAria: "Close documentation navigation",
+    copied: "Copied",
+    copy: "Copy",
+    copyAria: "Copy code",
+    heading: "Documentation",
+    navAria: "Documentation navigation",
+    next: "Next",
+    pagerAria: "Adjacent documentation",
+    previous: "Previous",
+    tocHeading: "On this page",
+  },
+  landing: {
+    closingCta: "Explore the repository",
+    closingEyebrow: "Free · Open source · MIT licensed",
+    closingHeading: "Keep test email local and observable.",
+    closingLede: "Use it, inspect the source, or help shape the next release.",
+    codeEyebrow: "From browser action to inbox assertion",
+    codeHeading: "The whole flow, in one test.",
+    codeLede:
+      "Create an isolated address, submit it through your app, then wait for the expected value. InboxTap works with Playwright, Vitest, Jest, and other Bun or Node runners.",
+    ctaPrimary: "Start catching emails",
+    ctaSecondary: "View on npm",
+    eyebrow: "Local SMTP capture for automated tests",
+    featuresHeading: "Built for deterministic test suites",
+    features: [
+      ["Local by default", "SMTP and HTTP bind to localhost. InboxTap never relays mail."],
+      [
+        "Parallel-safe inboxes",
+        "Unique client-generated addresses isolate concurrent test workers.",
+      ],
+      ["REST API", "List, retrieve, wait for, and clear captured messages over local HTTP."],
+      [
+        "Automatic extraction",
+        "Discover HTTP(S) links and unique 4–8 digit codes from parsed mail.",
+      ],
+      ["Test SDK", "Await messages, links, codes, and regex matches from Bun or Node tests."],
+      [
+        "Bounded resources",
+        "Storage, message size, and long-poll waits all have predictable limits.",
+      ],
+    ],
+    headline1: "Test the emails",
+    headline2: "your users actually receive",
+    installEyebrow: "Node 20+ · Bun or npm",
+    installLink: "Read installation guide →",
+    installReady: "SMTP on localhost:1025. API on localhost:8025. Ready.",
+    lede: "Trigger your app’s real email flow and assert the exact link or code from your test. Everything is captured on localhost — not one message leaves your machine.",
+    story: {
+      acts: [
+        {
+          eyebrow: "The problem",
+          line: "Sent to made-up addresses like test@example.com, they bounce or vanish unseen. Worse: with production SMTP in dev, one bad seed emails real people.",
+          title: "Where do your test emails go?",
+        },
+        {
+          eyebrow: "The catch",
+          line: "Point your app at localhost:1025. Every recipient is accepted and every message is stored on your machine — nothing crosses the network boundary.",
+          title: "InboxTap catches everything on localhost",
+        },
+        {
+          eyebrow: "The payoff",
+          line: "Await the exact verification link or OTP your user would receive, and assert the whole flow — signup to verified.",
+          title: "Your test reads the real email",
+        },
+      ],
+      ariaLabel: "How InboxTap keeps test email local",
+      labels: {
+        app: "Your app",
+        boundary: "Your machine",
+        captured: "captured",
+        fake: "never delivered",
+        inbox: "Local inbox",
+        localhostTag: "localhost:1025",
+        passed: "test passed",
+        real: "real inboxes",
+        risk: "leak risk",
+      },
+    },
+  },
+  meta: {
+    breadcrumbDocs: "Documentation",
+    breadcrumbHome: "Home",
+    description:
+      "InboxTap catches every email your app sends, on localhost. Test verification links and OTPs from real user flows — nothing ever leaves your machine.",
+    docsTitle: "Documentation",
+    docsTitleTemplate: "%s · InboxTap Docs",
+    ogDescription:
+      "Stop sending test emails to fake addresses. Capture them on localhost and assert real verification links and OTPs from your tests.",
+    ogImage: {
+      alt: "InboxTap — catch every email, extract every code",
+      line1: "Catch every email",
+      line2: "Extract every code",
+      tagline: "Test real email flows. Nothing leaves your machine.",
+    },
+    title: "InboxTap — deterministic email-flow tests",
+    titleTemplate: "%s · InboxTap",
+    twitterDescription:
+      "Catch your app’s emails on localhost. Test real flows — nothing leaves your machine.",
+  },
+  notFound: {
+    eyebrow: "404 · Message not captured",
+    goHome: "Go home",
+    readDocs: "Read the docs",
+    text: "The route may have moved, or the address may be incomplete.",
+    title: "This page is not in the inbox.",
+  },
+};

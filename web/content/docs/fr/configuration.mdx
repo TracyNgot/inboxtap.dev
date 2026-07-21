@@ -1,0 +1,69 @@
+InboxTap a des drapeaux CLI explicites et des options de serveur programmatiques. Il ne lit pas de
+fichier de configuration en v0.1.
+
+## Valeurs par défaut
+
+| Réglage | Valeur par défaut |
+| --- | --- |
+| Hôte SMTP | `localhost` (lie `127.0.0.1` et `::1`) |
+| Port SMTP | `1025` |
+| Hôte de l'API HTTP | `localhost` (lie `127.0.0.1` et `::1`) |
+| Port de l'API HTTP | `8025` |
+| Domaine destinataire | `local.test` |
+| Messages conservés | `100` |
+| Taille maximale de message | `5242880` octets (5 Mio) |
+
+## Options CLI
+
+```text
+--smtp-host <host>          SMTP host
+--smtp-port <port>          SMTP port, 0–65535
+--api-host <host>           HTTP API host
+--api-port <port>           HTTP API port, 0–65535
+--domain <domain>           Test recipient domain
+--max-messages <count>      Messages retained in memory
+--max-message-size <bytes>  Maximum accepted SMTP message size
+```
+
+Le mot optionnel `start` est accepté, donc `inboxtap` et `inboxtap start` sont équivalents.
+
+<Callout title="Frontière réseau">
+  Par défaut, les deux écouteurs ne lient que les adresses de loopback ; si IPv6 est indisponible,
+  le serveur se rabat sur `127.0.0.1` seul. Déplacer l’un des hôtes hors du loopback expose un
+  service de test non authentifié. Ne le faites que dans un environnement isolé que vous contrôlez.
+</Callout>
+
+## Plusieurs instances
+
+Choisissez des ports distincts et, éventuellement, un domaine destinataire distinct :
+
+```bash
+inboxtap --smtp-port 2025 --api-port 9025 --domain mail.local.test
+```
+
+Pointez l’application vers le port SMTP `2025` et créez le client avec l’URL de base d’API
+correspondante :
+
+```ts
+const inboxTap = new InboxTapClient({ baseUrl: "http://localhost:9025" });
+```
+
+## Serveur programmatique
+
+Les tests peuvent importer le serveur et demander des ports éphémères avec `0` :
+
+```ts
+import { InboxTapServer } from "inboxtap";
+
+const server = await new InboxTapServer({
+  apiPort: 0,
+  smtpPort: 0,
+  maxMessages: 50,
+}).start();
+
+console.log(server.apiUrl);
+await server.stop();
+```
+
+Les ports liés sont disponibles sur `server.apiPort` et `server.smtpPort` une fois `start()`
+résolu.
