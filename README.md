@@ -34,14 +34,14 @@ bun run start
 The defaults are:
 
 ```text
-SMTP: 127.0.0.1:1025
-API:  http://127.0.0.1:8025
+SMTP: localhost:1025
+API:  http://localhost:8025
 ```
 
 Configure the application under test:
 
 ```env
-SMTP_HOST=127.0.0.1
+SMTP_HOST=localhost
 SMTP_PORT=1025
 SMTP_SECURE=false
 ```
@@ -99,14 +99,14 @@ All endpoints return JSON. Query values are URL encoded.
 For example:
 
 ```bash
-curl "http://127.0.0.1:8025/api/emails/latest?to=signup%40local.test"
+curl "http://localhost:8025/api/emails/latest?to=signup%40local.test"
 ```
 
 Captured emails include the SMTP envelope, headers, decoded text/HTML, discovered HTTP(S) links, 4–8 digit codes, and raw RFC 822 source.
 
 ## Safety and scope
 
-InboxTap binds to `127.0.0.1` by default and intentionally disables SMTP authentication and STARTTLS. Keep it local; it is not an outbound relay or production mail server.
+InboxTap binds only the loopback addresses (`127.0.0.1` and `::1`, so `localhost` works out of the box) by default and intentionally disables SMTP authentication and STARTTLS. Keep it local; it is not an outbound relay or production mail server.
 
 Version 0.1 is in-memory only. It does not include persistence, a dashboard, attachments, webhooks, Docker, or configurable extraction files.
 

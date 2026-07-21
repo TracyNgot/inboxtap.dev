@@ -1,50 +1,54 @@
 import { createServer } from "node:http";
 import type { Server as HttpServer } from "node:http";
-import type { AddressInfo } from "node:net";
 import type { SMTPServer } from "smtp-server";
 import { createApiHandler } from "./api.js";
+import type { Listener } from "./listen.js";
+import { closeListener, listenDualStack, listenOn, readPort } from "./listen.js";
 import { createSmtpServer } from "./smtp.js";
 import { EmailStore } from "./store.js";
 import type { HealthResponse, InboxTapServerOptions } from "./types.js";
 
 const DEFAULT_OPTIONS = {
-  apiHost: "127.0.0.1",
   apiPort: 8025,
   domain: "local.test",
   maxMessages: 100,
   maxMessageSize: 5 * 1024 * 1024,
-  smtpHost: "127.0.0.1",
   smtpPort: 1025,
 } as const;
 
 export class InboxTapServer {
-  readonly apiHost: string;
+  apiHost: string;
   apiPort: number;
   readonly domain: string;
   readonly maxMessageSize: number;
   readonly store: EmailStore;
-  readonly smtpHost: string;
+  smtpHost: string;
   smtpPort: number;
-  #apiServer: HttpServer;
-  #smtpServer: SMTPServer;
+  readonly #explicitApiHost?: string;
+  readonly #explicitSmtpHost?: string;
+  readonly #apiServers: HttpServer[];
+  readonly #smtpServers: SMTPServer[];
   #started = false;
 
   constructor(options: InboxTapServerOptions = {}) {
     const config = { ...DEFAULT_OPTIONS, ...options };
-    this.apiHost = config.apiHost;
+    this.#explicitApiHost = options.apiHost;
+    this.#explicitSmtpHost = options.smtpHost;
+    this.apiHost = options.apiHost ?? "localhost";
     this.apiPort = config.apiPort;
     this.domain = config.domain.toLowerCase();
     this.maxMessageSize = config.maxMessageSize;
-    this.smtpHost = config.smtpHost;
+    this.smtpHost = options.smtpHost ?? "localhost";
     this.smtpPort = config.smtpPort;
     this.store = new EmailStore(config.maxMessages);
-    this.#smtpServer = createSmtpServer({
-      maxMessageSize: config.maxMessageSize,
-      onEmail: (email) => this.store.add(email),
-    });
-    this.#apiServer = createServer(
-      createApiHandler({ health: () => this.health(), store: this.store }),
+    this.#smtpServers = createInstances(this.#explicitSmtpHost, () =>
+      createSmtpServer({
+        maxMessageSize: config.maxMessageSize,
+        onEmail: (email) => this.store.add(email),
+      }),
     );
+    const handler = createApiHandler({ health: () => this.health(), store: this.store });
+    this.#apiServers = createInstances(this.#explicitApiHost, () => createServer(handler));
   }
 
   get apiUrl(): string {
@@ -54,10 +58,16 @@ export class InboxTapServer {
   async start(): Promise<this> {
     if (this.#started) return this;
     try {
-      await listenSmtp(this.#smtpServer, this.smtpPort, this.smtpHost);
-      this.smtpPort = readPort(this.#smtpServer.server.address());
-      await listenHttp(this.#apiServer, this.apiPort, this.apiHost);
-      this.apiPort = readPort(this.#apiServer.address());
+      const smtp = await bindGroup(
+        this.#smtpServers.map(smtpListener),
+        this.smtpPort,
+        this.#explicitSmtpHost,
+      );
+      this.smtpHost = smtp.host;
+      this.smtpPort = smtp.port;
+      const api = await bindGroup(this.#apiServers, this.apiPort, this.#explicitApiHost);
+      this.apiHost = api.host;
+      this.apiPort = api.port;
       this.#started = true;
       return this;
     } catch (error) {
@@ -67,7 +77,8 @@ export class InboxTapServer {
   }
 
   async stop(): Promise<void> {
-    await Promise.all([closeSmtp(this.#smtpServer), closeHttp(this.#apiServer)]);
+    const listeners = [...this.#smtpServers.map(smtpListener), ...this.#apiServers];
+    await Promise.all(listeners.map(closeListener));
     this.#started = false;
   }
 
@@ -81,42 +92,40 @@ export class InboxTapServer {
   }
 }
 
-function listenSmtp(server: SMTPServer, port: number, host: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    server.once("error", reject);
-    server.listen(port, host, () => {
-      server.off("error", reject);
-      resolve();
-    });
-  });
+interface BoundGroup {
+  host: string;
+  port: number;
 }
 
-function listenHttp(server: HttpServer, port: number, host: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    server.once("error", reject);
-    server.listen(port, host, () => {
-      server.off("error", reject);
-      resolve();
-    });
-  });
+function createInstances<T>(explicitHost: string | undefined, create: () => T): T[] {
+  return Array.from({ length: explicitHost === undefined ? 2 : 1 }, create);
 }
 
-function closeSmtp(server: SMTPServer): Promise<void> {
-  return new Promise((resolve) => {
-    if (!server.server.listening) return resolve();
-    server.close(resolve);
-  });
+async function bindGroup(
+  listeners: Listener[],
+  port: number,
+  explicitHost: string | undefined,
+): Promise<BoundGroup> {
+  const [ipv4, ipv6] = listeners;
+  if (!ipv4) throw new Error("No listener configured");
+  if (explicitHost !== undefined || !ipv6) {
+    const host = explicitHost ?? "127.0.0.1";
+    await listenOn(ipv4, port, host);
+    return { host, port: readPort(ipv4) };
+  }
+  const bound = await listenDualStack(ipv4, ipv6, port);
+  return { host: bound.hosts.includes("::1") ? "localhost" : "127.0.0.1", port: bound.port };
 }
 
-function closeHttp(server: HttpServer): Promise<void> {
-  return new Promise((resolve) => {
-    if (!server.listening) return resolve();
-    server.close(() => resolve());
-  });
-}
-
-function readPort(address: string | AddressInfo | null): number {
-  if (!address || typeof address === "string")
-    throw new Error("Unable to determine the listening port");
-  return address.port;
+function smtpListener(server: SMTPServer): Listener {
+  return {
+    get listening() {
+      return server.server.listening;
+    },
+    listen: (port, host, callback) => server.listen(port, host, callback),
+    close: (callback) => server.close(callback),
+    once: (event, listener) => server.once(event, listener),
+    off: (event, listener) => server.off(event, listener),
+    address: () => server.server.address(),
+  };
 }

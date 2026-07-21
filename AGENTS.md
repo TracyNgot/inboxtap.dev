@@ -12,7 +12,7 @@ InboxTap is a local-only SMTP capture server and test SDK.
 [docs/OVERVIEW.md](./docs/OVERVIEW.md) is the canonical statement of the design
 invariants and where the code enforces them. Preserve these invariants:
 
-- Bind SMTP and HTTP to `127.0.0.1` by default.
+- Bind SMTP and HTTP to the loopback addresses (`127.0.0.1` and `::1`) by default.
 - Capture mail without relaying it externally.
 - Accept arbitrary recipients and isolate tests with unique client addresses.
 - Keep the HTTP API, exported TypeScript types, and client SDK behavior aligned.

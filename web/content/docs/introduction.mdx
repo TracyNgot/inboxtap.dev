@@ -19,11 +19,11 @@ and exposes the result to the same test that triggered the email.
 
 ```text
 Your application ──SMTP──▶ InboxTap ──HTTP / SDK──▶ Your test
-                         127.0.0.1
+                         localhost
 ```
 
 1. Start InboxTap locally or alongside your test process.
-2. Point the application under test at `127.0.0.1:1025`.
+2. Point the application under test at `localhost:1025`.
 3. Give the application a unique address created by `InboxTapClient`.
 4. Await the expected value through the SDK or query the local HTTP API.
 
@@ -32,7 +32,8 @@ HTTP(S) links, unique 4–8 digit codes, and the raw RFC 822 source.
 
 ## Safety and scope
 
-InboxTap binds SMTP and HTTP to `127.0.0.1` by default and never relays a message externally. It is
+InboxTap binds SMTP and HTTP only to the loopback addresses (`127.0.0.1` and `::1`) by default and
+never relays a message externally. It is
 for development and automated tests, not for production mail delivery.
 
 The v0.1 server stores messages in memory, retains the newest 100 by default, rejects messages over

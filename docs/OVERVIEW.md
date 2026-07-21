@@ -27,7 +27,7 @@ end-to-end is painful because:
 - Existing tools (Mailhog, Mailpit) are Go binaries or Docker containers that
   add infrastructure overhead and do not provide a programmatic test SDK.
 
-InboxTap solves this by running a tiny SMTP server on `127.0.0.1` that captures
+InboxTap solves this by running a tiny SMTP server on the loopback interface that captures
 every message in a bounded in-memory store and exposes it through a typed SDK
 and HTTP API — so tests can assert on the exact email that was "sent."
 
@@ -35,7 +35,7 @@ and HTTP API — so tests can assert on the exact email that was "sent."
 
 ```mermaid
 graph LR
-    A[Application under test] -->|SMTP on 127.0.0.1:1025| B[InboxTap Server]
+    A[Application under test] -->|SMTP on localhost:1025| B[InboxTap Server]
     B -->|bounded in-memory store| C[HTTP API :8025]
     D[Test suite / Playwright / Jest] -->|InboxTapClient SDK| C
     C -->|verification URL, OTP, API key| D
@@ -43,7 +43,7 @@ graph LR
 ```
 
 1. Start the server — `bunx inboxtap` or `npx inboxtap` (Node 20+).
-2. Point the app under test at `127.0.0.1:1025` via environment variables.
+2. Point the app under test at `localhost:1025` via environment variables.
 3. In the test, create an isolated inbox with a unique address, trigger the
    email flow, then await the extracted value (link, code, pattern match).
 4. No message leaves the machine. No auth, no TLS, no relay.
@@ -53,7 +53,8 @@ graph LR
 | Module | Responsibility |
 | --- | --- |
 | `src/smtp.ts` | Wraps `smtp-server` with `AUTH`/`STARTTLS` disabled, enforces the max message size (SMTP 552 on overflow), and hands each inbound message to a capture callback. |
-| `src/server.ts` | `InboxTapServer` composes the SMTP listener and HTTP API with the `127.0.0.1:1025`/`:8025` defaults (domain `local.test`, 100 messages, 5 MiB) and owns the start/stop lifecycle and `/health` payload. |
+| `src/server.ts` | `InboxTapServer` composes the SMTP listener and HTTP API, binding both loopback addresses (`127.0.0.1` and `::1`) on the `1025`/`8025` defaults (domain `local.test`, 100 messages, 5 MiB), and owns the start/stop lifecycle and `/health` payload. |
+| `src/listen.ts` | Generic listen/close helpers plus `listenDualStack`, which binds `127.0.0.1` and `::1` on one port with bounded ephemeral-port retries and graceful IPv4-only fallback when IPv6 is unavailable. |
 | `src/parser.ts` | Parses raw RFC 822 mail via `mailparser` into a `CapturedEmail`: normalized headers, text/HTML bodies, deduplicated http(s) links, unique 4–8 digit codes, and the raw source. |
 | `src/store.ts` | In-memory `EmailStore` with FIFO eviction at `maxMessages`, filtered `list`/`latest`/`get`/`clear`, and long-poll waiters resolved on a matching add or cleaned up on timeout. |
 | `src/api.ts` | Dependency-free `node:http` JSON handler for `/health` and `/api/emails` routes, validating filters and capping waits at 60 s and list limits at 100. |
@@ -67,8 +68,9 @@ graph LR
 These are hard constraints the project will not compromise on. Each one is
 enforced in code today:
 
-1. **Local-only** — binds to `127.0.0.1` by default; never an outbound relay.
-   (`DEFAULT_OPTIONS` in `src/server.ts`; wider binding requires explicit
+1. **Local-only** — binds only the loopback addresses (`127.0.0.1` and `::1`,
+   so `localhost` resolves either way) by default; never an outbound relay.
+   (`listenDualStack` in `src/listen.ts`; wider binding requires explicit
    `--smtp-host`/`--api-host` flags.)
 2. **Capture, don't deliver** — no message is forwarded externally. The SMTP
    server disables `AUTH` and `STARTTLS` and only writes to the store
