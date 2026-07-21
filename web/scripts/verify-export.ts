@@ -10,6 +10,7 @@ const requiredFiles = [
   "sitemap.xml",
   "icon.svg",
   "favicon.ico",
+  "inboxtap-demo.mp4",
   "fr/opengraph-image",
   "es/opengraph-image",
 ];

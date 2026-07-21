@@ -126,6 +126,20 @@ a {
   margin: 0;
 }
 
+.header-brand {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.header-mark {
+  background: url("/icon.svg") center / contain no-repeat;
+  display: block;
+  flex: none;
+  height: 28px;
+  width: 28px;
+}
+
 .primary-nav {
   align-items: center;
   display: flex;
@@ -1532,6 +1546,12 @@ a {
 
   .docs-pager {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .primary-nav a:last-child {
+    display: none;
   }
 }
 
