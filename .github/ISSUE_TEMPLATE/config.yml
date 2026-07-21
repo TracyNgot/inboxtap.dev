@@ -1,1 +1,8 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/TracyNgot/inboxtap.dev/security/advisories/new
+    about: Report suspected vulnerabilities privately instead of opening a public issue.
+  - name: Read the documentation
+    url: https://inboxtap.dev/docs
+    about: Check the guides, configuration reference, and troubleshooting advice first.

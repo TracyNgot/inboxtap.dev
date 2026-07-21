@@ -1,40 +1,86 @@
 name: Bug report
-description: Report reproducible behavior that is not working as expected.
+description: Report reproducible InboxTap behavior that is not working as expected.
 title: "🐛 "
 labels:
   - bug
 body:
   - type: markdown
     attributes:
-      value: Thanks for helping improve Local Mailflow.
+      value: |
+        Thanks for helping improve InboxTap. Do not include real email contents,
+        credentials, or access tokens. Report vulnerabilities through the private
+        security link on the issue chooser.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - SMTP capture server
+        - HTTP API
+        - Client SDK
+        - CLI
+        - Package or build output
+        - Website or documentation
+        - Example project
+        - Not sure
+    validations:
+      required: true
   - type: textarea
-    id: problem
+    id: observed
     attributes:
       label: What happened?
-      description: Describe the observed and expected behavior.
+      description: Describe the behavior you observed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: Describe the behavior you expected instead.
     validations:
       required: true
   - type: textarea
     id: reproduce
     attributes:
       label: Reproduction
-      description: Include the smallest useful SMTP message, API request, or test snippet.
+      description: Include the smallest safe SMTP message, API request, or test snippet that reproduces the issue.
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Local Mailflow version
-      placeholder: 0.1.0
+      label: InboxTap version
+      placeholder: 1.0.0
     validations:
       required: true
   - type: input
-    id: environment
+    id: runtime
     attributes:
-      label: Environment
-      placeholder: macOS, Bun 1.x, Node 20
+      label: Runtime
+      placeholder: Bun 1.3.14 or Node 24
+    validations:
+      required: true
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system
+      placeholder: macOS 15, Ubuntu 24.04, or Windows 11
+    validations:
+      required: true
   - type: textarea
     id: logs
     attributes:
       label: Relevant logs
+      description: Remove email contents, credentials, tokens, and other sensitive data.
       render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues for the same problem.
+          required: true
+        - label: I removed real email contents, credentials, tokens, and other sensitive data.
+          required: true
+        - label: This report does not publicly disclose a suspected security vulnerability.
+          required: true
