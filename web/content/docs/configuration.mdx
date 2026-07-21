@@ -5,9 +5,9 @@ file in v0.1.
 
 | Setting | Default |
 | --- | --- |
-| SMTP host | `127.0.0.1` |
+| SMTP host | `localhost` (binds `127.0.0.1` and `::1`) |
 | SMTP port | `1025` |
-| HTTP API host | `127.0.0.1` |
+| HTTP API host | `localhost` (binds `127.0.0.1` and `::1`) |
 | HTTP API port | `8025` |
 | Recipient domain | `local.test` |
 | Retained messages | `100` |
@@ -28,8 +28,9 @@ file in v0.1.
 The optional `start` word is accepted, so `inboxtap` and `inboxtap start` are equivalent.
 
 <Callout title="Network boundary">
-  Changing either host away from `127.0.0.1` exposes an unauthenticated test service. Do so only in
-  an isolated environment you control.
+  By default both listeners bind only the loopback addresses, so if IPv6 is unavailable the server
+  falls back to `127.0.0.1` alone. Changing either host away from loopback exposes an
+  unauthenticated test service. Do so only in an isolated environment you control.
 </Callout>
 
 ## Run multiple instances
@@ -43,7 +44,7 @@ inboxtap --smtp-port 2025 --api-port 9025 --domain mail.local.test
 Point the application at SMTP port `2025` and create the client with the matching API base URL:
 
 ```ts
-const inboxTap = new InboxTapClient({ baseUrl: "http://127.0.0.1:9025" });
+const inboxTap = new InboxTapClient({ baseUrl: "http://localhost:9025" });
 ```
 
 ## Programmatic server

@@ -30,7 +30,7 @@ and TypeScript enforce the mechanical rules; this guide covers design choices.
 
 ## Product boundaries
 
-- Default hosts stay on `127.0.0.1`; broader network binding must be explicit.
+- Default hosts stay on loopback (`127.0.0.1` and `::1`); broader network binding must be explicit.
 - Never add outbound email relay behavior to the capture server.
 - Keep storage bounded and preserve predictable FIFO eviction.
 - Keep SDK filters and return types aligned with HTTP API fields and semantics.

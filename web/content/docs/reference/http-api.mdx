@@ -1,4 +1,4 @@
-The local HTTP API returns JSON and is available at `http://127.0.0.1:8025` by default.
+The local HTTP API returns JSON and is available at `http://localhost:8025` by default.
 
 ## Request conventions
 
@@ -23,8 +23,8 @@ Returns the bound SMTP and HTTP addresses plus the recipient domain.
 ```json
 {
   "ok": true,
-  "api": { "host": "127.0.0.1", "port": 8025 },
-  "smtp": { "host": "127.0.0.1", "port": 1025 },
+  "api": { "host": "localhost", "port": 8025 },
+  "smtp": { "host": "localhost", "port": 1025 },
   "domain": "local.test"
 }
 ```
@@ -36,7 +36,7 @@ Returns the bound SMTP and HTTP addresses plus the recipient domain.
 Returns matching messages in receive order. The response is `{ "emails": CapturedEmail[] }`.
 
 ```bash
-curl "http://127.0.0.1:8025/api/emails?to=signup%40local.test&limit=10"
+curl "http://localhost:8025/api/emails?to=signup%40local.test&limit=10"
 ```
 </Endpoint>
 
@@ -47,7 +47,7 @@ Returns `{ "email": CapturedEmail }` for the newest matching message. Returns `4
 exists.
 
 ```bash
-curl "http://127.0.0.1:8025/api/emails/latest?subject=verify"
+curl "http://localhost:8025/api/emails/latest?subject=verify"
 ```
 </Endpoint>
 
@@ -58,7 +58,7 @@ Long-polls until a matching message is available. The default wait is 10 seconds
 60 seconds. Returns `{ "email": CapturedEmail }` on success or `408` on timeout.
 
 ```bash
-curl "http://127.0.0.1:8025/api/emails/wait?to=signup%40local.test&timeoutMs=30000"
+curl "http://localhost:8025/api/emails/wait?to=signup%40local.test&timeoutMs=30000"
 ```
 </Endpoint>
 
@@ -75,6 +75,6 @@ Deletes every stored message and returns `{ "deleted": number }`. Add a `to` que
 messages addressed to one recipient.
 
 ```bash
-curl -X DELETE "http://127.0.0.1:8025/api/emails?to=signup%40local.test"
+curl -X DELETE "http://localhost:8025/api/emails?to=signup%40local.test"
 ```
 </Endpoint>

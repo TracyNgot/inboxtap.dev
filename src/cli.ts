@@ -89,9 +89,9 @@ function printHelp(): void {
   console.log(`Usage: inboxtap [start] [options]
 
 Options:
-  --smtp-host <host>          SMTP host (default: 127.0.0.1)
+  --smtp-host <host>          SMTP host (default: localhost, binds 127.0.0.1 and ::1)
   --smtp-port <port>          SMTP port (default: 1025)
-  --api-host <host>           API host (default: 127.0.0.1)
+  --api-host <host>           API host (default: localhost, binds 127.0.0.1 and ::1)
   --api-port <port>           API port (default: 8025)
   --domain <domain>           Test recipient domain (default: local.test)
   --max-messages <count>      Messages to retain (default: 100)
