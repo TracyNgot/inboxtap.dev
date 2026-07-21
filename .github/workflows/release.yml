@@ -188,6 +188,8 @@ jobs:
 
       - name: Publish to npm
         if: steps.registry.outputs.publish_required == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
 
       - name: Create the GitHub release
