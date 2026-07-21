@@ -130,6 +130,7 @@ a {
   align-items: center;
   display: flex;
   gap: 10px;
+  margin-right: auto;
 }
 
 .header-mark {
@@ -138,6 +139,10 @@ a {
   flex: none;
   height: 28px;
   width: 28px;
+}
+
+.header-wordmark {
+  margin-right: 0;
 }
 
 .primary-nav {

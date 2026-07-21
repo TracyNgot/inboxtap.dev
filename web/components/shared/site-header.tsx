@@ -15,9 +15,11 @@ export function SiteHeader({ locale, t }: { locale: Locale; t: Dictionary["chrom
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <Link aria-label={t.wordmarkAria} className="header-brand wordmark" href={home}>
+        <Link aria-label={t.wordmarkAria} className="header-brand" href={home}>
           <span aria-hidden="true" className="header-mark" />
-          Inbox<span>Tap</span>
+          <span className="header-wordmark wordmark">
+            Inbox<span>Tap</span>
+          </span>
         </Link>
         <nav aria-label={t.navAria} className="primary-nav">
           <Link href={featuresHref}>{t.navFeatures}</Link>
