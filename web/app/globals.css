@@ -126,6 +126,25 @@ a {
   margin: 0;
 }
 
+.header-brand {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-right: auto;
+}
+
+.header-mark {
+  background: url("/icon.svg") center / contain no-repeat;
+  display: block;
+  flex: none;
+  height: 28px;
+  width: 28px;
+}
+
+.header-wordmark {
+  margin-right: 0;
+}
+
 .primary-nav {
   align-items: center;
   display: flex;
@@ -765,6 +784,31 @@ a {
 .site-footer-links {
   display: flex;
   gap: 20px;
+}
+
+.footer-brand {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.footer-mark {
+  background: url("/icon.svg") center / contain no-repeat;
+  display: block;
+  flex: none;
+  height: 28px;
+  width: 28px;
+}
+
+.product-hunt-badge {
+  display: block;
+  flex: none;
+}
+
+.product-hunt-badge img {
+  display: block;
+  height: auto;
+  max-width: 100%;
 }
 
 .site-footer {
@@ -1507,6 +1551,12 @@ a {
 
   .docs-pager {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .primary-nav a:last-child {
+    display: none;
   }
 }
 
