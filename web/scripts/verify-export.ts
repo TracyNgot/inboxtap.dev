@@ -44,6 +44,17 @@ for (const route of routeFiles) {
     throw new Error(`DCanvas runtime leaked into ${route.path}`);
   }
 
+  if (html.includes('class="shiki')) {
+    if (/style="color:[^"]*--shiki-dark/.test(html)) {
+      throw new Error(
+        `Shiki inlined single-theme colors in ${route.path}; dark mode cannot override them`,
+      );
+    }
+    if (!html.includes("--shiki-light:")) {
+      throw new Error(`Shiki output in ${route.path} is missing --shiki-light variables`);
+    }
+  }
+
   for (const match of html.matchAll(/href="(\/docs[^"?#]*)(?:[?#][^"]*)?"/g)) {
     const href = (match[1] ?? "").replace(/\/$/, "") || "/";
     if (!routePaths.has(href))
