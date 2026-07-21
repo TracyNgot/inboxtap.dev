@@ -1,0 +1,43 @@
+InboxTap is one of several ways to catch email during development and testing. Every tool below
+answers the same question — your application sent an email, now what — but they differ in the
+interface they expose and in whether the message ever leaves your machine.
+
+## At a glance
+
+| Tool                  | Interface              | Runs as               | Best for                                    |
+| --------------------- | ---------------------- | --------------------- | ------------------------------------------- |
+| InboxTap              | Typed SDK and HTTP API | npm CLI or in-process | Deterministic automated tests               |
+| Mailpit               | Web UI and REST API    | Go binary or Docker   | Inspecting rendered mail during development |
+| MailHog               | Web UI and API         | Go binary or Docker   | Existing setups; largely unmaintained       |
+| smtp4dev              | Web UI and IMAP        | .NET binary or Docker | Cross-platform manual inspection            |
+| Ethereal and Mailtrap | Hosted web inbox       | SaaS                  | Previewing real delivery                    |
+
+## Mailpit and MailHog
+
+Both are local SMTP servers built around a browser inbox: send mail, open the UI, read it. Mailpit
+is the actively maintained successor to MailHog and adds a REST API that tests can poll.
+
+Neither ships a test SDK. Assertions mean hand-rolling HTTP polling, link and code extraction, and
+per-test recipient isolation — the pieces InboxTap's `TestInbox` provides. They also run as a
+separate binary or container, where InboxTap installs from npm and can start inside the test
+process. If the goal is to look at emails rather than assert on them, they are the better tool.
+
+## smtp4dev
+
+smtp4dev is a cross-platform .NET tool with a web UI and IMAP access, so a desktop mail client can
+browse captured messages. Like the Go viewers, it is built for inspection: good for watching what an
+application sends, while tests still need custom polling and parsing code.
+
+## Hosted services
+
+Ethereal and Mailtrap-style sandboxes accept mail over the network into a hosted inbox. They are the
+closest to production delivery, which makes them useful for manual QA and HTML-rendering checks
+across real clients. The same network hop adds accounts, credentials, latency, and rate limits to a
+test suite — and messages leave the machine, which local capture never does.
+
+## When not to use InboxTap
+
+InboxTap has no browser inbox, no persistence across restarts, and no attachments workflow. Choose a
+viewer when a team wants a shared, browsable inbox, or a hosted service when the job is checking
+deliverability and rendering in real clients. InboxTap's lane is narrower on purpose: deterministic,
+parallel-safe email assertions running next to the test that triggered them.
