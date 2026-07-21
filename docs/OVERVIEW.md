@@ -131,6 +131,8 @@ Explicitly excluded:
 - Importable as a library: `import { InboxTapClient } from "inboxtap/client"`.
 - Built with tsup; tested with Bun; formatted and linted with Biome;
   pre-commit/push hooks via Lefthook.
+- `examples/` holds standalone integration examples for the docs guides; they
+  are not part of the published package or the root verify gate.
 
 See [README.md](../README.md) for usage, [AGENTS.md](../AGENTS.md) for the
 agent and contributor contract, [STYLE_GUIDE.md](../STYLE_GUIDE.md) for

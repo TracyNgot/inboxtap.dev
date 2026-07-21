@@ -42,6 +42,20 @@ bun run format
 bun run verify
 ```
 
+## Examples
+
+Projects under `examples/` are standalone: each keeps its own `package.json`,
+lockfile, and test command, and none of them are part of `bun run verify`,
+releases, or the published npm package. Root Biome still owns their formatting
+and linting, so `bun run format` covers them. When you change an example, run
+its own install and test from inside its directory:
+
+```bash
+cd examples/express-nodemailer
+npm install
+npm test
+```
+
 ## Commits
 
 Configure the repository commit template once:

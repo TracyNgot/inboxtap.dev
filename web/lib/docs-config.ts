@@ -156,6 +156,30 @@ export const docs = [
     ],
   },
   {
+    description: "Verify Better Auth sign-up emails in a Next.js app with Playwright.",
+    group: "guides",
+    path: "/docs/guides/better-auth",
+    slug: "guides/better-auth",
+    title: "Better Auth",
+    toc: [
+      { id: "wire-better-auth-to-inboxtap", label: "Wire Better Auth" },
+      { id: "drive-the-flows-with-playwright", label: "Drive the flows" },
+      { id: "run-the-example", label: "Run the example" },
+    ],
+  },
+  {
+    description: "Test Nodemailer delivery from an Express API with Vitest.",
+    group: "guides",
+    path: "/docs/guides/nodemailer",
+    slug: "guides/nodemailer",
+    title: "Nodemailer",
+    toc: [
+      { id: "point-nodemailer-at-inboxtap", label: "Point Nodemailer at InboxTap" },
+      { id: "test-with-vitest", label: "Test with Vitest" },
+      { id: "run-the-example", label: "Run the example" },
+    ],
+  },
+  {
     description:
       "Run InboxTap in CI with a health-checked background step or a programmatic server.",
     group: "guides",

@@ -22,6 +22,10 @@ invariants and where the code enforces them. Preserve these invariants:
 ## Working conventions
 
 - Use Bun for installs, scripts, and tests. Keep `bun.lock` authoritative.
+- `examples/` projects are standalone: they keep their own lockfiles and test
+  commands and are not covered by `bun run verify`, though Biome still formats
+  and lints their source. Run the touched example's own install and test when
+  changing it, and update examples with every public SDK behavior change.
 - Follow `STYLE_GUIDE.md` for TypeScript, module, testing, and error conventions.
 - Verify before removing or renaming public exports, API fields, routes, or CLI flags.
 - Update tests and README examples with every public behavior change.

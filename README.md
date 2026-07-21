@@ -104,6 +104,15 @@ curl "http://localhost:8025/api/emails/latest?to=signup%40local.test"
 
 Captured emails include the SMTP envelope, headers, decoded text/HTML, discovered HTTP(S) links, 4–8 digit codes, and raw RFC 822 source.
 
+## Examples
+
+Runnable end-to-end projects live in [`examples/`](examples/):
+
+- [`examples/better-auth-nextjs`](examples/better-auth-nextjs) — Next.js + Better Auth email verification, magic links, and OTP, tested with Playwright.
+- [`examples/express-nodemailer`](examples/express-nodemailer) — Express + Nodemailer transactional email, tested with Vitest.
+
+Each example is standalone: install and test it from its own directory. Guided walkthroughs are on [inboxtap.dev/docs](https://inboxtap.dev/docs).
+
 ## Safety and scope
 
 InboxTap binds only the loopback addresses (`127.0.0.1` and `::1`, so `localhost` works out of the box) by default and intentionally disables SMTP authentication and STARTTLS. Keep it local; it is not an outbound relay or production mail server.
