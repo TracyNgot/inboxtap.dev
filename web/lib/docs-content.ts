@@ -1,8 +1,10 @@
 import type { ComponentType } from "react";
 import Alternatives from "@/content/docs/alternatives.mdx";
 import Configuration from "@/content/docs/configuration.mdx";
+import BetterAuth from "@/content/docs/guides/better-auth.mdx";
 import Ci from "@/content/docs/guides/ci.mdx";
 import Cypress from "@/content/docs/guides/cypress.mdx";
+import Nodemailer from "@/content/docs/guides/nodemailer.mdx";
 import Playwright from "@/content/docs/guides/playwright.mdx";
 import TestRunners from "@/content/docs/guides/test-runners.mdx";
 import Troubleshooting from "@/content/docs/guides/troubleshooting.mdx";
@@ -17,8 +19,10 @@ const contentBySlug = {
   "": Introduction,
   alternatives: Alternatives,
   configuration: Configuration,
+  "guides/better-auth": BetterAuth,
   "guides/ci": Ci,
   "guides/cypress": Cypress,
+  "guides/nodemailer": Nodemailer,
   "guides/playwright": Playwright,
   "guides/test-runners": TestRunners,
   "guides/troubleshooting": Troubleshooting,
