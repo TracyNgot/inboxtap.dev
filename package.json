@@ -5,6 +5,20 @@
     "web"
   ],
   "description": "A local SMTP inbox for deterministic email-flow tests.",
+  "keywords": [
+    "smtp",
+    "smtp-server",
+    "fake-smtp",
+    "email",
+    "email-testing",
+    "mail",
+    "inbox",
+    "mailbox",
+    "capture",
+    "testing",
+    "e2e",
+    "development"
+  ],
   "license": "MIT",
   "homepage": "https://inboxtap.dev",
   "repository": {
