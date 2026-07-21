@@ -18,10 +18,14 @@ entregado y expone el resultado al mismo test que disparó el email.
 
 ## Cómo funciona
 
-```text
-Your application ──SMTP──▶ InboxTap ──HTTP / SDK──▶ Your test
-                         localhost
-```
+<FlowDiagram
+  steps={[
+    { label: "Tu aplicación" },
+    { label: "InboxTap", note: "localhost", accent: true },
+    { label: "Tu test" },
+  ]}
+  connectors={["SMTP", "HTTP / SDK"]}
+/>
 
 1. Inicia InboxTap en local o junto a tu proceso de tests.
 2. Apunta la aplicación bajo test a `localhost:1025`.

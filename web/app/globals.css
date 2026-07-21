@@ -748,6 +748,89 @@ a {
   color: var(--muted);
 }
 
+.flow-diagram {
+  align-items: center;
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin: 0 0 28px;
+  padding: 34px 24px;
+}
+
+.flow-node {
+  align-items: center;
+  background: var(--glass);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 20px;
+  text-align: center;
+}
+
+.flow-node strong,
+.flow-node span,
+.flow-connector span {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+.flow-node strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.flow-node > span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.flow-node-accent {
+  border-color: var(--accent);
+}
+
+.flow-node-accent strong {
+  color: var(--accent-text);
+}
+
+.flow-connector {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.flow-connector span {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.flow-connector svg {
+  color: var(--border-strong);
+  width: 48px;
+}
+
+@media (max-width: 640px) {
+  .flow-diagram {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .flow-connector {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .flow-connector svg {
+    transform: rotate(90deg);
+    width: 26px;
+  }
+}
+
 .docs-code-block {
   background: var(--code-background);
   border: 1px solid var(--border);
