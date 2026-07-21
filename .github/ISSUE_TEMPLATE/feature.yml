@@ -4,6 +4,24 @@ title: "✨ "
 labels:
   - enhancement
 body:
+  - type: markdown
+    attributes:
+      value: Thanks for suggesting a focused improvement to InboxTap.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - SMTP capture server
+        - HTTP API
+        - Client SDK
+        - CLI
+        - Package or build output
+        - Website or documentation
+        - Example project
+        - Not sure
+    validations:
+      required: true
   - type: textarea
     id: problem
     attributes:
@@ -23,3 +41,12 @@ body:
     attributes:
       label: Alternatives considered
       description: Mention existing tools, workarounds, or API shapes you considered.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and did not find the same request.
+          required: true
+        - label: This request preserves InboxTap's local-only, capture-without-relay scope.
+          required: true
