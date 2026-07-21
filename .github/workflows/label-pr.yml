@@ -1,0 +1,42 @@
+name: Label pull requests
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Apply the release-notes label for the branch prefix
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          set -euo pipefail
+
+          # The breaking label is never applied automatically: the release
+          # workflow requires it as an explicit human confirmation before a
+          # major version bump.
+          case "${HEAD_REF%%/*}" in
+            feat) label=feature ;;
+            fix) label=bug ;;
+            docs) label=documentation ;;
+            test | tests) label=testing ;;
+            deps | dependabot) label=dependencies ;;
+            security) label=security ;;
+            chore | ci | build | refactor | perf | style) label=maintenance ;;
+            *)
+              echo "No release-notes label mapped for branch ${HEAD_REF}"
+              exit 0
+              ;;
+          esac
+
+          gh pr edit "$PR_URL" --add-label "$label"

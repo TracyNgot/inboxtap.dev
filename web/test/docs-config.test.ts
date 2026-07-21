@@ -28,7 +28,9 @@ describe("documentation registry", () => {
     for (const doc of docs) {
       const ids = doc.toc.map((item) => item.id);
       expect(new Set(ids).size).toBe(ids.length);
-      expect(ids.length).toBeGreaterThan(0);
+      // The changelog's anchors come from CHANGELOG.md at build time, so it is
+      // the only page allowed an empty static table of contents.
+      if (doc.slug !== "changelog") expect(ids.length).toBeGreaterThan(0);
     }
   });
 });

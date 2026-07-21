@@ -2,50 +2,33 @@
 
 InboxTap publishes its public, unscoped package to the npm registry. Merging a
 pull request into `main` normally performs the complete release automatically.
-The release commit and tag use gitmoji, while GitHub labels generate categorized
-release notes.
+The release commit and tag use gitmoji, GitHub labels generate categorized
+release notes, and every release is recorded in `CHANGELOG.md` and rendered on
+the website at <https://inboxtap.dev/docs/changelog>.
 
-## One-time bootstrap
+## npm authentication
 
-The `inboxtap` package must exist before npm can attach a trusted publisher. To
-publish the current `0.1.0` version once with an authenticated npm account, start
-from a clean, current `main` branch:
+`.github/workflows/release.yml` authenticates `npm publish` with the
+`NPM_TOKEN` repository secret. Keep that secret set to a granular npm access
+token allowed to publish `inboxtap`, and rotate it before it expires. The
+manual fallback below publishes with your own logged-in npm account instead.
 
-```bash
-git switch main
-git pull --ff-only
-bun run release:check
-git tag v0.1.0
-git push origin v0.1.0
-bun run release:publish
-gh release create v0.1.0 --generate-notes --title v0.1.0 --verify-tag
-```
+## Release notes, labels, and the changelog
 
-Complete this bootstrap before merging the release-automation pull request;
-merging first leaves `main` on a bumped version with nothing published. The
-publish command requires an npm account with publishing 2FA or an appropriately
-restricted granular access token, and publishes with the npm CLI so the
-registry integrity matches the automated workflow's resume checks.
+Release notes are generated from the pull requests merged since the previous
+tag and categorized by the labels in `.github/release.yml`: `breaking`,
+`enhancement`/`feature`, `bug`, `security`, `documentation`, `dependencies`,
+`testing`, and `maintenance`, with `skip-changelog` excluding a pull request
+entirely.
 
-In the `inboxtap` package settings on npmjs.com, add a GitHub Actions trusted
-publisher with these exact values:
+`.github/workflows/label-pr.yml` applies the matching label automatically from
+the source branch prefix when a pull request opens, for example `feat/` →
+`feature`, `fix/` → `bug`, and `chore/` → `maintenance`. The `breaking` label
+is never applied automatically; add it by hand to confirm a major release.
 
-| Setting | Value |
-| --- | --- |
-| Organization or user | `TracyNgot` |
-| Repository | `inboxtap.dev` |
-| Workflow filename | `release.yml` |
-| Environment | Leave blank |
-| Allowed action | `npm publish` |
-
-The workflow uses short-lived OpenID Connect credentials and does not need an
-`NPM_TOKEN` GitHub secret. It runs on Node 24 with a compatible npm CLI and has
-`id-token: write` permission. npm provenance is unavailable while the GitHub
-repository remains private.
-
-Create the labels referenced by `.github/release.yml`: `breaking`,
-`enhancement`, `feature`, `bug`, `security`, `documentation`, `dependencies`,
-`testing`, `maintenance`, and `skip-changelog`.
+During release preparation, `scripts/prepare-release.ts` prepends the same
+generated notes to `CHANGELOG.md` so the release commit, the GitHub release,
+and the website changelog always agree.
 
 ## Automated release flow
 
@@ -67,24 +50,41 @@ After a pull request merges into `main`, `.github/workflows/release.yml`:
 
 1. Serializes the release with any other pending release.
 2. Checks out trusted `main` and installs the frozen Bun dependency graph.
-3. Runs the complete release gate, bumps `package.json`, updates `bun.lock`, and
-   creates the release commit and tag.
-4. Atomically pushes the commit and tag, publishes through npm trusted
-   publishing, and creates a GitHub release with generated notes.
+3. Runs the complete release gate, bumps `package.json`, updates `bun.lock`,
+   prepends the new section to `CHANGELOG.md`, and creates the release commit
+   and tag.
+4. Atomically pushes the commit and tag, publishes to npm, and creates a
+   GitHub release with generated notes.
 
 Pull requests that are closed without merging, or target a branch other than
 `main`, do not trigger a release.
 
+## On-demand releases, including v1.0.0
+
+To cut a release that is not tied to a merge — for example the jump to
+v1.0.0 — dispatch the workflow with a bump level:
+
+```bash
+gh workflow run "Release to npm" -f bump=major
+```
+
+or open **Actions → Release to npm → Run workflow** and choose `patch`,
+`minor`, or `major` while leaving the tag field empty. The run executes the
+same pipeline as a merge-driven release from the current `main`. A dispatched
+`major` does not require the `breaking` label: choosing the level is the
+confirmation.
+
 ## Recovering a partial release
 
 If a run fails before the release commit and tag are pushed, rerun the failed
-workflow. If the tag was pushed, use **Actions → Release to npm → Run workflow**
-and enter that existing tag, such as `v0.1.1`.
+workflow. If the tag was pushed, use **Actions → Release to npm → Run
+workflow**, enter that existing tag such as `v0.1.1`, and leave the bump level
+on `none`.
 
 The recovery path checks out the exact tag, runs `bun run release:check`, and
 compares the local package integrity with npm. It publishes a missing version,
-skips an identical existing version, refuses to continue if the contents differ,
-and creates the GitHub release when needed.
+skips an identical existing version, refuses to continue if the contents
+differ, and creates the GitHub release when needed.
 
 ## Manual fallback
 
@@ -101,11 +101,13 @@ bun run release:publish
 gh release create vX.Y.Z --generate-notes --title vX.Y.Z --verify-tag
 ```
 
-The prepare command verifies the package, updates `package.json` and `bun.lock`,
-and creates the matching release commit and tag. The publish command refuses to
-run away from `main`, with a dirty worktree, or without the expected version tag,
-and publishes with the npm CLI so later automated resumes recognize the version.
-Finish by creating the GitHub release for the pushed tag.
+The prepare command verifies the package, updates `package.json`, `bun.lock`,
+and `CHANGELOG.md`, and creates the matching release commit and tag. It
+generates the changelog section through the GitHub CLI, so `gh auth status`
+must succeed first. The publish command refuses to run away from `main`, with
+a dirty worktree, or without the expected version tag, and publishes with the
+npm CLI so later automated resumes recognize the version. Finish by creating
+the GitHub release for the pushed tag.
 
 ## Local package inspection
 
