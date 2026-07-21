@@ -379,7 +379,7 @@ a {
   height: calc(100vh - 64px);
   /* biome-ignore lint/suspicious/noDuplicateProperties: svh with a vh fallback for browsers without small-viewport units. */
   height: calc(100svh - 64px);
-  padding: 28px 0 20px;
+  padding: 28px clamp(32px, 5vw, 72px) 20px;
   position: sticky;
   top: 64px;
 }
