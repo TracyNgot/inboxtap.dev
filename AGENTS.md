@@ -1,14 +1,16 @@
 # AGENTS.md
 
 Canonical guidance for agents and contributors working on InboxTap. Read
-[README.md](./README.md), [CONTRIBUTING.md](./CONTRIBUTING.md), and
-[STYLE_GUIDE.md](./STYLE_GUIDE.md), and [.gitmessage](./.gitmessage) before
-changing public behavior or release tooling.
+[README.md](./README.md), [docs/OVERVIEW.md](./docs/OVERVIEW.md),
+[CONTRIBUTING.md](./CONTRIBUTING.md), [STYLE_GUIDE.md](./STYLE_GUIDE.md), and
+[.gitmessage](./.gitmessage) before changing public behavior or release
+tooling.
 
 ## Product contract
 
-InboxTap is a local-only SMTP capture server and test SDK. Preserve these
-invariants:
+InboxTap is a local-only SMTP capture server and test SDK.
+[docs/OVERVIEW.md](./docs/OVERVIEW.md) is the canonical statement of the design
+invariants and where the code enforces them. Preserve these invariants:
 
 - Bind SMTP and HTTP to `127.0.0.1` by default.
 - Capture mail without relaying it externally.
