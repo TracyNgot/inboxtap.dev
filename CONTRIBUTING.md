@@ -15,8 +15,18 @@ Create a focused branch from `main`:
 git switch -c feat/short-description
 ```
 
-Use `fix/`, `docs/`, `refactor/`, `test/`, or `chore/` when they describe the
-change better. An issue number may be included, but is not required.
+The source branch determines the release created after the pull request merges:
+
+| Branch prefix | Release |
+| --- | --- |
+| `breaking/`, `major/` | Major |
+| `feat/` | Minor |
+| `fix/`, `docs/`, `refactor/`, `test/`, `chore/` | Patch |
+
+Unrecognized prefixes also produce a patch release, and when several merges
+release together the highest bump among them wins. A major release additionally
+requires the `breaking` label on the pull request. An issue number may be
+included in the branch name, but is not required.
 
 ## Coding style
 
@@ -64,3 +74,5 @@ Use `Refs #123` in the commit body when helpful. Do not add Linear identifiers.
   `testing`, `dependencies`, `security`, or `breaking`.
 - Complete every section of the pull request template.
 - Run `bun run verify` before requesting review.
+- Expect a successful merge into `main` to publish the corresponding npm
+  release; closing a pull request without merging does not release anything.
