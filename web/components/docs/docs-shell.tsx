@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
 import { docGroups } from "@/lib/docs-config";
 import { getDictionary, getDocsDictionary, getLocalizedDocs } from "@/lib/i18n";
@@ -33,6 +34,7 @@ export function DocsShell({ children, locale }: { children: ReactNode; locale: L
         />
         <main className="docs-main">{children}</main>
       </div>
+      <SiteFooter t={dictionary.chrome} />
     </>
   );
 }

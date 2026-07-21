@@ -40,7 +40,7 @@ export const en: Dictionary = {
     codeLede:
       "Create an isolated address, submit it through your app, then wait for the expected value. InboxTap works with Playwright, Vitest, Jest, and other Bun or Node runners.",
     ctaPrimary: "Get started",
-    ctaSecondary: "View on GitHub",
+    ctaSecondary: "View on npm",
     eyebrow: "Local SMTP capture for automated tests",
     featuresHeading: "Built for deterministic test suites",
     features: [

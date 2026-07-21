@@ -40,7 +40,7 @@ export const es: Dictionary = {
     codeLede:
       "Crea una dirección aislada, envíala a través de tu app y espera el valor esperado. InboxTap funciona con Playwright, Vitest, Jest y otros runners de Bun o Node.",
     ctaPrimary: "Empezar",
-    ctaSecondary: "Ver en GitHub",
+    ctaSecondary: "Ver en npm",
     eyebrow: "Captura SMTP local para tests automatizados",
     featuresHeading: "Diseñado para suites de tests deterministas",
     features: [

@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/shared/site-header";
 import { getDictionary, getLocalizedDoc } from "@/lib/i18n";
 import { docPath, type Locale } from "@/lib/i18n/config";
 import { homeJsonLd } from "@/lib/seo/json-ld";
-import { BUY_ME_A_COFFEE_URL, GITHUB_URL } from "@/lib/site-config";
+import { BUY_ME_A_COFFEE_URL, GITHUB_URL, NPM_URL } from "@/lib/site-config";
 import { Reveal } from "./reveal";
 
 export function LandingPage({ locale }: { locale: Locale }) {
@@ -40,7 +40,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <Link className="button button-primary" href={docsHref}>
                 {t.ctaPrimary}
               </Link>
-              <a className="button button-ghost" href={GITHUB_URL}>
+              <a className="button button-ghost" href={NPM_URL}>
                 {t.ctaSecondary}
               </a>
             </Reveal>
