@@ -4,6 +4,13 @@ Release history for the `inboxtap` npm package. Sections are generated from
 merged pull requests by the release workflow; each version also appears on
 [GitHub Releases](https://github.com/TracyNgot/inboxtap.dev/releases).
 
+## v0.3.1 — 2026-07-21
+
+### 📦 Maintenance
+* ⬆️ chore: override postcss and esbuild to patched versions by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/16
+
+**Full Changelog**: https://github.com/TracyNgot/inboxtap.dev/compare/v0.3.0...v0.3.1
+
 ## v0.3.0 — 2026-07-21
 
 ### ✨ Features
