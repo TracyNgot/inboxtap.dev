@@ -33,6 +33,15 @@ export function normalizeNotesBody(body: string): string {
     .trim();
 }
 
+// A release dispatched with no pull requests merged since the previous tag
+// (e.g. promoting to v1.0.0) generates a body with no bullets, which the
+// changelog parity gate rejects: every release section must contain an item.
+export function ensureChangelogItem(notes: string, previousTag?: string): string {
+  if (/^\* /m.test(notes)) return notes;
+  const origin = previousTag ?? "the previous release";
+  return `* 🔖 chore: promote ${origin} unchanged\n\n${notes}`;
+}
+
 export function formatChangelogSection(
   tag: string,
   date: string,
