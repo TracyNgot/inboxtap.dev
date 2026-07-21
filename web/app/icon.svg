@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <title>InboxTap</title>
-  <rect width="64" height="64" rx="10" fill="#050505"/>
-  <path d="M14 18h36v28H14z" fill="none" stroke="#00e676" stroke-width="4"/>
-  <path d="m16 21 16 13 16-13" fill="none" stroke="#00e676" stroke-width="4"/>
-  <rect x="27" y="27" width="10" height="10" fill="#00e676"/>
+  <title>InboxTap mark</title>
+  <rect x="1" y="1" width="62" height="62" rx="11" fill="#050505" stroke="#e7ebe8" stroke-opacity=".8" stroke-width="1.5"/>
+  <path d="M32 8V23" fill="none" stroke="#e7ebe8" stroke-width="5"/>
+  <path d="m24 17 8 8 8-8" fill="none" stroke="#e7ebe8" stroke-width="5"/>
+  <path d="M13 32h11l5 7h6l5-7h11v19H13Z" fill="none" stroke="#00e676" stroke-width="5"/>
 </svg>

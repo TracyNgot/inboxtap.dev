@@ -767,6 +767,31 @@ a {
   gap: 20px;
 }
 
+.footer-brand {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.footer-mark {
+  background: url("/icon.svg") center / contain no-repeat;
+  display: block;
+  flex: none;
+  height: 28px;
+  width: 28px;
+}
+
+.product-hunt-badge {
+  display: block;
+  flex: none;
+}
+
+.product-hunt-badge img {
+  display: block;
+  height: auto;
+  max-width: 100%;
+}
+
 .site-footer {
   border-top: 1px solid var(--border);
 }
