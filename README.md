@@ -123,7 +123,7 @@ bun run verify
 
 Lefthook installs pre-commit checks for formatting, linting, type checking, and Bun tests. Pre-push runs the complete verification suite, including the tsup build and Node distribution smoke test.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [STYLE_GUIDE.md](STYLE_GUIDE.md) for coding and commit conventions. Maintainers can use [RELEASING.md](RELEASING.md) for the verified npm release flow.
+Read [docs/OVERVIEW.md](docs/OVERVIEW.md) for the project goals and design invariants, then [CONTRIBUTING.md](CONTRIBUTING.md) and [STYLE_GUIDE.md](STYLE_GUIDE.md) for coding and commit conventions. Maintainers can use [RELEASING.md](RELEASING.md) for the verified npm release flow.
 
 ## License
 

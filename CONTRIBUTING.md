@@ -20,9 +20,10 @@ change better. An issue number may be included, but is not required.
 
 ## Coding style
 
-Read [STYLE_GUIDE.md](STYLE_GUIDE.md) before changing production behavior. It is
-the source of truth for TypeScript, architecture, resource limits, errors,
-testing, and documentation conventions.
+Read [docs/OVERVIEW.md](docs/OVERVIEW.md) for the product goals and design
+invariants, and [STYLE_GUIDE.md](STYLE_GUIDE.md) before changing production
+behavior. STYLE_GUIDE.md is the source of truth for TypeScript, architecture,
+resource limits, errors, testing, and documentation conventions.
 
 Biome owns formatting and linting. Do not hand-format around it:
 
