@@ -21,9 +21,11 @@ bun run release:publish
 gh release create v0.1.0 --generate-notes --title v0.1.0 --verify-tag
 ```
 
-Complete this bootstrap before merging the release-automation pull request. The
+Complete this bootstrap before merging the release-automation pull request;
+merging first leaves `main` on a bumped version with nothing published. The
 publish command requires an npm account with publishing 2FA or an appropriately
-restricted granular access token.
+restricted granular access token, and publishes with the npm CLI so the
+registry integrity matches the automated workflow's resume checks.
 
 In the `inboxtap` package settings on npmjs.com, add a GitHub Actions trusted
 publisher with these exact values:
@@ -47,13 +49,19 @@ Create the labels referenced by `.github/release.yml`: `breaking`,
 
 ## Automated release flow
 
-The merged pull request's source branch determines the version bump:
+Source branch prefixes map to version bumps:
 
 | Branch prefix | Version bump |
 | --- | --- |
 | `breaking/`, `major/` | Major |
 | `feat/` | Minor |
 | Any other prefix | Patch |
+
+The workflow applies the highest bump among all pull requests merged into
+`main` since the last release tag, so rapid merges that collapse into a single
+run cannot drop a queued minor or major release. A major bump additionally
+requires the `breaking` label on a contributing pull request; the run fails
+until the label is added and the run is retried.
 
 After a pull request merges into `main`, `.github/workflows/release.yml`:
 
@@ -90,11 +98,14 @@ bun run release:check
 bun run release:patch # or release:minor / release:major
 git push origin main --follow-tags
 bun run release:publish
+gh release create vX.Y.Z --generate-notes --title vX.Y.Z --verify-tag
 ```
 
 The prepare command verifies the package, updates `package.json` and `bun.lock`,
 and creates the matching release commit and tag. The publish command refuses to
-run away from `main`, with a dirty worktree, or without the expected version tag.
+run away from `main`, with a dirty worktree, or without the expected version tag,
+and publishes with the npm CLI so later automated resumes recognize the version.
+Finish by creating the GitHub release for the pushed tag.
 
 ## Local package inspection
 

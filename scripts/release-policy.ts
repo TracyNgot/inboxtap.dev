@@ -1,10 +1,19 @@
 export type ReleaseLevel = "patch" | "minor" | "major";
 
+const LEVEL_RANK: Record<ReleaseLevel, number> = { patch: 0, minor: 1, major: 2 };
+
 export function releaseLevelForBranch(branch: string): ReleaseLevel {
   const [prefix] = branch.split("/", 1);
   if (prefix === "breaking" || prefix === "major") return "major";
   if (prefix === "feat") return "minor";
   return "patch";
+}
+
+export function maxReleaseLevel(branches: string[]): ReleaseLevel {
+  if (branches.length === 0) throw new Error("Expected at least one branch name");
+  return branches
+    .map(releaseLevelForBranch)
+    .reduce((highest, level) => (LEVEL_RANK[level] > LEVEL_RANK[highest] ? level : highest));
 }
 
 export function bumpVersion(current: string, level: ReleaseLevel): string {
@@ -28,7 +37,8 @@ export function bumpVersion(current: string, level: ReleaseLevel): string {
 }
 
 if (import.meta.main) {
-  const branch = process.argv[2];
-  if (!branch) throw new Error("Usage: bun scripts/release-policy.ts <branch>");
-  console.log(releaseLevelForBranch(branch));
+  const branches = process.argv.slice(2);
+  if (branches.length === 0)
+    throw new Error("Usage: bun scripts/release-policy.ts <branch> [branch...]");
+  console.log(maxReleaseLevel(branches));
 }

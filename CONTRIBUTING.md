@@ -23,7 +23,9 @@ The source branch determines the release created after the pull request merges:
 | `feat/` | Minor |
 | `fix/`, `docs/`, `refactor/`, `test/`, `chore/` | Patch |
 
-Unrecognized prefixes also produce a patch release. An issue number may be
+Unrecognized prefixes also produce a patch release, and when several merges
+release together the highest bump among them wins. A major release additionally
+requires the `breaking` label on the pull request. An issue number may be
 included in the branch name, but is not required.
 
 ## Coding style

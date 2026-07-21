@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { bumpVersion, releaseLevelForBranch } from "../scripts/release-policy.js";
+import { bumpVersion, maxReleaseLevel, releaseLevelForBranch } from "../scripts/release-policy.js";
 
 test.each(["breaking/remove-legacy-api", "major/next-generation"])(
   "%s selects a major release",
@@ -21,6 +21,19 @@ test.each([
   "dependabot/npm_and_yarn/typescript-5.8",
 ])("%s selects a patch release", (branch) => {
   expect(releaseLevelForBranch(branch)).toBe("patch");
+});
+
+test.each([
+  [["docs/readme", "chore/deps"], "patch"],
+  [["fix/header-parsing", "feat/new-filter", "docs/readme"], "minor"],
+  [["chore/deps", "breaking/remove-legacy-api", "feat/new-filter"], "major"],
+  [["feat/only-change"], "minor"],
+] as const)("%p selects the highest release level %s", (branches, expected) => {
+  expect(maxReleaseLevel([...branches])).toBe(expected);
+});
+
+test("maxReleaseLevel rejects an empty branch list", () => {
+  expect(() => maxReleaseLevel([])).toThrow("Expected at least one branch name");
 });
 
 test.each([

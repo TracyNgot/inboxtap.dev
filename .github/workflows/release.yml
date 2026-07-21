@@ -16,6 +16,7 @@ on:
 permissions:
   contents: write
   id-token: write
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-main
@@ -34,7 +35,7 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || 'main' }}
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
 
@@ -51,8 +52,10 @@ jobs:
       - name: Prepare or resume the release
         id: release
         env:
+          GH_TOKEN: ${{ github.token }}
           MANUAL_TAG: ${{ inputs.tag }}
           SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+          SOURCE_PR: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
 
@@ -78,7 +81,44 @@ jobs:
             exit 0
           fi
 
-          level=$(bun scripts/release-policy.ts "$SOURCE_BRANCH")
+          # Derive the bump from every pull request merged since the last
+          # release tag, not only the triggering one: GitHub keeps a single
+          # pending run per concurrency group, so a canceled queued run must
+          # not lose its pull request's minor or major bump.
+          branches=()
+          breaking_labeled=false
+          last_tag=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
+          if [[ -n "$last_tag" ]]; then
+            while IFS= read -r sha; do
+              while IFS=$'\t' read -r ref labels; do
+                branches+=("$ref")
+                if [[ ",${labels}," == *",breaking,"* ]]; then
+                  breaking_labeled=true
+                fi
+              done < <(
+                gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
+                  --jq '.[] | select(.base.ref == "main" and .merged_at != null) | [.head.ref, ([.labels[].name] | join(","))] | @tsv'
+              )
+            done < <(git log "${last_tag}..HEAD" --format=%H)
+          fi
+
+          if [[ ${#branches[@]} -eq 0 ]]; then
+            branches=("$SOURCE_BRANCH")
+            labels=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}" \
+              --jq '[.labels[].name] | join(",")')
+            if [[ ",${labels}," == *",breaking,"* ]]; then
+              breaking_labeled=true
+            fi
+          fi
+
+          level=$(bun scripts/release-policy.ts "${branches[@]}")
+
+          if [[ "$level" == "major" && "$breaking_labeled" != "true" ]]; then
+            echo "A major release requires the 'breaking' label on a contributing pull request." >&2
+            echo "Label the pull request, then re-run this workflow run." >&2
+            exit 1
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           bun run "release:${level}"
@@ -116,15 +156,34 @@ jobs:
               '
           )
 
-          if registry_integrity=$(npm view "${package_name}@${RELEASE_VERSION}" dist.integrity 2>/dev/null); then
+          # Only a definitive E404 means the version is unpublished; any other
+          # npm view failure (network, registry outage) must fail the run
+          # instead of driving a duplicate publish.
+          view_status=0
+          view_output=$(npm view "${package_name}@${RELEASE_VERSION}" dist.integrity --json 2>&1) || view_status=$?
+          if [[ "$view_status" -ne 0 ]]; then
+            if grep -q '"code": *"E404"' <<<"$view_output"; then
+              echo "publish_required=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Unable to query npm for ${package_name}@${RELEASE_VERSION}:" >&2
+              echo "$view_output" >&2
+              exit 1
+            fi
+          else
+            registry_integrity=$(
+              node -e '
+                const value = JSON.parse(process.argv[1]);
+                if (typeof value !== "string" || !value)
+                  throw new Error("npm view did not return a dist integrity string");
+                process.stdout.write(value);
+              ' "$view_output"
+            )
             if [[ "$registry_integrity" != "$local_integrity" ]]; then
               echo "npm already has ${package_name}@${RELEASE_VERSION} with different contents" >&2
               exit 1
             fi
             echo "publish_required=false" >> "$GITHUB_OUTPUT"
             echo "${package_name}@${RELEASE_VERSION} is already published with matching contents"
-          else
-            echo "publish_required=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Publish to npm

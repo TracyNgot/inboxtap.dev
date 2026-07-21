@@ -15,4 +15,6 @@ if (!tags.includes(expectedTag)) {
 }
 
 run("bun", ["run", "verify"]);
-run("bun", ["publish", "--access", "public", "--registry", "https://registry.npmjs.org/"]);
+// npm (not bun) packs the tarball so its registry integrity matches the
+// npm-pack comparison in the release workflow's resume path.
+run("npm", ["publish", "--access", "public", "--registry", "https://registry.npmjs.org/"]);
