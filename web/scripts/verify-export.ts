@@ -9,6 +9,7 @@ const requiredFiles = [
   "robots.txt",
   "sitemap.xml",
   "icon.svg",
+  "favicon.ico",
   "fr/opengraph-image",
   "es/opengraph-image",
 ];
