@@ -79,6 +79,10 @@
   "engines": {
     "node": ">=20"
   },
+  "overrides": {
+    "postcss": "^8.5.10",
+    "esbuild": "^0.28.1"
+  },
   "dependencies": {
     "mailparser": "^3.9.14",
     "smtp-server": "^3.19.2"
