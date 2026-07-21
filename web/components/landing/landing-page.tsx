@@ -6,9 +6,33 @@ import { getDictionary, getLocalizedDoc } from "@/lib/i18n";
 import { docPath, type Locale } from "@/lib/i18n/config";
 import { homeJsonLd } from "@/lib/seo/json-ld";
 import { BUY_ME_A_COFFEE_URL, GITHUB_URL, NPM_URL } from "@/lib/site-config";
+import { HighlightedCode } from "./highlighted-code";
 import { Reveal } from "./reveal";
 import { StoryScene } from "./story-scene";
 import { StoryStacked } from "./story-stacked";
+
+const terminalJson = `{
+  "email": {
+    "subject": "Verify your account",
+    "codes": ["482910"],
+    "links": ["https://app.test/verify?…"]
+  }
+}`;
+
+const signupSpec = `import { InboxTapClient } from "inboxtap/client";
+
+const inboxTap = new InboxTapClient();
+const inbox = await inboxTap.createInbox({ alias: "signup" });
+
+await page.getByLabel("Email").fill(inbox.address);
+await page.getByRole("button", { name: "Create account" }).click();
+
+const verificationUrl = await inbox.waitForLink({
+  subject: /verify your email/i,
+  contains: "/verify",
+});
+
+await page.goto(verificationUrl);`;
 
 export function LandingPage({ locale }: { locale: Locale }) {
   const dictionary = getDictionary(locale);
@@ -58,13 +82,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <span className="cursor" />
               </p>
               <p className="terminal-comment">GET /api/emails/latest?to=signup%40local.test</p>
-              <pre>{`{
-  "email": {
-    "subject": "Verify your account",
-    "codes": ["482910"],
-    "links": ["https://app.test/verify?…"]
-  }
-}`}</pre>
+              <HighlightedCode code={terminalJson} lang="json" />
             </div>
           </Reveal>
         </section>
@@ -99,22 +117,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
           </Reveal>
           <Reveal className="code-window">
             <div className="code-label">signup.spec.ts</div>
-            <pre>
-              <code>{`import { InboxTapClient } from "inboxtap/client";
-
-const inboxTap = new InboxTapClient();
-const inbox = await inboxTap.createInbox({ alias: "signup" });
-
-await page.getByLabel("Email").fill(inbox.address);
-await page.getByRole("button", { name: "Create account" }).click();
-
-const verificationUrl = await inbox.waitForLink({
-  subject: /verify your email/i,
-  contains: "/verify",
-});
-
-await page.goto(verificationUrl);`}</code>
-            </pre>
+            <HighlightedCode code={signupSpec} lang="typescript" />
           </Reveal>
         </section>
 

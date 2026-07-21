@@ -1099,13 +1099,20 @@ a {
   font-family: inherit;
 }
 
-.docs-code-block .shiki span {
+.docs-code-block .shiki span,
+.code-highlight .shiki span {
   color: var(--shiki-light, inherit);
 }
 
 [data-theme="dark"] .docs-code-block .shiki,
-[data-theme="dark"] .docs-code-block .shiki span {
+[data-theme="dark"] .docs-code-block .shiki span,
+[data-theme="dark"] .code-highlight .shiki,
+[data-theme="dark"] .code-highlight .shiki span {
   color: var(--shiki-dark, inherit);
+}
+
+.code-highlight pre code {
+  font-family: inherit;
 }
 
 .docs-callout {
