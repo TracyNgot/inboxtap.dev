@@ -91,3 +91,8 @@ Use `Refs #123` in the commit body when helpful. Do not add Linear identifiers.
 - Run `bun run verify` before requesting review.
 - Expect a successful merge into `main` to publish the corresponding npm
   release; closing a pull request without merging does not release anything.
+
+## Security reports
+
+Do not disclose suspected vulnerabilities in a public issue. Follow
+[SECURITY.md](SECURITY.md) to report them privately.
