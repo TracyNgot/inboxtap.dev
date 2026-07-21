@@ -2,9 +2,9 @@ InboxTap est un serveur de capture SMTP strictement local et un SDK de test. Vot
 envoie un vrai email à InboxTap, puis votre test attend le message, le lien de vérification, le code
 à usage unique ou la correspondance personnalisée dont il a besoin pour continuer.
 
-<Callout title="API pré-1.0">
-  InboxTap est actuellement en v0.1. Le comportement public peut changer entre versions mineures
-  jusqu’à la v1.0.0.
+<Callout title="Version actuelle">
+  InboxTap est actuellement en v<Version />. Consultez le journal des modifications pour connaître
+  les changements entre les versions.
 </Callout>
 
 ## Pourquoi InboxTap
@@ -43,7 +43,7 @@ Par défaut, InboxTap ne lie SMTP et HTTP qu’aux adresses de loopback (`127.0.
 relaie jamais un message vers l’extérieur. Il est destiné au développement et aux tests
 automatisés, pas à la livraison de mail en production.
 
-Le serveur v0.1 stocke les messages en mémoire, conserve les 100 plus récents par défaut, rejette
-par défaut les messages de plus de 5 Mio et plafonne les attentes HTTP en long-poll à 60 secondes.
-Il ne fournit ni persistance, ni boîte de réception dans le navigateur, ni gestion des pièces
-jointes, ni webhooks, ni authentification SMTP, ni STARTTLS.
+Le serveur v<Version /> stocke les messages en mémoire, conserve les 100 plus récents par défaut,
+rejette par défaut les messages de plus de 5 Mio et plafonne les attentes HTTP en long-poll à 60
+secondes. Il ne fournit ni persistance, ni boîte de réception dans le navigateur, ni gestion des
+pièces jointes, ni webhooks, ni authentification SMTP, ni STARTTLS.
