@@ -9,6 +9,7 @@ export interface ExpectedRoute {
   canonical: string;
   hreflangs: Record<Locale | "x-default", string>;
   htmlLang: Locale;
+  kind: "home" | "doc";
   ogLocale: string;
   tocIds: readonly string[];
   jsonLdTypes: readonly string[];
@@ -40,6 +41,7 @@ export function expectedRoutes(): ExpectedRoute[] {
       hreflangs: hreflangsFor(homePaths),
       htmlLang: locale,
       jsonLdTypes: ["Organization", "SoftwareApplication"],
+      kind: "home",
       locale,
       ogLocale: ogLocales[locale],
       path: homePaths[locale],
@@ -52,6 +54,7 @@ export function expectedRoutes(): ExpectedRoute[] {
         hreflangs: hreflangsFor(docAlternatePaths(doc.key)),
         htmlLang: locale,
         jsonLdTypes: ["TechArticle", "BreadcrumbList"],
+        kind: "doc",
         locale,
         ogLocale: ogLocales[locale],
         path: doc.path,

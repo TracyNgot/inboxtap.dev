@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { bold, dim, errorRed, green, stdoutColor } from "./colors.js";
 import { InboxTapServer } from "./server.js";
 import type { InboxTapServerOptions } from "./types.js";
 
@@ -12,7 +13,7 @@ if (args[0] === "--help" || args[0] === "-h") {
   process.exitCode = 1;
 } else {
   void start(parseOptions(args)).catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : "Unable to start InboxTap");
+    console.error(errorRed(error instanceof Error ? error.message : "Unable to start InboxTap"));
     process.exitCode = 1;
   });
 }
@@ -20,9 +21,12 @@ if (args[0] === "--help" || args[0] === "-h") {
 async function start(options: InboxTapServerOptions): Promise<void> {
   const server = new InboxTapServer(options);
   await server.start();
-  console.log(`SMTP listening on ${server.smtpHost}:${server.smtpPort}`);
-  console.log(`Test API listening on ${server.apiUrl}`);
-  console.log("Set SMTP_HOST and SMTP_PORT in the application under test. Press Ctrl+C to stop.");
+  if (stdoutColor) console.log(`${bold("Inbox")}${bold(green("Tap"))}`);
+  console.log(`SMTP listening on ${green(`${server.smtpHost}:${server.smtpPort}`)}`);
+  console.log(`Test API listening on ${green(server.apiUrl)}`);
+  console.log(
+    dim("Set SMTP_HOST and SMTP_PORT in the application under test. Press Ctrl+C to stop."),
+  );
 
   const shutdown = async (): Promise<void> => {
     await server.stop();
@@ -86,14 +90,17 @@ function parsePositiveInt(value: string, option: string): number {
 }
 
 function printHelp(): void {
-  console.log(`Usage: inboxtap [start] [options]
+  const option = (flag: string, description: string) => `  ${flag.padEnd(28)}${dim(description)}`;
+  console.log(`${bold("Usage:")} inboxtap [start] [options]
 
-Options:
-  --smtp-host <host>          SMTP host (default: localhost, binds 127.0.0.1 and ::1)
-  --smtp-port <port>          SMTP port (default: 1025)
-  --api-host <host>           API host (default: localhost, binds 127.0.0.1 and ::1)
-  --api-port <port>           API port (default: 8025)
-  --domain <domain>           Test recipient domain (default: local.test)
-  --max-messages <count>      Messages to retain (default: 100)
-  --max-message-size <bytes>  Maximum SMTP message size (default: 5242880)`);
+${bold("Options:")}
+${[
+  option("--smtp-host <host>", "SMTP host (default: localhost, binds 127.0.0.1 and ::1)"),
+  option("--smtp-port <port>", "SMTP port (default: 1025)"),
+  option("--api-host <host>", "API host (default: localhost, binds 127.0.0.1 and ::1)"),
+  option("--api-port <port>", "API port (default: 8025)"),
+  option("--domain <domain>", "Test recipient domain (default: local.test)"),
+  option("--max-messages <count>", "Messages to retain (default: 100)"),
+  option("--max-message-size <bytes>", "Maximum SMTP message size (default: 5242880)"),
+].join("\n")}`);
 }

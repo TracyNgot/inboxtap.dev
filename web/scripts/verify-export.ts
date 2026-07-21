@@ -66,6 +66,11 @@ for (const route of routes) {
   for (const type of route.jsonLdTypes) {
     requireTag(html, `"@type":"${type}"`, route.path, "JSON-LD type");
   }
+  if (route.kind === "home") {
+    for (const marker of ["story-track", "story-stacked", "test@example.com"]) {
+      requireTag(html, marker, route.path, "landing story");
+    }
+  }
   for (const id of route.tocIds) {
     if (!html.includes(`id="${id}"`)) {
       throw new Error(`Missing table-of-contents anchor #${id} in ${route.path}`);

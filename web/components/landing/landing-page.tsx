@@ -7,6 +7,8 @@ import { docPath, type Locale } from "@/lib/i18n/config";
 import { homeJsonLd } from "@/lib/seo/json-ld";
 import { BUY_ME_A_COFFEE_URL, GITHUB_URL, NPM_URL } from "@/lib/site-config";
 import { Reveal } from "./reveal";
+import { StoryScene } from "./story-scene";
+import { StoryStacked } from "./story-stacked";
 
 export function LandingPage({ locale }: { locale: Locale }) {
   const dictionary = getDictionary(locale);
@@ -27,7 +29,6 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <Reveal delay={0.12}>
               <h1>
                 {t.headline1}
-                <span>.</span>
                 <br />
                 {t.headline2}
                 <span>.</span>
@@ -68,20 +69,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
           </Reveal>
         </section>
 
-        <section className="section-shell landing-section">
-          <Reveal>
-            <h2>{t.stepsHeading}</h2>
-          </Reveal>
-          <div className="card-grid three-column">
-            {t.steps.map((step, index) => (
-              <Reveal className="glass-card step-card" delay={index * 0.07} key={step.number}>
-                <span className="step-number">{step.number}</span>
-                <h3>{step.title}</h3>
-                <p>{step.description}</p>
-                <pre>{step.code}</pre>
-              </Reveal>
-            ))}
-          </div>
+        <section aria-label={t.story.ariaLabel} className="story-section">
+          <StoryScene t={t.story} />
+          <StoryStacked t={t.story} />
         </section>
 
         <section className="section-shell landing-section" id="features">

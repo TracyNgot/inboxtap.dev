@@ -17,11 +17,10 @@ export interface DocsDictionary {
   entries: Record<DocKey, DocStrings>;
 }
 
-export interface LandingStep {
-  number: string;
+export interface StoryAct {
+  eyebrow: string;
   title: string;
-  description: string;
-  code: string;
+  line: string;
 }
 
 export interface Dictionary {
@@ -61,8 +60,21 @@ export interface Dictionary {
     lede: string;
     ctaPrimary: string;
     ctaSecondary: string;
-    stepsHeading: string;
-    steps: readonly LandingStep[];
+    story: {
+      ariaLabel: string;
+      acts: readonly [StoryAct, StoryAct, StoryAct];
+      labels: {
+        app: string;
+        boundary: string;
+        captured: string;
+        fake: string;
+        inbox: string;
+        localhostTag: string;
+        passed: string;
+        real: string;
+        risk: string;
+      };
+    };
     featuresHeading: string;
     features: readonly (readonly [string, string])[];
     codeEyebrow: string;
