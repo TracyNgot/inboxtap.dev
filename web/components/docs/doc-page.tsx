@@ -40,7 +40,7 @@ export function DocPage({ slug }: { slug: DocSlug }) {
           )}
         </nav>
       </article>
-      <TableOfContents items={doc.toc} />
+      {doc.toc.length > 0 ? <TableOfContents items={doc.toc} /> : null}
     </div>
   );
 }

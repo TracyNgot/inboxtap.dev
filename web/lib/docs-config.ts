@@ -210,6 +210,16 @@ export const docs = [
       { id: "message-rejected-as-too-large", label: "Message too large" },
     ],
   },
+  {
+    description: "Release history for every InboxTap version, with links to pull requests.",
+    group: "reference",
+    path: "/docs/changelog",
+    slug: "changelog",
+    title: "Changelog",
+    // Version anchors come from CHANGELOG.md at build time, so this page has
+    // no static table of contents.
+    toc: [],
+  },
 ] as const satisfies readonly DocDefinition[];
 
 export type DocSlug = (typeof docs)[number]["slug"];

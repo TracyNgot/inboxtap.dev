@@ -84,8 +84,9 @@ Use `Refs #123` in the commit body when helpful. Do not add Linear identifiers.
 
 - Keep one concern per pull request.
 - Link the issue with `Closes #123` when the PR completes it.
-- Apply relevant labels such as `bug`, `enhancement`, `documentation`,
-  `testing`, `dependencies`, `security`, or `breaking`.
+- Release-notes labels are applied automatically from the branch prefix. Add
+  `breaking` yourself when a major release is intended, and `skip-changelog`
+  to keep a pull request out of the release notes.
 - Complete every section of the pull request template.
 - Run `bun run verify` before requesting review.
 - Expect a successful merge into `main` to publish the corresponding npm

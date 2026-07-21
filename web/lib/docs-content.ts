@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { ChangelogContent } from "@/components/docs/changelog-content";
 import Alternatives from "@/content/docs/alternatives.mdx";
 import Configuration from "@/content/docs/configuration.mdx";
 import BetterAuth from "@/content/docs/guides/better-auth.mdx";
@@ -18,6 +19,7 @@ import type { DocSlug } from "./docs-config";
 const contentBySlug = {
   "": Introduction,
   alternatives: Alternatives,
+  changelog: ChangelogContent,
   configuration: Configuration,
   "guides/better-auth": BetterAuth,
   "guides/ci": Ci,
