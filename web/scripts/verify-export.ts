@@ -68,4 +68,21 @@ for (const route of routeFiles) {
   if (!sitemap.includes(`<loc>${url}</loc>`)) throw new Error(`Sitemap is missing ${url}`);
 }
 
-console.log(`Verified ${routeFiles.length} static routes and their internal documentation links.`);
+const analyticsMarker = "/_vercel/insights";
+const chunkGlob = new Bun.Glob("_next/static/chunks/**/*.js");
+let analyticsWired = false;
+for await (const chunkPath of chunkGlob.scan({ cwd: Bun.fileURLToPath(outputRoot) })) {
+  if ((await Bun.file(new URL(chunkPath, outputRoot)).text()).includes(analyticsMarker)) {
+    analyticsWired = true;
+    break;
+  }
+}
+if (!analyticsWired) {
+  throw new Error(
+    `No exported chunk references ${analyticsMarker}; is <Analytics /> still rendered in app/layout.tsx?`,
+  );
+}
+
+console.log(
+  `Verified ${routeFiles.length} static routes, their internal documentation links, and the Vercel Analytics bootstrap.`,
+);
