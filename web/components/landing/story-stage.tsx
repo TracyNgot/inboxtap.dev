@@ -69,6 +69,11 @@ export function StoryStage({ progress, t }: StageProps) {
     track.passedTag.opacity.input,
     track.passedTag.opacity.output,
   );
+  const assertionValueOpacity = useTransform(
+    progress,
+    track.assertionValue.opacity.input,
+    track.assertionValue.opacity.output,
+  );
 
   return (
     <>
@@ -126,7 +131,7 @@ export function StoryStage({ progress, t }: StageProps) {
           style={{ opacity: assertionOpacity, y: assertionY }}
         >
           <strong>await inbox.waitForCode()</strong>
-          <span>→ {CONSTANTS.code}</span>
+          <motion.span style={{ opacity: assertionValueOpacity }}>→ {CONSTANTS.code}</motion.span>
         </motion.div>
       </Anchor>
       <Anchor x={ANCHORS.assertion.x} y={ANCHORS.assertion.y + 52}>

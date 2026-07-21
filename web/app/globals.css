@@ -411,6 +411,7 @@ a {
 
 .story-stage-wrap {
   align-items: center;
+  container-type: size;
   display: flex;
   flex: 1;
   justify-content: center;
@@ -419,9 +420,18 @@ a {
 
 .story-stage {
   aspect-ratio: 1200 / 560;
-  max-height: 100%;
   position: relative;
   width: 100%;
+  /* biome-ignore lint/suspicious/noDuplicateProperties: cqh sizing keeps the stage at the exact viewBox ratio; plain width is the fallback for browsers without container-query units. */
+  width: min(100%, calc(100cqh * (1200 / 560)));
+}
+
+.story-progress {
+  background: var(--accent);
+  height: 2px;
+  margin-top: 14px;
+  transform-origin: left;
+  width: 132px;
 }
 
 .story-svg {

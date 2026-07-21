@@ -1,5 +1,6 @@
 "use client";
 
+import { easeInOut, easeOut } from "motion";
 import { motion, type MotionValue, useTransform } from "motion/react";
 import { ANCHORS, BOUNDARY, CONSTANTS, STAGE, SVG_TRACKS } from "./story-timeline";
 
@@ -11,8 +12,8 @@ interface TravelTracks {
 
 function Envelope({ progress, track }: { progress: MotionValue<number>; track: TravelTracks }) {
   const opacity = useTransform(progress, track.opacity.input, track.opacity.output);
-  const x = useTransform(progress, track.x.input, track.x.output);
-  const y = useTransform(progress, track.y.input, track.y.output);
+  const x = useTransform(progress, track.x.input, track.x.output, { ease: easeInOut });
+  const y = useTransform(progress, track.y.input, track.y.output, { ease: easeOut });
 
   return (
     <motion.g className="story-envelope story-mover" style={{ opacity, x, y }}>
@@ -34,8 +35,8 @@ function Chip({
   width: number;
 }) {
   const opacity = useTransform(progress, track.opacity.input, track.opacity.output);
-  const x = useTransform(progress, track.x.input, track.x.output);
-  const y = useTransform(progress, track.y.input, track.y.output);
+  const x = useTransform(progress, track.x.input, track.x.output, { ease: easeInOut });
+  const y = useTransform(progress, track.y.input, track.y.output, { ease: easeInOut });
 
   return (
     <motion.g className="story-mover" style={{ opacity, x, y }}>

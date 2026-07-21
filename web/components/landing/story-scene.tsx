@@ -49,6 +49,11 @@ export function StoryScene({ t }: { t: StoryStrings }) {
             />
           ))}
         </div>
+        <motion.div
+          aria-hidden="true"
+          className="story-progress"
+          style={{ scaleX: scrollYProgress }}
+        />
         <div className="story-stage-wrap">
           <div aria-hidden="true" className="story-stage">
             <StorySvgLayer progress={scrollYProgress} />

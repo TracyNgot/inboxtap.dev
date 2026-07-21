@@ -37,16 +37,16 @@ export interface CaptionTrack {
 
 export const CAPTIONS: readonly [CaptionTrack, CaptionTrack, CaptionTrack] = [
   {
-    opacity: { input: [0, 0.3, 0.34], output: [1, 1, 0] },
-    y: { input: [0, 0.3, 0.34], output: [0, 0, -8] },
+    opacity: { input: [0, 0.28, 0.32], output: [1, 1, 0] },
+    y: { input: [0, 0.28, 0.32], output: [0, 0, -12] },
   },
   {
-    opacity: { input: [0.3, 0.34, 0.62, 0.66], output: [0, 1, 1, 0] },
-    y: { input: [0.3, 0.34, 0.62, 0.66], output: [8, 0, 0, -8] },
+    opacity: { input: [0.34, 0.38, 0.6, 0.64], output: [0, 1, 1, 0] },
+    y: { input: [0.34, 0.38, 0.6, 0.64], output: [12, 0, 0, -12] },
   },
   {
-    opacity: { input: [0.62, 0.66, 1], output: [0, 1, 1] },
-    y: { input: [0.62, 0.66, 1], output: [8, 0, 0] },
+    opacity: { input: [0.66, 0.7, 1], output: [0, 1, 1] },
+    y: { input: [0.66, 0.7, 1], output: [12, 0, 0] },
   },
 ];
 
@@ -54,9 +54,9 @@ export const SVG_TRACKS = {
   boundaryDraw: { input: [0.38, 0.5], output: [0, 1] },
   check: { input: [0.84, 0.9], output: [0, 1] },
   codeChip: {
-    opacity: { input: [0.68, 0.71, 0.8], output: [0, 1, 1] },
-    x: { input: [0.68, 0.8], output: [ANCHORS.inbox.x, ANCHORS.assertion.x] },
-    y: { input: [0.68, 0.8], output: [ANCHORS.inbox.y, ANCHORS.assertion.y - 34] },
+    opacity: { input: [0.68, 0.71, 0.78, 0.82], output: [0, 1, 1, 0] },
+    x: { input: [0.68, 0.82], output: [ANCHORS.inbox.x, ANCHORS.assertion.x] },
+    y: { input: [0.68, 0.82], output: [ANCHORS.inbox.y, ANCHORS.assertion.y] },
   },
   envelopeCaught: {
     opacity: { input: [0.44, 0.47, 0.56, 0.585], output: [0, 1, 1, 0] },
@@ -79,7 +79,7 @@ export const SVG_TRACKS = {
   linkChip: {
     opacity: { input: [0.72, 0.75, 0.84], output: [0, 1, 1] },
     x: { input: [0.72, 0.84], output: [ANCHORS.inbox.x, ANCHORS.assertion.x] },
-    y: { input: [0.72, 0.84], output: [ANCHORS.inbox.y, ANCHORS.assertion.y + 2] },
+    y: { input: [0.72, 0.84], output: [ANCHORS.inbox.y, ANCHORS.assertion.y - 48] },
   },
   routeFake: { input: [0, 0.04, 0.34, 0.42], output: [0.9, 0.9, 0.9, 0.25] },
   routeReal: { input: [0.14, 0.18, 0.34, 0.42], output: [0, 0.9, 0.9, 0.25] },
@@ -91,6 +91,7 @@ export const DOM_TRACKS = {
     opacity: { input: [0.66, 0.72], output: [0, 1] },
     y: { input: [0.66, 0.72], output: [24, 0] },
   },
+  assertionValue: { opacity: { input: [0.78, 0.83], output: [0, 1] } },
   boundaryTag: { opacity: { input: [0.46, 0.52], output: [0, 1] } },
   inboxCard: {
     opacity: { input: [0.58, 0.64], output: [0, 1] },

@@ -38,6 +38,16 @@ describe("story timeline", () => {
     }
   });
 
+  test("captions never overlap anywhere in the scrub range", () => {
+    for (let step = 0; step <= 100; step++) {
+      const progress = step / 100;
+      const visible = CAPTIONS.filter(
+        (caption) => transform(caption.opacity.input, caption.opacity.output)(progress) > 0.02,
+      );
+      expect(visible.length, `P=${progress}`).toBeLessThanOrEqual(1);
+    }
+  });
+
   test("exactly one caption is fully visible at each act midpoint", () => {
     const midpoints = [0.15, 0.5, 0.85];
     for (const [actIndex, progress] of midpoints.entries()) {
