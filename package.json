@@ -6,6 +6,7 @@
   ],
   "description": "A local SMTP inbox for deterministic email-flow tests.",
   "license": "MIT",
+  "homepage": "https://inboxtap.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TracyNgot/inboxtap.dev.git"
