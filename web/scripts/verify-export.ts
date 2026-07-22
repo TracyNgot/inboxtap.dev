@@ -11,8 +11,8 @@ const requiredFiles = [
   "icon.svg",
   "favicon.ico",
   "inboxtap-demo.mp4",
-  "fr/opengraph-image",
-  "es/opengraph-image",
+  "opengraph-image.png",
+  "twitter-image.png",
 ];
 
 for (const relativePath of requiredFiles) {
@@ -20,21 +20,13 @@ for (const relativePath of requiredFiles) {
   if (!(await file.exists())) throw new Error(`Missing static export file: ${relativePath}`);
 }
 
-// The English Open Graph image lives in the (en) route group, so the exporter
-// emits it under a content-hashed name; find every OG image by prefix.
 const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
-const openGraphGlob = new Bun.Glob("**/opengraph-image*");
-const openGraphImages: string[] = [];
-for await (const imagePath of openGraphGlob.scan({ cwd: Bun.fileURLToPath(outputRoot) })) {
-  openGraphImages.push(imagePath);
+for (const imagePath of ["opengraph-image.png", "twitter-image.png"]) {
   const image = Bun.file(new URL(imagePath, outputRoot));
   const signature = new Uint8Array(await image.slice(0, 8).arrayBuffer());
   if (!pngSignature.every((byte, index) => signature[index] === byte)) {
-    throw new Error(`Static Open Graph image ${imagePath} is not a PNG`);
+    throw new Error(`Static social image ${imagePath} is not a PNG`);
   }
-}
-if (openGraphImages.length < 3) {
-  throw new Error(`Expected one Open Graph image per locale, found: ${openGraphImages.join(", ")}`);
 }
 
 function requireTag(html: string, tag: string, route: string, label: string) {
@@ -64,6 +56,18 @@ for (const route of routes) {
     );
   }
   requireTag(html, `property="og:locale" content="${route.ogLocale}"`, route.path, "og:locale");
+  requireTag(
+    html,
+    'property="og:image" content="https://inboxtap.dev/opengraph-image.png"',
+    route.path,
+    "Open Graph image",
+  );
+  requireTag(
+    html,
+    'name="twitter:image" content="https://inboxtap.dev/twitter-image.png"',
+    route.path,
+    "Twitter image",
+  );
   for (const type of route.jsonLdTypes) {
     requireTag(html, `"@type":"${type}"`, route.path, "JSON-LD type");
   }
@@ -95,7 +99,6 @@ for (const route of routes) {
 
   for (const match of html.matchAll(/href="(\/(?:docs|fr|es)(?:\/[^"?#]*)?)(?:[?#][^"]*)?"/g)) {
     const href = (match[1] ?? "").replace(/\/$/, "") || "/";
-    if (href.endsWith("/opengraph-image")) continue;
     if (!routePaths.has(href)) {
       throw new Error(`Broken internal link ${href} in ${route.path}`);
     }

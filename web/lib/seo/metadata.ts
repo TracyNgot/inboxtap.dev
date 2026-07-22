@@ -36,6 +36,7 @@ export function rootMetadata(locale: Locale): Metadata {
     openGraph: {
       alternateLocale: alternateOgLocales(locale),
       description: meta.ogDescription,
+      images: [`${SITE_ORIGIN}/opengraph-image.png`],
       locale: ogLocales[locale],
       siteName: SITE_NAME,
       title: meta.title,
@@ -45,6 +46,7 @@ export function rootMetadata(locale: Locale): Metadata {
     twitter: {
       card: "summary_large_image",
       description: meta.twitterDescription,
+      images: [`${SITE_ORIGIN}/twitter-image.png`],
       title: SITE_NAME,
     },
   };
@@ -64,6 +66,7 @@ export function docMetadata(locale: Locale, key: DocKey): Metadata {
     openGraph: {
       alternateLocale: alternateOgLocales(locale),
       description: doc.description,
+      images: [`${SITE_ORIGIN}/opengraph-image.png`],
       locale: ogLocales[locale],
       siteName: SITE_NAME,
       title: doc.title,
@@ -71,6 +74,11 @@ export function docMetadata(locale: Locale, key: DocKey): Metadata {
       url: paths[locale],
     },
     title: doc.title,
-    twitter: { card: "summary_large_image", description: doc.description, title: doc.title },
+    twitter: {
+      card: "summary_large_image",
+      description: doc.description,
+      images: [`${SITE_ORIGIN}/twitter-image.png`],
+      title: doc.title,
+    },
   };
 }
