@@ -96,13 +96,14 @@ export const docsEn: DocsDictionary = {
     },
     "reference/client-sdk": {
       description:
-        "Reference for InboxTapClient, TestInbox, runner fixtures, filters, and captured messages.",
+        "Reference for the client SDK, runner fixtures, SMTP fault controller, and captured messages.",
       slug: "reference/client-sdk",
       title: "Client SDK",
       toc: [
         { id: "create-a-client", label: "Create a client" },
         { id: "create-an-inbox", label: "Create an inbox" },
         { id: "fixture-entry-points", label: "Fixture entry points" },
+        { id: "smtp-fault-controller", label: "SMTP fault controller" },
         { id: "testinbox-methods", label: "TestInbox methods" },
         { id: "low-level-client-methods", label: "Low-level methods" },
         { id: "capturedemail", label: "CapturedEmail" },
@@ -137,7 +138,7 @@ export const docsEn: DocsDictionary = {
     },
     "guides/test-runners": {
       description:
-        "Start InboxTap on dynamic ports with lifecycle fixtures for Bun test, Vitest, and Playwright.",
+        "Use lifecycle fixtures and SMTP fault injection with Bun test, Vitest, and Playwright.",
       slug: "guides/test-runners",
       title: "Test emails with Bun, Vitest, and Playwright",
       toc: [
@@ -147,6 +148,7 @@ export const docsEn: DocsDictionary = {
         { id: "vitest", label: "Vitest" },
         { id: "playwright", label: "Playwright" },
         { id: "isolation-and-cleanup", label: "Isolation and cleanup" },
+        { id: "exercise-failure-paths", label: "Exercise failure paths" },
         { id: "choose-the-right-helper", label: "Choose a helper" },
       ],
     },

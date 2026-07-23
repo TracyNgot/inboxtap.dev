@@ -136,6 +136,51 @@ All adapters stop the server and close the transport when their native scope end
 server options to `setupInboxTap(options)` or `extendInboxTap(baseTest, options)` when the defaults
 need adjustment; omitted SMTP and API ports remain dynamic.
 
+## Exercise failure paths
+
+Use the fixture server’s fault controller to test application retries at the real SMTP boundary.
+Target every rule to the test’s unique envelope recipient so a concurrent transaction cannot
+consume it. Register the rule immediately before triggering the application.
+
+```ts
+test("retries a transient SMTP failure", async ({ inboxTap, inbox }) => {
+  const send = () =>
+    inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify?id=example",
+    });
+
+  inboxTap.server.faults.failNext({
+    code: 451,
+    to: inbox.address,
+  });
+
+  await expect(send()).rejects.toThrow();
+  await expect(send()).resolves.toBeDefined();
+
+  expect(await inbox.messages()).toHaveLength(1);
+});
+```
+
+A `451` response is useful for retry and backoff paths; use a `550` response for permanent-failure
+handling. `delayNext()` exercises application timeouts, and `disconnectNext()` exercises recovery
+from an interrupted SMTP session. Failed and disconnected attempts never produce partial captured
+messages.
+
+For concurrency, use `pauseNext()` as an explicit gate instead of sleeping. Await
+`gate.waitUntilPaused()` before launching the competing action, and call the idempotent
+`gate.release()` in a `finally` block. The default 60-second absolute gate timeout still bounds a
+missed match or release; if an active pause expires, SMTP returns `451` and the message is not
+captured. Teardown aborts remaining gates; avoid calling `reset()` from a concurrent test because
+it affects the shared server’s other rules.
+
+Only one fault rule applies to a transaction. Use `times` when consecutive attempts need the same
+failure, or register the next rule after observing the previous attempt. InboxTap controls SMTP
+delivery behavior; application persistence, idempotency, and business-level deduplication remain
+assertions owned by the application’s tests.
+
 ## Choose the right helper
 
 - Use `waitForLink()` for verification, password-reset, and magic-link URLs.

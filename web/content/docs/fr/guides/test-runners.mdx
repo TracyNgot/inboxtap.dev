@@ -141,6 +141,53 @@ Vous pouvez passer des options serveur à `setupInboxTap(options)` ou
 `extendInboxTap(baseTest, options)` si les valeurs par défaut doivent être adaptées ; les ports SMTP
 et API omis restent dynamiques.
 
+## Tester les chemins d’échec
+
+Utilisez le contrôleur de pannes du serveur de la fixture pour tester les nouvelles tentatives de
+l’application à la vraie frontière SMTP. Ciblez chaque règle sur le destinataire d’enveloppe unique
+du test afin qu’une transaction concurrente ne puisse pas la consommer. Enregistrez la règle juste
+avant de déclencher l’application.
+
+```ts
+test("retries a transient SMTP failure", async ({ inboxTap, inbox }) => {
+  const send = () =>
+    inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify?id=example",
+    });
+
+  inboxTap.server.faults.failNext({
+    code: 451,
+    to: inbox.address,
+  });
+
+  await expect(send()).rejects.toThrow();
+  await expect(send()).resolves.toBeDefined();
+
+  expect(await inbox.messages()).toHaveLength(1);
+});
+```
+
+Une réponse `451` convient aux chemins de nouvelle tentative et de backoff ; utilisez une réponse
+`550` pour le traitement des échecs permanents. `delayNext()` teste les timeouts applicatifs, et
+`disconnectNext()` la récupération après une session SMTP interrompue. Les tentatives échouées ou
+déconnectées ne produisent jamais de message capturé partiel.
+
+Pour la concurrence, utilisez `pauseNext()` comme portail explicite au lieu d’une temporisation.
+Attendez `gate.waitUntilPaused()` avant de lancer l’action concurrente et appelez
+`gate.release()`, idempotente, dans un bloc `finally`. Le timeout absolu de 60 secondes par défaut
+borne toujours une correspondance ou une libération manquée ; si une pause active expire, SMTP
+renvoie `451` et le message n’est pas capturé. Le nettoyage abandonne les portails restants ; évitez
+d’appeler `reset()` depuis un test concurrent, car il affecte les autres règles du serveur partagé.
+
+Une seule règle de panne s’applique à une transaction. Utilisez `times` lorsque plusieurs
+tentatives consécutives doivent subir le même échec, ou enregistrez la règle suivante après avoir
+observé la tentative précédente. InboxTap contrôle la livraison SMTP ; la persistance,
+l’idempotence et la déduplication métier restent des assertions appartenant aux tests de
+l’application.
+
 ## Choisir le bon helper
 
 - Utilisez `waitForLink()` pour les URL de vérification, de réinitialisation de mot de passe et de

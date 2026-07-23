@@ -52,8 +52,10 @@ graph LR
 
 | Module | Responsibility |
 | --- | --- |
-| `src/smtp.ts` | Wraps `smtp-server` with `AUTH`/`STARTTLS` disabled, enforces the max message size (SMTP 552 on overflow), and hands each inbound message to a capture callback. |
-| `src/server.ts` | `InboxTapServer` composes the SMTP listener and HTTP API, binding both loopback addresses (`127.0.0.1` and `::1`) on the `1025`/`8025` defaults (domain `local.test`, 100 messages, 5 MiB), and owns the start/stop lifecycle and `/health` payload. |
+| `src/smtp.ts` | Wraps `smtp-server` with `AUTH`/`STARTTLS` disabled, claims at most one matching fault when a transaction reaches `DATA`, enforces the max message size (SMTP 552 on overflow), and stores only successfully completed deliveries. |
+| `src/faults/` | Owns the bounded `server.faults` controller, validated next-matching rule queue, and independently timed pause gates shared by both SMTP listeners. |
+| `src/smtp-disconnect.ts` | Quarantines the tested adapter that maps an `smtp-server` session to its private connection socket and closes it safely for disconnect injection. |
+| `src/server.ts` | `InboxTapServer` composes the SMTP listener, shared programmatic fault controller, and HTTP API, binding both loopback addresses (`127.0.0.1` and `::1`) on the `1025`/`8025` defaults (domain `local.test`, 100 messages, 5 MiB), and owns the start/stop lifecycle and `/health` payload. |
 | `src/listen.ts` | Generic listen/close helpers plus `listenDualStack`, which binds `127.0.0.1` and `::1` on one port with bounded ephemeral-port retries and graceful IPv4-only fallback when IPv6 is unavailable. |
 | `src/parser.ts` | Parses raw RFC 822 mail via `mailparser` into a `CapturedEmail`: normalized headers, text/HTML bodies, deduplicated http(s) links, unique 4–8 digit codes, and the raw source. |
 | `src/store.ts` | In-memory `EmailStore` with FIFO eviction at `maxMessages`, filtered `list`/`latest`/`get`/`clear`, and long-poll waiters resolved on a matching add or cleaned up on timeout. |
@@ -86,7 +88,10 @@ enforced in code today:
    messages without server-side registration; the API has no registration
    route at all. Runner adapters create a fresh `TestInbox` for every test
    while sharing only the bounded server lifecycle at file scope (Vitest) or
-   worker scope (Playwright). Bun keeps per-test creation explicit.
+   worker scope (Playwright). Bun keeps per-test creation explicit. SMTP fault
+   rules are programmatic, bounded, and consumed by the next matching
+   transaction at `DATA`, so failure-path tests remain deterministic without
+   exposing a remote control surface.
 5. **Dual-format output** — ships ESM, CJS, type declarations, and a compiled
    Node 20 CLI (`exports`/`bin` in `package.json`, `tsup.config.ts`, smoke-
    tested by `scripts/test-package.ts`).
@@ -102,6 +107,9 @@ Included:
 - CLI, HTTP API, and TypeScript SDK
 - Optional fixture subpaths for explicit, Bun, Vitest, and Playwright
   lifecycles, backed by Nodemailer 9
+- Programmatic SMTP fault injection for bounded failure, delay, disconnect, and
+  pause/release scenarios; rules can target a unique envelope recipient and
+  failed or disconnected messages never reach the store
 - Server-side extraction of http(s) links and 4–8 digit codes; arbitrary
   regex matching is SDK-side via `waitForMatch` (and `waitForCode` defaults to
   6-digit codes)
@@ -119,6 +127,7 @@ Explicitly excluded:
 - Configurable extraction rules
 - SMTP authentication or STARTTLS
 - Outbound relay of any kind
+- Fault-control HTTP routes, CLI flags, history, or statistics
 
 ## Target users
 
