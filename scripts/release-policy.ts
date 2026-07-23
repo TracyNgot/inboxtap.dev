@@ -1,20 +1,11 @@
 export type ReleaseLevel = "patch" | "minor" | "major";
 
-export const LIBRARY_RELEASE_PATHS = [
-  "LICENSE",
-  "package.json",
-  "src/**",
-  "tsconfig.json",
-  "tsup.config.ts",
-] as const;
+export const LIBRARY_RELEASE_PATHS = ["src/**"] as const;
 
 const LEVEL_RANK: Record<ReleaseLevel, number> = { patch: 0, minor: 1, major: 2 };
-const LIBRARY_ROOT_FILES = new Set<string>(
-  LIBRARY_RELEASE_PATHS.filter((path) => !path.endsWith("/**")),
-);
 
 export function isLibraryReleasePath(path: string): boolean {
-  return path.startsWith("src/") || LIBRARY_ROOT_FILES.has(path);
+  return path.startsWith("src/");
 }
 
 export function hasLibraryChanges(paths: string[]): boolean {

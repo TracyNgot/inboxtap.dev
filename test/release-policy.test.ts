@@ -9,26 +9,23 @@ import {
   releaseLevelForBranch,
 } from "../scripts/release-policy.js";
 
-test.each([
-  "LICENSE",
-  "package.json",
-  "src/api.ts",
-  "src/client/index.ts",
-  "tsconfig.json",
-  "tsup.config.ts",
-])("%s is a library release path", (path) => {
+test.each(["src/api.ts", "src/client/index.ts"])("%s is a library release path", (path) => {
   expect(isLibraryReleasePath(path)).toBeTrue();
 });
 
 test.each([
   "AGENTS.md",
+  "LICENSE",
   "README.md",
   "RELEASING.md",
   "bun.lock",
   "docs/OVERVIEW.md",
   "examples/express-nodemailer/package.json",
+  "package.json",
   "scripts/release-policy.ts",
   "test/inboxtap.test.ts",
+  "tsconfig.json",
+  "tsup.config.ts",
   "web/package.json",
 ])("%s does not trigger a library release", (path) => {
   expect(isLibraryReleasePath(path)).toBeFalse();

@@ -63,8 +63,8 @@ ESM/CJS imports, and the compiled Node CLI. Never bypass Lefthook with
 - npm is the canonical package registry. Do not publish this unscoped package to
   GitHub Packages.
 - Merging a pull request into `main` runs the serialized npm release workflow
-  only when the pull request changes the published library. It derives the
-  semantic version bump from the source branches of every library-changing pull
+  only when the pull request changes `src/`. It derives the
+  semantic version bump from the source branches of every `src/`-changing pull
   request merged since the last release tag (a major bump also requires the
   `breaking` label), while release notes include all merged pull requests in
   that range, including deferred documentation and website changes. It then

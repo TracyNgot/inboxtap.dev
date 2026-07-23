@@ -1,12 +1,12 @@
 # Releasing InboxTap
 
 InboxTap publishes its public, unscoped package to the npm registry. Merging a
-pull request that changes the published library into `main` performs the
-complete release automatically. Documentation, website, example, test-only, and
-release-tooling changes wait for the next library release. The release commit
-and tag use gitmoji, GitHub labels generate categorized release notes, and every
-release is recorded in `CHANGELOG.md` and rendered on the website at
-<https://inboxtap.dev/docs/changelog>.
+pull request that changes `src/` into `main` performs the complete release
+automatically. Documentation, website, example, test-only, and
+package/build/release-tooling changes wait for the next source release. The
+release commit and tag use gitmoji, GitHub labels generate categorized release
+notes, and every release is recorded in `CHANGELOG.md` and rendered on the
+website at <https://inboxtap.dev/docs/changelog>.
 
 ## npm authentication
 
@@ -35,9 +35,8 @@ and the website changelog always agree.
 
 ## Automated release flow
 
-The workflow runs for a merged pull request only when it changes `src/`,
-`LICENSE`, `package.json`, `tsconfig.json`, or `tsup.config.ts`. Source branch
-prefixes on those library-changing pull requests map to version bumps:
+The workflow runs for a merged pull request only when it changes `src/`. Source
+branch prefixes on those `src/`-changing pull requests map to version bumps:
 
 | Branch prefix | Version bump |
 | --- | --- |
@@ -45,13 +44,13 @@ prefixes on those library-changing pull requests map to version bumps:
 | `feat/` | Minor |
 | Any other prefix | Patch |
 
-The workflow applies the highest bump among all library-changing pull requests
+The workflow applies the highest bump among all `src/`-changing pull requests
 merged into `main` since the last release tag, so rapid merges that collapse
 into a single run cannot drop a queued minor or major release. Documentation,
 website, and other deferred pull requests do not affect the version bump but
 remain in the generated release notes. A major bump additionally requires the
-`breaking` label on a contributing library pull request; the run fails until
-the label is added and the run is retried.
+`breaking` label on a contributing source pull request; the run fails until the
+label is added and the run is retried.
 
 After an eligible pull request merges into `main`,
 `.github/workflows/release.yml`:
@@ -64,8 +63,10 @@ After an eligible pull request merges into `main`,
 4. Atomically pushes the commit and tag, publishes to npm, and creates a
    GitHub release with generated notes.
 
-Pull requests that do not change the published library, are closed without
-merging, or target a branch other than `main` do not trigger a release.
+Pull requests that do not change `src/`, are closed without merging, or target a
+branch other than `main` do not trigger a release.
+Use the on-demand workflow below when a package metadata or build configuration
+change must be published without a corresponding `src/` change.
 
 ## On-demand releases, including v1.0.0
 
