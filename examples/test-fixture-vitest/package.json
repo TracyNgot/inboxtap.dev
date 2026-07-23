@@ -1,0 +1,13 @@
+{
+  "name": "inboxtap-example-test-fixture-vitest",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "inboxtap": "1.1.0",
+    "nodemailer": "^9.0.0",
+    "vitest": "^4.1.0"
+  }
+}
