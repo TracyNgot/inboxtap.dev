@@ -96,13 +96,14 @@ export const docsEn: DocsDictionary = {
     },
     "reference/client-sdk": {
       description:
-        "Reference for the client SDK, runner fixtures, SMTP fault controller, and captured messages.",
+        "Reference for the client SDK, runner fixtures, assertion matchers, SMTP faults, and captured messages.",
       slug: "reference/client-sdk",
       title: "Client SDK",
       toc: [
         { id: "create-a-client", label: "Create a client" },
         { id: "create-an-inbox", label: "Create an inbox" },
         { id: "fixture-entry-points", label: "Fixture entry points" },
+        { id: "matcher-entry-points", label: "Matcher entry points" },
         { id: "smtp-fault-controller", label: "SMTP fault controller" },
         { id: "testinbox-methods", label: "TestInbox methods" },
         { id: "low-level-client-methods", label: "Low-level methods" },
@@ -138,7 +139,7 @@ export const docsEn: DocsDictionary = {
     },
     "guides/test-runners": {
       description:
-        "Use lifecycle fixtures and SMTP fault injection with Bun test, Vitest, and Playwright.",
+        "Use lifecycle fixtures, native assertion matchers, and SMTP faults with Bun, Vitest, and Playwright.",
       slug: "guides/test-runners",
       title: "Test emails with Bun, Vitest, and Playwright",
       toc: [
@@ -147,6 +148,7 @@ export const docsEn: DocsDictionary = {
         { id: "bun-test", label: "Bun test" },
         { id: "vitest", label: "Vitest" },
         { id: "playwright", label: "Playwright" },
+        { id: "runner-native-matchers", label: "Runner-native matchers" },
         { id: "isolation-and-cleanup", label: "Isolation and cleanup" },
         { id: "exercise-failure-paths", label: "Exercise failure paths" },
         { id: "choose-the-right-helper", label: "Choose a helper" },
