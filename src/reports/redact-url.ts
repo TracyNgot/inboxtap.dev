@@ -1,6 +1,5 @@
 export function redactUrl(candidate: string): string {
-  const trailing = candidate.match(/[.,;:!?)\]]+$/u)?.[0] ?? "";
-  const source = trailing ? candidate.slice(0, -trailing.length) : candidate;
+  const { source, trailing } = splitTrailingPunctuation(candidate);
   try {
     const url = new URL(source.replaceAll("&amp;", "&"));
     url.username = "";
@@ -24,6 +23,31 @@ export function redactUrl(candidate: string): string {
   } catch {
     return `[REDACTED URL]${trailing}`;
   }
+}
+
+function splitTrailingPunctuation(candidate: string): {
+  source: string;
+  trailing: string;
+} {
+  let end = candidate.length;
+  while (end > 0 && isTrailingPunctuation(candidate.charCodeAt(end - 1))) end -= 1;
+  return {
+    source: candidate.slice(0, end),
+    trailing: candidate.slice(end),
+  };
+}
+
+function isTrailingPunctuation(code: number): boolean {
+  return (
+    code === 33 ||
+    code === 41 ||
+    code === 44 ||
+    code === 46 ||
+    code === 58 ||
+    code === 59 ||
+    code === 63 ||
+    code === 93
+  );
 }
 
 function isSecretRoute(value: string): boolean {

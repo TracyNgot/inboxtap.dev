@@ -338,6 +338,20 @@ describe("InboxTapReport", () => {
       expect(output).not.toContain(secret);
   });
 
+  test("bounds URL punctuation scanning on adversarial input", () => {
+    const report = new InboxTapReport();
+    const punctuation = "!".repeat(12_000);
+    report.addMessage(
+      message({
+        text: `Open https://app.example.test/path/${punctuation}x`,
+      }),
+    );
+
+    const output = report.render({ format: "json" });
+    expect(output).toContain("https://app.example.test/path/");
+    expect(output.length).toBeLessThan(20_000);
+  });
+
   test("bounds recursive assertion data without invoking accessors", () => {
     const details: Record<string, unknown> = {};
     details.aSelf = details;
