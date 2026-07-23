@@ -5,6 +5,7 @@ import FaultInjectionVitest from "../../examples/fault-injection-vitest/README.m
 import TestFixtureBun from "../../examples/test-fixture-bun/README.md";
 import TestFixturePlaywright from "../../examples/test-fixture-playwright/README.md";
 import TestFixtureVitest from "../../examples/test-fixture-vitest/README.md";
+import TestReportingVitest from "../../examples/test-reporting-vitest/README.md";
 import type { Locale } from "./i18n/config";
 import type { DocStrings, TocItem } from "./i18n/types";
 
@@ -121,6 +122,42 @@ const faultInjectionToc = {
     { id: "pause-and-release", label: "Pause et libération" },
     { id: "disconnect-recovery", label: "Reprise après déconnexion" },
     { id: "ownership-boundaries", label: "Limites de responsabilité" },
+    { id: "troubleshooting", label: "Dépannage" },
+  ],
+} as const satisfies Record<Locale, readonly TocItem[]>;
+
+const testReportingToc = {
+  en: [
+    ...sharedToc.en,
+    { id: "what-the-example-proves", label: "What the example proves" },
+    { id: "collect-matcher-observations", label: "Collect matcher observations" },
+    { id: "add-messages-and-assertions", label: "Add messages and assertions" },
+    { id: "write-html-and-json", label: "Write HTML and JSON" },
+    { id: "redaction-boundaries", label: "Redaction boundaries" },
+    { id: "artifact-lifecycle", label: "Artifact lifecycle" },
+    { id: "troubleshooting", label: "Troubleshooting" },
+  ],
+  es: [
+    ...sharedToc.es,
+    { id: "what-the-example-proves", label: "Qué demuestra el ejemplo" },
+    { id: "collect-matcher-observations", label: "Recopilar observaciones de matchers" },
+    { id: "add-messages-and-assertions", label: "Añadir mensajes y aserciones" },
+    { id: "write-html-and-json", label: "Escribir HTML y JSON" },
+    { id: "redaction-boundaries", label: "Límites de la redacción" },
+    { id: "artifact-lifecycle", label: "Ciclo de vida de los artefactos" },
+    { id: "troubleshooting", label: "Solución de problemas" },
+  ],
+  fr: [
+    ...sharedToc.fr,
+    { id: "what-the-example-proves", label: "Ce que démontre l’exemple" },
+    {
+      id: "collect-matcher-observations",
+      label: "Collecter les observations des matchers",
+    },
+    { id: "add-messages-and-assertions", label: "Ajouter des messages et assertions" },
+    { id: "write-html-and-json", label: "Écrire le HTML et le JSON" },
+    { id: "redaction-boundaries", label: "Limites de l’expurgation" },
+    { id: "artifact-lifecycle", label: "Cycle de vie des artefacts" },
     { id: "troubleshooting", label: "Dépannage" },
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
@@ -298,6 +335,28 @@ export const exampleReadmes = [
       },
     },
     toc: fixtureToc,
+  },
+  {
+    Content: TestReportingVitest,
+    directory: "test-reporting-vitest",
+    strings: {
+      en: {
+        description:
+          "Generate redacted HTML and JSON artifacts from matcher observations, captured messages, and application assertions.",
+        title: "Redacted test reports + Vitest",
+      },
+      es: {
+        description:
+          "Genera artefactos HTML y JSON redactados a partir de observaciones de matchers, mensajes capturados y aserciones de la aplicación.",
+        title: "Informes de prueba redactados + Vitest",
+      },
+      fr: {
+        description:
+          "Générez des artefacts HTML et JSON expurgés à partir d’observations de matchers, de messages capturés et d’assertions de l’application.",
+        title: "Rapports de test expurgés + Vitest",
+      },
+    },
+    toc: testReportingToc,
   },
 ] as const satisfies readonly {
   Content: ComponentType;
