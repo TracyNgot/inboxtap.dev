@@ -18,6 +18,7 @@ describe("signup verification", () => {
 
     const signup = await postJson(`${stack.baseUrl}/signup`, { email: inbox.address });
     expect(signup.status).toBe(201);
+    await expect(inbox).toHaveDeliveredOnce({ subject: /welcome/i });
 
     const link = await inbox.waitForLink({ subject: /welcome/i, contains: "/verify?token=" });
     const verify = await fetch(link);
@@ -33,10 +34,11 @@ describe("signup verification", () => {
     await postJson(`${stack.baseUrl}/signup`, { email: inbox.address });
 
     const email = await inbox.waitForMessage({ subject: /welcome/i });
-    expect(email.to).toEqual([inbox.address]);
+    expect(email).toHaveRecipient(inbox.address);
+    expect(email).toContainLink("/verify?token=");
+    expect(email).not.toHaveUnsubscribeHeader();
     expect(email.from).toContain("no-reply@example.test");
     expect(email.html).toContain("<a href=");
     expect(email.links).toHaveLength(1);
-    expect(email.links[0]).toContain("/verify?token=");
   });
 });
