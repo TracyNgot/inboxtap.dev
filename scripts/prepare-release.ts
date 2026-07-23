@@ -18,7 +18,8 @@ run("bun", ["run", "release:check"]);
 
 const manifestPath = "package.json";
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { version: string };
-const previousTag = capture("git", ["describe", "--tags", "--abbrev=0", "--match", "v*"]);
+const previousTag = `v${manifest.version}`;
+capture("git", ["rev-parse", "--verify", `${previousTag}^{commit}`]);
 manifest.version = bumpVersion(manifest.version, level);
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
