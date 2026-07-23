@@ -196,6 +196,8 @@ The default redaction pipeline:
   captured or remote images, styles, or tracking pixels.
 
 Use `redaction.patterns` and `redaction.additionalSensitiveHeaders` for project-specific secrets.
+If a custom pattern overlaps a URL, InboxTap replaces the whole URL so regex-driven mutation cannot
+expose adjacent query or fragment values.
 Collection is bounded to 100 messages and 1,000 assertions, and each rendered artifact is capped at
 10 MiB. When a limit is reached, the output records explicit truncation markers instead of growing
 without bound.

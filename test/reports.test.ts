@@ -338,6 +338,48 @@ describe("InboxTapReport", () => {
       expect(output).not.toContain(secret);
   });
 
+  test("scrubs URL secrets before custom redaction can split the candidate", () => {
+    const report = new InboxTapReport({
+      redaction: {
+        patterns: [
+          /account-\d+/giu,
+          /\?token=/giu,
+          /URL_[0-9a-z]+/giu,
+          /tinysecret(?= before https:\/\/)/giu,
+          /名字/gu,
+          /APP\.example/gu,
+        ],
+      },
+    });
+    report.addMessage(
+      message({
+        links: ["https://app.example.test/profile/account-42?token=query-secret#fragment-secret"],
+        text:
+          "Open account-42, then tinysecret before " +
+          "https://APP.example.test/users/名字?token=query-secret#fragment-secret " +
+          "password=https://app.example.test/customer/private-short-value " +
+          `"token":"https://app.example.test/another-private-value"`,
+      }),
+    );
+
+    const output = report.render({ format: "json" });
+    expect(output).toContain("[REDACTED CUSTOM]");
+    expect(output).toContain("[REDACTED URL]");
+    expect(output).not.toMatch(/[\uE000\uE001]/u);
+    for (const secret of [
+      "account-42",
+      "tinysecret",
+      "名字",
+      "APP.example",
+      "query-secret",
+      "fragment-secret",
+      "private-short-value",
+      "another-private-value",
+      "CUSTOM]#fragment-secret",
+    ])
+      expect(output).not.toContain(secret);
+  });
+
   test("bounds URL punctuation scanning on adversarial input", () => {
     const report = new InboxTapReport();
     const punctuation = "!".repeat(12_000);

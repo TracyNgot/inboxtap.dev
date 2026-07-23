@@ -202,7 +202,9 @@ Le pipeline d’expurgation par défaut :
   charge d’images, de styles ou de pixels de suivi capturés ou distants.
 
 Utilisez `redaction.patterns` et `redaction.additionalSensitiveHeaders` pour les secrets propres au
-projet. La collecte est limitée à 100 messages et 1 000 assertions, et chaque artefact rendu est
+projet. Si un motif personnalisé chevauche une URL, InboxTap remplace l’URL entière afin qu’une
+mutation par expression régulière ne révèle pas les valeurs de requête ou de fragment adjacentes.
+La collecte est limitée à 100 messages et 1 000 assertions, et chaque artefact rendu est
 limité à 10 Mio. Lorsqu’une limite est atteinte, la sortie consigne des marqueurs de troncature
 explicites au lieu de croître sans limite.
 

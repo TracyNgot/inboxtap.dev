@@ -7,6 +7,7 @@ import {
   sourceArrayRangeBytes,
   sourceValueBytes,
 } from "./byte-accounting.js";
+import { redactCustomSegments } from "./custom-redaction.js";
 import { truncateUtf8 } from "./fit-output.js";
 import { compareAscii, uniqueKey } from "./record-utils.js";
 import { redactRawSource } from "./redact-raw.js";
@@ -32,7 +33,6 @@ const DEFAULT_SENSITIVE_HEADERS = [
 ];
 const EMAIL_PATTERN =
   /[A-Z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}@[A-Z0-9](?:[A-Z0-9.-]{0,253}[A-Z0-9])?/giu;
-const URL_PATTERN = /https?:\/\/[^\s<>"']+/giu;
 const AUTH_PATTERN = /\b(?:basic|bearer)\s+[A-Za-z0-9+/._~-]+={0,2}/giu;
 const JWT_PATTERN = /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/gu;
 const OPAQUE_TOKEN_PATTERN = /\b(?:[A-F0-9]{24,}|[A-Za-z0-9_-]{32,})\b/giu;
@@ -75,21 +75,19 @@ export class ReportRedactor {
   }
 
   redactText(value: string, maximumBytes = MAX_REDACTED_TEXT_BYTES): string {
-    let redacted = this.#truncateSource(value, maximumBytes);
-    for (const pattern of this.#customPatterns) {
-      redacted = redacted.replace(pattern, "[REDACTED CUSTOM]");
-    }
-    const protectedUrls: { placeholder: string; value: string }[] = [];
-    redacted = redacted.replace(URL_PATTERN, (candidate) => {
-      const placeholder = `\uE000URL_${protectedUrls.length.toString(36)}\uE001`;
-      protectedUrls.push({
-        placeholder,
-        value: this.#redactEmails(redactUrl(candidate)),
-      });
-      return placeholder;
-    });
-    redacted = this.#redactEmails(redacted);
-    redacted = redacted
+    const source = this.#truncateSource(value, maximumBytes);
+    const redacted = redactCustomSegments(
+      source,
+      this.#customPatterns,
+      (plain) => this.#redactPlainText(plain),
+      (url) => this.#redactUrlText(url),
+    );
+    return this.#truncateOutput(redacted, maximumBytes);
+  }
+
+  #redactPlainText(value: string): string {
+    const redacted = this.#redactEmails(value);
+    return redacted
       .replace(AUTH_PATTERN, (match) => `${match.split(/\s/u, 1)[0]} [REDACTED]`)
       .replace(JWT_PATTERN, "[REDACTED TOKEN]")
       .replace(
@@ -104,9 +102,10 @@ export class ReportRedactor {
       )
       .replace(OPAQUE_TOKEN_PATTERN, "[REDACTED TOKEN]")
       .replace(SHORT_CODE_PATTERN, "[REDACTED CODE]");
-    for (const protectedUrl of protectedUrls)
-      redacted = redacted.replace(protectedUrl.placeholder, protectedUrl.value);
-    return this.#truncateOutput(redacted, maximumBytes);
+  }
+
+  #redactUrlText(candidate: string): string {
+    return this.#redactEmails(redactUrl(candidate));
   }
 
   #truncateSource(value: string, maximumBytes: number): string {

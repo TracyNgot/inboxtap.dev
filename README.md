@@ -230,7 +230,8 @@ raw RFC source, consistently pseudonymize email addresses, and redact URL
 credentials, every query value, fragments, secret-like path values, common
 authentication and cookie headers, and token-like values in text and HTML. Add
 project-specific `redaction.patterns` or `redaction.additionalSensitiveHeaders`
-when needed.
+when needed. If a custom pattern overlaps a URL, InboxTap replaces the whole
+URL so regex-driven mutation cannot expose adjacent query or fragment values.
 
 Recorder scope follows the extended `expect`. The example uses Vitest's
 test-bound instance for per-test observations. Do not attach different
