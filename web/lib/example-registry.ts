@@ -1,6 +1,9 @@
 import type { ComponentType } from "react";
 import BetterAuthNextjs from "../../examples/better-auth-nextjs/README.md";
 import ExpressNodemailer from "../../examples/express-nodemailer/README.md";
+import TestFixtureBun from "../../examples/test-fixture-bun/README.md";
+import TestFixturePlaywright from "../../examples/test-fixture-playwright/README.md";
+import TestFixtureVitest from "../../examples/test-fixture-vitest/README.md";
 import type { Locale } from "./i18n/config";
 import type { DocStrings, TocItem } from "./i18n/types";
 
@@ -67,6 +70,27 @@ const sharedToc = {
     { id: "prerequisites", label: "Prérequis" },
     { id: "setup", label: "Installation" },
     { id: "run-the-tests", label: "Lancer les tests" },
+  ],
+} as const satisfies Record<Locale, readonly TocItem[]>;
+
+const fixtureToc = {
+  en: [
+    ...sharedToc.en,
+    { id: "how-it-works", label: "How it works" },
+    { id: "isolation-and-cleanup", label: "Isolation and cleanup" },
+    { id: "troubleshooting", label: "Troubleshooting" },
+  ],
+  es: [
+    ...sharedToc.es,
+    { id: "how-it-works", label: "Cómo funciona" },
+    { id: "isolation-and-cleanup", label: "Aislamiento y limpieza" },
+    { id: "troubleshooting", label: "Solución de problemas" },
+  ],
+  fr: [
+    ...sharedToc.fr,
+    { id: "how-it-works", label: "Fonctionnement" },
+    { id: "isolation-and-cleanup", label: "Isolation et nettoyage" },
+    { id: "troubleshooting", label: "Dépannage" },
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
 
@@ -152,6 +176,72 @@ export const exampleReadmes = [
         { id: "troubleshooting", label: "Dépannage" },
       ],
     },
+  },
+  {
+    Content: TestFixtureBun,
+    directory: "test-fixture-bun",
+    strings: {
+      en: {
+        description:
+          "Use Bun lifecycle hooks with a dynamic InboxTap server and an explicit fresh inbox per test.",
+        title: "Bun test fixtures + InboxTap",
+      },
+      es: {
+        description:
+          "Usa los hooks de ciclo de vida de Bun con un servidor InboxTap dinámico y un buzón nuevo por test.",
+        title: "Fixtures de Bun + InboxTap",
+      },
+      fr: {
+        description:
+          "Utilisez les hooks de cycle de vie de Bun avec un serveur InboxTap dynamique et une nouvelle boîte par test.",
+        title: "Fixtures Bun test + InboxTap",
+      },
+    },
+    toc: fixtureToc,
+  },
+  {
+    Content: TestFixtureVitest,
+    directory: "test-fixture-vitest",
+    strings: {
+      en: {
+        description:
+          "Run concurrent Vitest cases through one file-scoped InboxTap server with isolated test inboxes.",
+        title: "Vitest fixtures + InboxTap",
+      },
+      es: {
+        description:
+          "Ejecuta casos concurrentes de Vitest con un servidor InboxTap por archivo y buzones aislados por test.",
+        title: "Fixtures de Vitest + InboxTap",
+      },
+      fr: {
+        description:
+          "Exécutez des cas Vitest concurrents avec un serveur InboxTap par fichier et des boîtes isolées par test.",
+        title: "Fixtures Vitest + InboxTap",
+      },
+    },
+    toc: fixtureToc,
+  },
+  {
+    Content: TestFixturePlaywright,
+    directory: "test-fixture-playwright",
+    strings: {
+      en: {
+        description:
+          "Compose Playwright worker fixtures so an application consumes InboxTap's dynamic SMTP settings.",
+        title: "Playwright fixtures + InboxTap",
+      },
+      es: {
+        description:
+          "Compón fixtures worker de Playwright para que una aplicación use la configuración SMTP dinámica de InboxTap.",
+        title: "Fixtures de Playwright + InboxTap",
+      },
+      fr: {
+        description:
+          "Composez des fixtures worker Playwright pour qu’une application utilise la configuration SMTP dynamique d’InboxTap.",
+        title: "Fixtures Playwright + InboxTap",
+      },
+    },
+    toc: fixtureToc,
   },
 ] as const satisfies readonly {
   Content: ComponentType;
