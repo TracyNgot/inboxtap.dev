@@ -20,14 +20,24 @@ const RUNNERS = [
   },
 ] as const;
 
-for (const runner of RUNNERS) {
-  test(`${runner.name} fixture follows its native lifecycle`, async () => {
-    await verifyRunnerLifecycle(runner.args, false);
-  });
+const RUNNER_TEST_TIMEOUT_MS = 30_000;
 
-  test(`${runner.name} fixture cleans up after a failed test`, async () => {
-    await verifyRunnerLifecycle(runner.args, true);
-  });
+for (const runner of RUNNERS) {
+  test(
+    `${runner.name} fixture follows its native lifecycle`,
+    async () => {
+      await verifyRunnerLifecycle(runner.args, false);
+    },
+    RUNNER_TEST_TIMEOUT_MS,
+  );
+
+  test(
+    `${runner.name} fixture cleans up after a failed test`,
+    async () => {
+      await verifyRunnerLifecycle(runner.args, true);
+    },
+    RUNNER_TEST_TIMEOUT_MS,
+  );
 }
 
 async function verifyRunnerLifecycle(

@@ -121,41 +121,40 @@ jobs:
             branches=()
             breaking_labeled=false
             declare -A seen_prs=()
-            last_tag=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
-            if [[ -n "$last_tag" ]]; then
-              while IFS= read -r sha; do
-                while IFS=$'\t' read -r number ref labels; do
-                  if [[ -z "$number" ]]; then
-                    continue
-                  fi
-                  if [[ -n "${seen_prs[$number]:-}" ]]; then
-                    continue
-                  fi
-                  seen_prs["$number"]=true
+            last_tag="v$(node -p "require('./package.json').version")"
+            git rev-parse --verify "${last_tag}^{commit}" >/dev/null
+            while IFS= read -r sha; do
+              while IFS=$'\t' read -r number ref labels; do
+                if [[ -z "$number" ]]; then
+                  continue
+                fi
+                if [[ -n "${seen_prs[$number]:-}" ]]; then
+                  continue
+                fi
+                seen_prs["$number"]=true
 
-                  files=()
-                  while IFS= read -r file; do
-                    files+=("$file")
-                  done < <(
-                    gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${number}/files" \
-                      --jq '.[].filename'
-                  )
-                  if [[ "$(
-                    bun scripts/release-policy.ts --has-library-changes "${files[@]}"
-                  )" != "true" ]]; then
-                    continue
-                  fi
-
-                  branches+=("$ref")
-                  if [[ ",${labels}," == *",breaking,"* ]]; then
-                    breaking_labeled=true
-                  fi
+                files=()
+                while IFS= read -r file; do
+                  files+=("$file")
                 done < <(
-                  gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
-                    --jq '.[] | select(.base.ref == "main" and .merged_at != null) | [.number, .head.ref, ([.labels[].name] | join(","))] | @tsv'
+                  gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${number}/files" \
+                    --jq '.[].filename'
                 )
-              done < <(git log "${last_tag}..HEAD" --format=%H)
-            fi
+                if [[ "$(
+                  bun scripts/release-policy.ts --has-library-changes "${files[@]}"
+                )" != "true" ]]; then
+                  continue
+                fi
+
+                branches+=("$ref")
+                if [[ ",${labels}," == *",breaking,"* ]]; then
+                  breaking_labeled=true
+                fi
+              done < <(
+                gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
+                  --jq '.[] | select(.base.ref == "main" and .merged_at != null) | [.number, .head.ref, ([.labels[].name] | join(","))] | @tsv'
+              )
+            done < <(git log "${last_tag}..HEAD" --format=%H)
 
             if [[ ${#branches[@]} -eq 0 ]]; then
               branches=("$SOURCE_BRANCH")

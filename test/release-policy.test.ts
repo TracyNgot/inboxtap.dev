@@ -55,6 +55,16 @@ test("the release workflow path filter matches the release policy", () => {
   expect(workflowPaths).toEqual([...LIBRARY_RELEASE_PATHS]);
 });
 
+test("the release workflow derives the previous tag from the package version", () => {
+  const workflow = readFileSync(".github/workflows/release.yml", "utf8");
+  const prepareRelease = readFileSync("scripts/prepare-release.ts", "utf8");
+
+  expect(workflow).toContain('last_tag="v$(node -p "require(\'./package.json\').version")"');
+  expect(workflow).not.toContain("git describe --tags");
+  expect(prepareRelease).toMatch(/const previousTag = `v\$\{manifest\.version\}`;/);
+  expect(prepareRelease).toContain('capture("git", ["rev-parse", "--verify"');
+});
+
 test.each(["breaking/remove-legacy-api", "major/next-generation"])(
   "%s selects a major release",
   (branch) => {
