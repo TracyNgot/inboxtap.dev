@@ -178,6 +178,66 @@ recorder recibe observaciones estructuradas sin contenido sensible; los diagnós
 matchers también omiten cuerpos, valores de destinatario, enlaces, patrones con tokens y cabeceras
 en bruto.
 
+## Escribir un informe de prueba redactado
+
+`InboxTapReport`, desde `inboxtap/reports`, funciona como recorder de matchers y como recopilador de
+mensajes capturados y aserciones de la aplicación. Para un flujo de informes de Vitest no
+concurrente, amplía el `expect` vinculado a la prueba actual:
+
+```ts
+import { test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+import { InboxTapReport } from "inboxtap/reports";
+
+const test = extendInboxTap(base);
+
+test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
+  const report = new InboxTapReport({ title: "Signup email" });
+  extendInboxTapExpect(expect, { recorder: report });
+
+  try {
+    await inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify/id-example?next=private",
+    });
+    await expect(inbox).toHaveDeliveredOnce({ subject: /verify/i });
+    const email = await inbox.waitForMessage({ subject: /verify/i });
+
+    report.addAssertion({
+      name: "verification email exposes one link",
+      passed: email.links.length === 1,
+      messageId: email.id,
+    });
+  } finally {
+    for (const email of await inbox.messages()) report.addMessage(email);
+    await report.write("artifacts/signup-email.json");
+    await report.write("artifacts/signup-email.html");
+  }
+});
+```
+
+Escribir desde `finally` conserva la evidencia más reciente cuando falla un matcher o una aserción
+de la aplicación.
+
+La misma entrada ordenada produce JSON determinista y versionado o HTML estático y autocontenido.
+`write()` infiere el formato a partir de `.json` o `.html` y crea los directorios padre que falten.
+El informe predeterminado excluye la fuente RFC en bruto, asigna seudónimos coherentes a las
+direcciones de correo, redacta superficies secretas habituales, escapa el HTML capturado y nunca
+carga recursos remotos. La recopilación se detiene al alcanzar 100 mensajes y 1.000 aserciones;
+cada artefacto renderizado tiene un máximo de 10 MiB y registra el truncamiento de forma explícita.
+El conteo de bytes omitidos distingue los valores exactos de los límites inferiores medidos.
+
+El ámbito del recorder sigue al `expect` ampliado. No conectes repetidamente recopiladores por
+prueba a un mismo `expect` compartido de Bun o Vitest durante una ejecución concurrente; registra
+explícitamente los mensajes y las aserciones de la aplicación, o produce de forma deliberada un
+único artefacto para la suite. Playwright puede crear un nuevo `expect` devuelto para cada informe.
+La redacción sigue siendo un esfuerzo de protección: revisa los artefactos antes de compartirlos.
+`includeRaw: true` es una opción de mayor riesgo porque conserva una copia redactada con el mismo
+criterio de esfuerzo de la fuente RFC en bruto.
+
 ## Aislamiento y limpieza
 
 Comparte el servidor solo en el alcance definido por el adaptador. Nunca crees un único `TestInbox`

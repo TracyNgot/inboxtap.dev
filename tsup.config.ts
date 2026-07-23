@@ -16,6 +16,7 @@ export default defineConfig([
       "matchers/index": "src/matchers/index.ts",
       "matchers/playwright": "src/matchers/playwright.ts",
       "matchers/vitest": "src/matchers/vitest.ts",
+      "reports/index": "src/reports/index.ts",
     },
     external: ["bun:test"],
     format: ["esm", "cjs"],

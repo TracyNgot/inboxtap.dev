@@ -179,6 +179,78 @@ The recorder receives the same content-safe, structured observations for
 later report collection. Importing `inboxtap`, `inboxtap/client`, or
 `inboxtap/matchers` does not load Nodemailer, Vitest, or Playwright.
 
+### Redacted test reports
+
+Build shareable CI evidence with the client-side `inboxtap/reports` subpath.
+`InboxTapReport` accepts matcher observations, captured messages, and explicit
+application assertions, then produces deterministic, versioned JSON or a
+self-contained static HTML report:
+
+```ts
+import { test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+import { InboxTapReport } from "inboxtap/reports";
+
+const test = extendInboxTap(base);
+
+test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
+  const report = new InboxTapReport({ title: "Signup email" });
+  extendInboxTapExpect(expect, { recorder: report });
+
+  try {
+    await inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify/id-example?next=private",
+    });
+    await expect(inbox).toHaveDeliveredOnce({ subject: /verify/i });
+    const email = await inbox.waitForMessage({ subject: /verify/i });
+
+    report.addAssertion({
+      name: "verification email exposes one link",
+      passed: email.links.length === 1,
+      messageId: email.id,
+    });
+  } finally {
+    for (const email of await inbox.messages()) report.addMessage(email);
+    await report.write("artifacts/signup-email.json");
+    await report.write("artifacts/signup-email.html");
+  }
+});
+```
+
+Writing from `finally` preserves the latest evidence when a matcher or
+application assertion fails.
+
+`write()` infers JSON or HTML from the file extension unless `format` is
+provided, and creates missing parent directories. By default, reports exclude
+raw RFC source, consistently pseudonymize email addresses, and redact URL
+credentials, every query value, fragments, secret-like path values, common
+authentication and cookie headers, and token-like values in text and HTML. Add
+project-specific `redaction.patterns` or `redaction.additionalSensitiveHeaders`
+when needed.
+
+Recorder scope follows the extended `expect`. The example uses Vitest's
+test-bound instance for per-test observations. Do not attach different
+collectors to one shared Bun or Vitest `expect` while tests run concurrently;
+record messages and application assertions explicitly instead, or intentionally
+build one suite-level report.
+
+Reports accept at most 100 messages and 1,000 assertions, and each rendered
+artifact is capped at 10 MiB; bounded output includes explicit truncation
+markers. JSON exposes `utf8BytesOmittedExact`; when bounded accounting cannot
+inspect an entire omitted value, the byte count is a measured lower bound and
+HTML labels it as `at least`. HTML output escapes captured markup and does not
+execute captured scripts or load captured or remote images, styles, or tracking
+pixels.
+
+Redaction is best-effort, not a guarantee that arbitrary personal or secret
+data will be detected. Review artifacts before sharing them. Setting
+`includeRaw: true` retains a best-effort-redacted copy of the raw RFC source
+and carries materially higher disclosure risk.
+
 ### SMTP fault injection
 
 Every programmatic server exposes `server.faults` for deterministic
@@ -245,6 +317,7 @@ Runnable end-to-end projects live in [`examples/`](examples/):
 
 - [`examples/better-auth-nextjs`](examples/better-auth-nextjs) — Next.js + Better Auth email verification, magic links, and OTP, tested with Playwright.
 - [`examples/express-nodemailer`](examples/express-nodemailer) — Express + Nodemailer transactional email, tested with Vitest.
+- [`examples/fault-injection-vitest`](examples/fault-injection-vitest) — SMTP retries, pauses, latency, recipient targeting, and disconnect recovery with Vitest.
 - [`examples/test-fixture-bun`](examples/test-fixture-bun) — Bun lifecycle hooks with an explicit fresh inbox per test.
 - [`examples/test-fixture-vitest`](examples/test-fixture-vitest) — File-scoped Vitest setup with concurrent, isolated inboxes.
 - [`examples/test-fixture-playwright`](examples/test-fixture-playwright) — Playwright worker-fixture composition using a dynamic SMTP port.

@@ -118,6 +118,99 @@ contenu sensible. Elle ne contient jamais le destinataire attendu, le sujet, le 
 valeur d’un en-tête ou le corps capturé. Passez `matchers` à l’`expect.extend()` d’un runner
 compatible ; les adaptateurs propres aux runners appellent la même fabrique.
 
+## Rapports de test
+
+Importez `InboxTapReport` depuis le sous-chemin sans peer `inboxtap/reports`. Le collecteur
+implémente `InboxTapMatcherRecorder` : transmettez-le directement à un adaptateur de runner ou à
+`createInboxTapMatchers({ recorder })`. Ajoutez explicitement les messages capturés et les
+assertions de l’application :
+
+```ts
+import { test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+import { InboxTapReport } from "inboxtap/reports";
+
+const test = extendInboxTap(base);
+
+test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
+  const report = new InboxTapReport({ title: "Signup email" });
+  extendInboxTapExpect(expect, { recorder: report });
+
+  try {
+    await inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify/id-example?next=private",
+    });
+    await expect(inbox).toHaveDeliveredOnce({ subject: /verify/i });
+    const email = await inbox.waitForMessage({ subject: /verify/i });
+
+    report.addAssertion({
+      name: "verification email exposes one link",
+      passed: email.links.length === 1,
+      messageId: email.id,
+    });
+  } finally {
+    for (const email of await inbox.messages()) report.addMessage(email);
+    await report.write("artifacts/signup-email.json");
+    await report.write("artifacts/signup-email.html");
+  }
+});
+```
+
+L’écriture depuis `finally` conserve les preuves les plus récentes lorsqu’un matcher ou une
+assertion de l’application échoue.
+
+| Méthode | Comportement |
+| --- | --- |
+| `addMessage(message)` | Ajoute un `CapturedEmail`, le déduplique par identifiant et renvoie le collecteur pour permettre le chaînage. |
+| `addAssertion({ name, passed, message?, messageId?, details? })` | Ajoute une assertion de l’application et renvoie le collecteur. Les chaînes facultatives et les `details` structurés passent par le même pipeline d’expurgation borné. |
+| `recordMatcherObservation(observation)` | Implémente `InboxTapMatcherRecorder` ; les adaptateurs de runner l’appellent pour chaque matcher terminé. |
+| `render({ format: "json" \| "html" })` | Renvoie l’artefact déterministe sous forme de chaîne. |
+| `write(filePath, { format? })` | Écrit l’artefact de manière asynchrone et déduit le format de l’extension lorsqu’il est omis. |
+
+`render({ format })` renvoie un JSON déterministe ou un HTML statique autonome pour les mêmes
+entrées ordonnées. Le JSON inclut une version de schéma. `write(filePath, { format? })` déduit le
+format d’une extension `.json` ou `.html` lorsqu’il est omis et crée les répertoires parents
+manquants. Aucune de ces opérations n’appelle le serveur InboxTap.
+
+Le document JSON de version 1 expose `title`, `protection`, `summary`, `messages`, `assertions` et
+`truncation`. La troncature consigne le nombre de messages et d’assertions omis, le nombre de champs
+raccourcis, les octets UTF-8 omis et la limite d’octets de l’artefact.
+`utf8BytesOmittedExact` vaut `true` lorsque `utf8BytesOmitted` est exact. Il vaut `false` lorsqu’un
+parcours borné s’arrête avant d’avoir inspecté toute la valeur ; le nombre est alors une limite
+inférieure mesurée et le HTML distingue les cas avec `exactly` et `at least`.
+
+La portée du recorder suit l’objet `expect` étendu. L’exemple utilise l’`expect` de Vitest lié au
+test, de sorte que chaque rapport ne reçoit que les observations des matchers de ce test. Ne
+rattachez pas différents collecteurs propres aux tests à un même `expect` Bun ou Vitest partagé
+pendant une exécution concurrente. Dans ce cas, utilisez explicitement `addMessage()` et
+`addAssertion()`, ou collectez délibérément un seul rapport pour la suite. L’adaptateur Playwright
+renvoie un nouvel `expect` étendu qui peut être limité à un rapport.
+
+Le pipeline d’expurgation par défaut :
+
+- exclut la source RFC brute ;
+- attribue à chaque adresse e-mail un pseudonyme cohérent dans le rapport ;
+- supprime les identifiants d’URL et masque toutes les valeurs de requête, les fragments, les
+  valeurs de chemin assimilables à des secrets, `Authorization`, `Cookie`, `Proxy-Authorization`,
+  `Set-Cookie`, `X-API-Key`, `X-Auth-Token` et les valeurs similaires à des jetons dans le texte et
+  le HTML ; et
+- échappe le HTML capturé au lieu de l’afficher et n’exécute jamais les scripts capturés ni ne
+  charge d’images, de styles ou de pixels de suivi capturés ou distants.
+
+Utilisez `redaction.patterns` et `redaction.additionalSensitiveHeaders` pour les secrets propres au
+projet. La collecte est limitée à 100 messages et 1 000 assertions, et chaque artefact rendu est
+limité à 10 Mio. Lorsqu’une limite est atteinte, la sortie consigne des marqueurs de troncature
+explicites au lieu de croître sans limite.
+
+L’expurgation est une protection au mieux et ne peut garantir la détection de données personnelles
+ou secrètes arbitraires. Vérifiez l’artefact avant de le partager. `includeRaw: true` conserve une
+copie expurgée au mieux de la source RFC brute et ne doit être utilisé que lorsque la valeur
+diagnostique supplémentaire justifie un risque de divulgation sensiblement plus élevé.
+
 ## Contrôleur de pannes SMTP
 
 Chaque serveur programmatique expose un `SmtpFaultController` sous `server.faults` ; les

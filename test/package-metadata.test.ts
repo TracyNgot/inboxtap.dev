@@ -45,7 +45,7 @@ test("keeps npm release metadata aligned with the public package", () => {
   );
 });
 
-test("publishes isolated fixture and matcher subpaths with optional runner peers", () => {
+test("publishes isolated fixture, matcher, and report subpaths with optional runner peers", () => {
   const exportFiles = {
     ".": "index",
     "./client": "client",
@@ -57,6 +57,7 @@ test("publishes isolated fixture and matcher subpaths with optional runner peers
     "./matchers/bun": "matchers/bun",
     "./matchers/playwright": "matchers/playwright",
     "./matchers/vitest": "matchers/vitest",
+    "./reports": "reports/index",
   };
 
   expect(Object.keys(manifest.exports)).toEqual(Object.keys(exportFiles));
