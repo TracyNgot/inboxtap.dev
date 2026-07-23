@@ -1,41 +1,143 @@
-El SDK no depende de ningún runner de tests concreto. Funciona en cualquier lugar donde el paquete
-publicado pueda usar el `fetch` de Node 20, incluidos Bun test, Vitest y Jest.
+InboxTap incluye fixtures opcionales y nativas para Bun test, Vitest y Playwright. Cada fixture
+inicia los listeners SMTP y HTTP locales en puertos seleccionados automáticamente, crea un
+transport de Nodemailer listo para usar y garantiza la limpieza.
 
-## Configuración independiente del runner
+## Instalar las dependencias opcionales
 
-Puedes iniciar la CLI como servicio aparte o gestionar el ciclo de vida del servidor directamente
-desde un setup global de tests. El arranque programático es útil cuando el runner necesita puertos
-aislados y seleccionados automáticamente.
+Instala solo el adaptador del runner que use tu proyecto. Nodemailer 9 es necesario para todas las
+fixtures; Vitest 4.1 y Playwright 1.61 son dependencias opcionales de sus respectivos subpaths.
 
-## Arrancar y parar en los tests
+```bash
+bun add --dev inboxtap nodemailer
+bun add --dev vitest
+# or
+bun add --dev @playwright/test
+```
 
-Adapta los hooks de ciclo de vida a tu runner:
+Las dependencias de las fixtures permanecen detrás de subpaths de paquete aislados. Importar
+`inboxtap` o `inboxtap/client` no requiere Nodemailer, Vitest ni Playwright.
+
+## Fixture compartida
+
+Usa `startInboxTapFixture()` cuando un runner tenga su propio modelo de ciclo de vida. Ambos puertos
+usan `0` por defecto, por lo que el sistema operativo elige puertos libres. El arranque verifica el
+transport de Nodemailer antes de devolver el control, limpia los fallos parciales y permite llamar
+a `close()` más de una vez de forma segura.
 
 ```ts
-import { afterAll, beforeAll } from "vitest";
-import { InboxTapServer } from "inboxtap";
-import { InboxTapClient } from "inboxtap/client";
+import { startInboxTapFixture } from "inboxtap/fixtures";
 
-let server: InboxTapServer;
-let inboxTap: InboxTapClient;
+const inboxTap = await startInboxTapFixture();
 
-beforeAll(async () => {
-  server = await new InboxTapServer({ apiPort: 0, smtpPort: 0 }).start();
-  inboxTap = new InboxTapClient({
-    baseUrl: server.apiUrl,
-    domain: server.domain,
+try {
+  const inbox = await inboxTap.createInbox({ alias: "signup" });
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
   });
 
-  // Configure the application under test with server.smtpHost and server.smtpPort.
-});
+  await inbox.waitForMessage({ subject: /verify your account/i });
+} finally {
+  await inboxTap.close();
+}
+```
 
-afterAll(async () => {
-  await server.stop();
+El objeto devuelto también expone `server`, `client` y los datos de conexión `smtp` para las
+aplicaciones que necesitan arrancar con los puertos seleccionados.
+
+## Bun test
+
+`setupInboxTap()` registra los hooks asíncronos de preparación y limpieza de Bun. Bun no inyecta un
+contexto de fixture personalizado, así que crea explícitamente un buzón nuevo dentro de cada test.
+
+```ts
+import { expect, test } from "bun:test";
+import { setupInboxTap } from "inboxtap/fixtures/bun";
+
+const inboxTap = setupInboxTap();
+
+test("captures one email", async () => {
+  const inbox = await inboxTap.createInbox({ alias: "signup" });
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  const message = await inbox.waitForMessage({ subject: /verify your account/i });
+  expect(message.envelope.to).toContain(inbox.address);
 });
 ```
 
-Para Bun test, importa los hooks desde `bun:test`. Para Jest, usa sus `beforeAll` y `afterAll`
-globales. Las llamadas a InboxTap no cambian.
+## Vitest
+
+`extendInboxTap()` añade a un test base de Vitest una fixture `inboxTap` con alcance de archivo y
+una fixture `inbox` con alcance de test. Cada test recibe una dirección nueva mientras el archivo
+reutiliza un único servidor y transport verificados.
+
+```ts
+import { expect, test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+
+const test = extendInboxTap(base);
+
+test("captures one email", async ({ inboxTap, inbox }) => {
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  const message = await inbox.waitForMessage({ subject: /verify your account/i });
+  expect(message.envelope.to).toContain(inbox.address);
+});
+```
+
+## Playwright
+
+El adaptador de Playwright proporciona una fixture `inboxTap` con alcance de worker y una fixture
+`inbox` con alcance de test. Cada worker obtiene sus propios puertos dinámicos y cada test su propia
+dirección de destinatario.
+
+```ts
+import { expect, test as base } from "@playwright/test";
+import { extendInboxTap } from "inboxtap/fixtures/playwright";
+
+const test = extendInboxTap(base);
+
+test("captures a verification link", async ({ inboxTap, inbox }) => {
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  const link = await inbox.waitForLink({ subject: /verify your account/i });
+  expect(link).toContain("/verify");
+});
+```
+
+Si la aplicación necesita el puerto SMTP dinámico, iníciala como otra fixture de worker que dependa
+de `inboxTap` y lee `inboxTap.smtp` al arrancar el proceso. El `webServer` de Playwright se inicia
+antes que las fixtures de test, por lo que un `webServer` ya iniciado no puede consumir un puerto
+que la fixture de worker de InboxTap seleccione después.
+
+## Aislamiento y limpieza
+
+Comparte el servidor solo en el alcance definido por el adaptador. Nunca crees un único `TestInbox`
+global para toda la suite: llama a `createInbox()` dentro de cada test de Bun o usa el `inbox`
+inyectado en Vitest y Playwright. Los destinatarios de sobre únicos mantienen aislados los tests
+concurrentes sin borrar los mensajes de otro test.
+
+Todos los adaptadores detienen el servidor y cierran el transport cuando termina su alcance nativo.
+Puedes pasar opciones del servidor a `setupInboxTap(options)` o
+`extendInboxTap(baseTest, options)` cuando necesites ajustar los valores por defecto; los puertos
+SMTP y API omitidos siguen siendo dinámicos.
 
 ## Elegir el helper adecuado
 

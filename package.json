@@ -43,14 +43,64 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./client": {
-      "types": "./dist/client.d.ts",
-      "import": "./dist/client.js",
-      "require": "./dist/client.cjs"
+      "import": {
+        "types": "./dist/client.d.ts",
+        "default": "./dist/client.js"
+      },
+      "require": {
+        "types": "./dist/client.d.cts",
+        "default": "./dist/client.cjs"
+      }
+    },
+    "./fixtures": {
+      "import": {
+        "types": "./dist/fixtures/index.d.ts",
+        "default": "./dist/fixtures/index.js"
+      },
+      "require": {
+        "types": "./dist/fixtures/index.d.cts",
+        "default": "./dist/fixtures/index.cjs"
+      }
+    },
+    "./fixtures/bun": {
+      "import": {
+        "types": "./dist/fixtures/bun.d.ts",
+        "default": "./dist/fixtures/bun.js"
+      },
+      "require": {
+        "types": "./dist/fixtures/bun.d.cts",
+        "default": "./dist/fixtures/bun.cjs"
+      }
+    },
+    "./fixtures/playwright": {
+      "import": {
+        "types": "./dist/fixtures/playwright.d.ts",
+        "default": "./dist/fixtures/playwright.js"
+      },
+      "require": {
+        "types": "./dist/fixtures/playwright.d.cts",
+        "default": "./dist/fixtures/playwright.cjs"
+      }
+    },
+    "./fixtures/vitest": {
+      "import": {
+        "types": "./dist/fixtures/vitest.d.ts",
+        "default": "./dist/fixtures/vitest.js"
+      },
+      "require": {
+        "types": "./dist/fixtures/vitest.d.cts",
+        "default": "./dist/fixtures/vitest.cjs"
+      }
     }
   },
   "files": [
@@ -64,7 +114,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && bun scripts/fix-declarations.ts",
     "dev": "bun --watch src/cli.ts",
     "start": "bun src/cli.ts",
     "test": "bun test",
@@ -94,17 +144,37 @@
     "sharp": "0.35.3"
   },
   "dependencies": {
+    "@types/nodemailer": "^8.0.1",
     "mailparser": "^3.9.14",
     "smtp-server": "^3.19.2"
   },
+  "peerDependencies": {
+    "@playwright/test": ">=1.61.0 <2",
+    "nodemailer": ">=9.0.0 <10",
+    "vitest": ">=4.1.0 <5"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    },
+    "nodemailer": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
+    "@playwright/test": "^1.61.0",
     "@types/bun": "^1.3.14",
     "@types/mailparser": "^3.4.6",
     "@types/node": "^26.1.1",
     "@types/smtp-server": "^3.5.13",
     "lefthook": "^2.1.10",
+    "nodemailer": "^9.0.0",
     "tsup": "^8.5.1",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "vitest": "^4.1.0"
   }
 }

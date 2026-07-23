@@ -59,6 +59,7 @@ graph LR
 | `src/store.ts` | In-memory `EmailStore` with FIFO eviction at `maxMessages`, filtered `list`/`latest`/`get`/`clear`, and long-poll waiters resolved on a matching add or cleaned up on timeout. |
 | `src/api.ts` | Dependency-free `node:http` JSON handler for `/health` and `/api/emails` routes, validating filters and capping waits at 60 s and list limits at 100. |
 | `src/client/` | The fetch-based test SDK: `InboxTapClient` plus `TestInbox` with `waitForMessage`/`waitForLink`/`waitForCode`/`waitForMatch` polling helpers and a typed `InboxTapError`. |
+| `src/fixtures/` | Optional runner-native fixtures: the shared starter owns dynamic SMTP/API ports, a verified Nodemailer transport, partial-startup cleanup, and idempotent shutdown; Bun, Vitest, and Playwright adapters map that lifecycle to their native scopes. |
 | `src/cli.ts` | Node/Bun executable that parses the CLI flags, starts `InboxTapServer`, prints connection info, and shuts down on `SIGINT`/`SIGTERM`. |
 | `src/index.ts` | Public server entry point re-exporting `InboxTapServer` and the shared public types. |
 | `src/types.ts` | Shared interfaces (`CapturedEmail`, `EmailFilters`, `HealthResponse`, …) imported by both server and client — the mechanism behind the SDK ↔ API alignment invariant. |
@@ -83,7 +84,9 @@ enforced in code today:
 4. **Deterministic tests** — inbox addresses are generated in the client
    (`createInbox` in `src/client/index.ts`), so parallel tests isolate their
    messages without server-side registration; the API has no registration
-   route at all.
+   route at all. Runner adapters create a fresh `TestInbox` for every test
+   while sharing only the bounded server lifecycle at file scope (Vitest) or
+   worker scope (Playwright). Bun keeps per-test creation explicit.
 5. **Dual-format output** — ships ESM, CJS, type declarations, and a compiled
    Node 20 CLI (`exports`/`bin` in `package.json`, `tsup.config.ts`, smoke-
    tested by `scripts/test-package.ts`).
@@ -97,6 +100,8 @@ Included:
 
 - In-memory bounded store with FIFO eviction
 - CLI, HTTP API, and TypeScript SDK
+- Optional fixture subpaths for explicit, Bun, Vitest, and Playwright
+  lifecycles, backed by Nodemailer 9
 - Server-side extraction of http(s) links and 4–8 digit codes; arbitrary
   regex matching is SDK-side via `waitForMatch` (and `waitForCode` defaults to
   6-digit codes)
@@ -129,6 +134,10 @@ Explicitly excluded:
 - Published as `inboxtap` on the public npm registry; runnable via
   `bunx inboxtap` or `npx inboxtap` with no install.
 - Importable as a library: `import { InboxTapClient } from "inboxtap/client"`.
+  Runner integrations live behind `inboxtap/fixtures`,
+  `inboxtap/fixtures/bun`, `inboxtap/fixtures/vitest`, and
+  `inboxtap/fixtures/playwright`, so root and client imports do not load
+  optional peers.
 - Built with tsup; tested with Bun; formatted and linted with Biome;
   pre-commit/push hooks via Lefthook.
 - `examples/` holds standalone integration examples for the docs guides; they

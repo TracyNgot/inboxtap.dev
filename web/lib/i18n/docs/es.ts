@@ -97,12 +97,14 @@ export const docsEs: DocsDictionary = {
       ],
     },
     "reference/client-sdk": {
-      description: "Referencia de InboxTapClient, TestInbox, filtros y mensajes capturados.",
+      description:
+        "Referencia de InboxTapClient, TestInbox, fixtures, filtros y mensajes capturados.",
       slug: "referencia/sdk-cliente",
       title: "SDK cliente",
       toc: [
         { id: "crear-un-cliente", label: "Crear un cliente" },
         { id: "crear-un-buzón", label: "Crear un buzón" },
+        { id: "puntos-de-entrada-de-fixtures", label: "Puntos de entrada" },
         { id: "métodos-de-testinbox", label: "Métodos de TestInbox" },
         { id: "métodos-de-bajo-nivel", label: "Métodos de bajo nivel" },
         { id: "capturedemail", label: "CapturedEmail" },
@@ -137,12 +139,17 @@ export const docsEs: DocsDictionary = {
       ],
     },
     "guides/test-runners": {
-      description: "Ejecuta InboxTap programáticamente con Bun test, Vitest, Jest u otro runner.",
+      description:
+        "Inicia InboxTap en puertos dinámicos con fixtures para Bun test, Vitest y Playwright.",
       slug: "guias/ejecutores-de-tests",
-      title: "Probar emails con Bun, Vitest y Jest",
+      title: "Probar emails con Bun, Vitest y Playwright",
       toc: [
-        { id: "configuración-independiente-del-runner", label: "Config independiente del runner" },
-        { id: "arrancar-y-parar-en-los-tests", label: "Ciclo de vida del test" },
+        { id: "instalar-las-dependencias-opcionales", label: "Instalar dependencias" },
+        { id: "fixture-compartida", label: "Fixture compartida" },
+        { id: "bun-test", label: "Bun test" },
+        { id: "vitest", label: "Vitest" },
+        { id: "playwright", label: "Playwright" },
+        { id: "aislamiento-y-limpieza", label: "Aislamiento y limpieza" },
         { id: "elegir-el-helper-adecuado", label: "Elegir un helper" },
       ],
     },

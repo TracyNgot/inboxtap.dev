@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
-import { once } from "node:events";
 import { spawn } from "node:child_process";
+import { once } from "node:events";
+import { copyFile, cp, mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 await verifyModuleExports();
+await verifyDeclarationExports();
+await verifyIsolatedDeclarations();
+await runBun(["test", "./smoke/package-consumers/bun-fixture.case.js"]);
 const cli = await startCli();
 
 try {
@@ -18,19 +24,122 @@ async function verifyModuleExports(): Promise<void> {
   await runNode([
     "--input-type=module",
     "--eval",
-    "import { InboxTapServer } from './dist/index.js'; if (!InboxTapServer) process.exit(1);",
+    "import { InboxTapServer } from 'inboxtap'; import { InboxTapClient } from 'inboxtap/client'; import { startInboxTapFixture } from 'inboxtap/fixtures'; import { extendInboxTap as extendVitest } from 'inboxtap/fixtures/vitest'; import { extendInboxTap as extendPlaywright } from 'inboxtap/fixtures/playwright'; if (!InboxTapServer || !InboxTapClient || !startInboxTapFixture || !extendVitest || !extendPlaywright) process.exit(1);",
   ]);
   await runNode([
     "--input-type=commonjs",
     "--eval",
-    "const { InboxTapServer } = require('./dist/index.cjs'); const { InboxTapClient } = require('./dist/client.cjs'); if (!InboxTapServer || !InboxTapClient) process.exit(1);",
+    "const { InboxTapServer } = require('inboxtap'); const { InboxTapClient } = require('inboxtap/client'); const { startInboxTapFixture } = require('inboxtap/fixtures'); const { extendInboxTap: extendVitest } = require('inboxtap/fixtures/vitest'); const { extendInboxTap: extendPlaywright } = require('inboxtap/fixtures/playwright'); if (!InboxTapServer || !InboxTapClient || !startInboxTapFixture || !extendVitest || !extendPlaywright) process.exit(1);",
+  ]);
+  await runNode([
+    "--experimental-loader",
+    "./smoke/package-consumers/block-fixture-peers-loader.mjs",
+    "--input-type=module",
+    "--eval",
+    "import { InboxTapServer } from 'inboxtap'; import { InboxTapClient } from 'inboxtap/client'; if (!InboxTapServer || !InboxTapClient) process.exit(1);",
+  ]);
+  await runNode([
+    "--input-type=commonjs",
+    "--eval",
+    "const Module = require('node:module'); const load = Module._load; const blocked = new Set(['@playwright/test', 'nodemailer', 'vitest']); Module._load = function(request, parent, isMain) { if (blocked.has(request)) throw new Error('Unexpected optional fixture peer import: ' + request); return load.call(this, request, parent, isMain); }; const { InboxTapServer } = require('inboxtap'); const { InboxTapClient } = require('inboxtap/client'); if (!InboxTapServer || !InboxTapClient) process.exit(1);",
   ]);
 }
 
+async function verifyDeclarationExports(): Promise<void> {
+  await runBun(["x", "tsc", "--project", "smoke/package-consumers/tsconfig.json"]);
+  await runBun(["x", "tsc", "--project", "smoke/package-consumers/playwright-tsconfig.json"]);
+}
+
+async function verifyIsolatedDeclarations(): Promise<void> {
+  const directory = await mkdtemp(join(tmpdir(), "inboxtap-types-"));
+  try {
+    await copyPackage(directory);
+    await verifyRootClientTypesWithoutPeers(directory);
+    await copyFixtureTypeDependencies(directory);
+    await verifyFixtureTypesWithNodemailer(directory);
+  } finally {
+    await rm(directory, { force: true, recursive: true });
+  }
+}
+
+async function copyPackage(directory: string): Promise<void> {
+  const packageDirectory = join(directory, "node_modules", "inboxtap");
+  await mkdir(packageDirectory, { recursive: true });
+  await cp("dist", join(packageDirectory, "dist"), { recursive: true });
+  await copyFile("package.json", join(packageDirectory, "package.json"));
+}
+
+async function verifyRootClientTypesWithoutPeers(directory: string): Promise<void> {
+  const source = [
+    'import { InboxTapServer } from "inboxtap";',
+    'import { InboxTapClient } from "inboxtap/client";',
+    "void [InboxTapServer, InboxTapClient];",
+  ].join("\n");
+  await writeFile(join(directory, "root-client.mts"), source, "utf8");
+  await writeFile(join(directory, "root-client.cts"), source, "utf8");
+  await writeTypeScriptConfig(directory, ["root-client.mts", "root-client.cts"], []);
+  await runBun(["x", "tsc", "--project", join(directory, "tsconfig.json")]);
+}
+
+async function copyFixtureTypeDependencies(directory: string): Promise<void> {
+  for (const packageName of ["nodemailer", "@types/nodemailer", "@types/node"]) {
+    const source = await realpath(join("node_modules", packageName));
+    const destination = join(directory, "node_modules", packageName);
+    await mkdir(join(destination, ".."), { recursive: true });
+    await cp(source, destination, { recursive: true });
+  }
+  const nodeTypes = await realpath(join("node_modules", "@types/node"));
+  const undiciTypes = await realpath(join(nodeTypes, "..", "..", "undici-types"));
+  await cp(undiciTypes, join(directory, "node_modules", "undici-types"), {
+    recursive: true,
+  });
+}
+
+async function verifyFixtureTypesWithNodemailer(directory: string): Promise<void> {
+  const source = [
+    'import { startInboxTapFixture } from "inboxtap/fixtures";',
+    "void startInboxTapFixture;",
+  ].join("\n");
+  await writeFile(join(directory, "fixture.mts"), source, "utf8");
+  await writeFile(join(directory, "fixture.cts"), source, "utf8");
+  await writeTypeScriptConfig(directory, ["fixture.mts", "fixture.cts"], ["node"]);
+  await runBun(["x", "tsc", "--project", join(directory, "tsconfig.json")]);
+}
+
+async function writeTypeScriptConfig(
+  directory: string,
+  files: string[],
+  types: string[],
+): Promise<void> {
+  await writeFile(
+    join(directory, "tsconfig.json"),
+    JSON.stringify({
+      compilerOptions: {
+        lib: ["ES2023", "DOM"],
+        module: "Node16",
+        moduleResolution: "Node16",
+        noEmit: true,
+        skipLibCheck: false,
+        strict: true,
+        target: "ES2022",
+        types,
+      },
+      files,
+    }),
+    "utf8",
+  );
+}
+
 async function runNode(args: string[]): Promise<void> {
-  const process = spawn("node", args, { stdio: "inherit" });
-  const [exitCode] = (await once(process, "exit")) as [number | null];
+  const child = spawn("node", args, { stdio: "inherit" });
+  const [exitCode] = (await once(child, "exit")) as [number | null];
   assert.equal(exitCode, 0, `Node command failed: node ${args.join(" ")}`);
+}
+
+async function runBun(args: string[]): Promise<void> {
+  const child = spawn(process.execPath, args, { stdio: "inherit" });
+  const [exitCode] = (await once(child, "exit")) as [number | null];
+  assert.equal(exitCode, 0, `Bun command failed: bun ${args.join(" ")}`);
 }
 
 async function startCli(): Promise<{

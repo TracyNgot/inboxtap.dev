@@ -24,6 +24,27 @@ console.log(inbox.address);
 The alias is normalized to lowercase letters, digits, and hyphens, then a random 12-character suffix
 is added. The default alias is `test`.
 
+## Fixture entry points
+
+Runner fixtures are published behind isolated subpaths so the root server and client SDK do not
+load optional test dependencies.
+
+| Import | Main export | Lifecycle |
+| --- | --- | --- |
+| `inboxtap/fixtures` | `startInboxTapFixture()` | Explicit start and idempotent `close()` |
+| `inboxtap/fixtures/bun` | `setupInboxTap()` | File setup and teardown through Bun hooks |
+| `inboxtap/fixtures/vitest` | `extendInboxTap()` | File-scoped server, test-scoped inbox |
+| `inboxtap/fixtures/playwright` | `extendInboxTap()` | Worker-scoped server, test-scoped inbox |
+
+`startInboxTapFixture()` defaults both ports to `0` and returns `server`, `client`, a verified
+Nodemailer `transport`, `smtp` connection details, `createInbox()`, and `close()`. Every adapter
+uses the same fixture object. Install Nodemailer 9, plus Vitest 4.1 or Playwright 1.61 when using
+those runner-specific subpaths. The `smtp` value contains
+`{ host, port, secure: false, ignoreTLS: true }` for configuring the application under test.
+
+Create a new inbox for every test. A fixture may share the capture server and transport at its
+documented scope, but a suite-global inbox would allow parallel tests to read the same recipient.
+
 ## TestInbox methods
 
 | Method | Resolves to | Purpose |

@@ -24,6 +24,28 @@ console.log(inbox.address);
 El alias se normaliza a letras minúsculas, dígitos y guiones, y después se añade un sufijo
 aleatorio de 12 caracteres. El alias por defecto es `test`.
 
+## Puntos de entrada de fixtures
+
+Las fixtures de runners se publican detrás de subpaths aislados para que el servidor raíz y el SDK
+cliente no carguen dependencias de test opcionales.
+
+| Import | Export principal | Ciclo de vida |
+| --- | --- | --- |
+| `inboxtap/fixtures` | `startInboxTapFixture()` | Inicio explícito y `close()` idempotente |
+| `inboxtap/fixtures/bun` | `setupInboxTap()` | Preparación y limpieza del archivo mediante hooks de Bun |
+| `inboxtap/fixtures/vitest` | `extendInboxTap()` | Servidor por archivo, buzón por test |
+| `inboxtap/fixtures/playwright` | `extendInboxTap()` | Servidor por worker, buzón por test |
+
+`startInboxTapFixture()` usa `0` en ambos puertos por defecto y devuelve `server`, `client`, un
+`transport` verificado de Nodemailer, los datos de conexión `smtp`, `createInbox()` y `close()`.
+Todos los adaptadores usan el mismo objeto fixture. Instala Nodemailer 9 y, además, Vitest 4.1 o
+Playwright 1.61 al usar sus subpaths específicos. El valor `smtp` contiene
+`{ host, port, secure: false, ignoreTLS: true }` para configurar la aplicación que se está probando.
+
+Crea un buzón nuevo para cada test. Una fixture puede compartir el servidor de captura y el
+transport en su alcance documentado, pero un buzón global para toda la suite permitiría que los
+tests en paralelo leyeran el mismo destinatario.
+
 ## Métodos de TestInbox
 
 | Método | Se resuelve a | Propósito |
