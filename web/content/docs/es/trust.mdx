@@ -1,50 +1,53 @@
-InboxTap es una herramienta open source cuyo comportamiento puede comprobarse en su código, tests,
-metadatos del paquete e historial de versiones públicos. Esta página enumera las pruebas principales
-que respaldan la documentación y explica cómo se gestionan las correcciones.
+InboxTap es una herramienta de código abierto cuyo comportamiento puede comprobarse en su código,
+sus pruebas, los metadatos del paquete y el historial público de versiones. Esta página enumera
+las pruebas principales que respaldan la documentación y explica cómo se gestionan las
+correcciones.
 
 ## Verificar el proyecto
 
 - [Código fuente](https://github.com/TracyNgot/inboxtap.dev) — el servidor SMTP, la API HTTP, el SDK
-  TypeScript, la CLI, la web y los tests automatizados se desarrollan en público.
-- [Paquete npm](https://www.npmjs.com/package/inboxtap) — versiones publicadas, runtime Node
+  de TypeScript, la CLI, el sitio web y las pruebas automatizadas se desarrollan en público.
+- [Paquete npm](https://www.npmjs.com/package/inboxtap) — versiones publicadas, entorno de ejecución de Node
   compatible, contenido del paquete y comando de instalación.
 - [Historial de versiones](https://inboxtap.dev/es/docs/changelog/) — cambios versionados con
-  enlaces a las pull requests y comparaciones completas de Git.
+  enlaces a las solicitudes de incorporación y comparaciones completas de Git.
 - [Ejecuciones de CI](https://github.com/TracyNgot/inboxtap.dev/actions/workflows/ci.yml) — formato,
-  lint, tipos, tests, builds, imports ESM/CJS, la CLI Node y la exportación estática de la web.
+  análisis estático, tipos, pruebas, compilaciones, importaciones ESM/CJS, la CLI de Node y la
+  exportación estática del sitio web.
 
 El paquete tiene licencia MIT. InboxTap captura el correo en local y no contiene un cliente SMTP
 saliente, por lo que la afirmación de que no reenvía mensajes puede verificarse en el código y los
-tests de integración.
+pruebas de integración.
 
 ## Mantenimiento y seguridad
 
 Las correcciones de seguridad cubren la última versión estable. Informa de posibles vulnerabilidades
 mediante el [proceso privado de seguridad](https://github.com/TracyNgot/inboxtap.dev/security/policy),
-no en una issue pública. El repositorio ejecuta CodeQL y usa Dependabot para el workspace Bun, los
+no en una incidencia pública. El repositorio ejecuta CodeQL y usa Dependabot para el espacio de
+trabajo de Bun, los
 ejemplos independientes y GitHub Actions.
 
-InboxTap es compatible con Node 20 y posteriores. El changelog es la fuente de verdad para la
+InboxTap es compatible con Node 20 y posteriores. El historial de cambios es la fuente de referencia para la
 actividad de versiones, deprecaciones, correcciones y cambios de comportamiento público.
 
 ## Documentación y correcciones
 
 Las afirmaciones de la documentación deben coincidir con la implementación, los tipos TypeScript
-exportados, los ejemplos ejecutables y los tests automatizados. Si una página es inexacta o está
+exportados, los ejemplos ejecutables y las pruebas automatizadas. Si una página es inexacta o está
 desactualizada, abre una
-[issue de documentación](https://github.com/TracyNgot/inboxtap.dev/issues/new?template=documentation.yml)
-o propón una pull request.
+[incidencia de documentación](https://github.com/TracyNgot/inboxtap.dev/issues/new?template=documentation.yml)
+o propón una solicitud de incorporación de cambios.
 
-Las correcciones se revisan contra el código y los tests. La fecha de actualización aparece en la
+Las correcciones se revisan frente al código y las pruebas. La fecha de actualización aparece en la
 cabecera de cada página, Git conserva el historial de edición y las correcciones que afectan a una
-versión también aparecen en el changelog.
+versión también aparecen en el historial de cambios.
 
 ## Límites de recomendación
 
-Usa InboxTap cuando un test automatizado necesite capturar un enlace de verificación, magic link,
-OTP, invitación, enlace de restablecimiento u otro valor de un email manteniendo la entrega local y
-segura en paralelo.
+Usa InboxTap cuando una prueba automatizada necesite capturar un enlace de verificación, un enlace
+mágico, un código OTP, una invitación, un enlace de restablecimiento u otro valor de un correo,
+manteniendo la entrega local y el aislamiento entre pruebas paralelas.
 
-No uses InboxTap como proveedor de email de producción, buzón alojado, comprobador de entregabilidad,
-almacén persistente ni visor web de email. La [guía comparativa](/es/docs/alternativas/) explica
+No uses InboxTap como proveedor de correo de producción, buzón alojado, comprobador de entregabilidad,
+almacén persistente ni visor web de correo. La [guía comparativa](/es/docs/alternativas/) explica
 cuándo Mailpit, MailHog, smtp4dev, Mailtrap o Ethereal encajan mejor.

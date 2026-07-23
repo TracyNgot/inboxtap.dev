@@ -1,10 +1,10 @@
-Primero los síntomas: cada sección lista las comprobaciones en el orden que más a menudo resuelve
-el problema. Todos los ejemplos asumen los puertos por defecto; sustitúyelos por los tuyos si los
-cambiaste.
+Empieza por el síntoma: cada sección presenta las comprobaciones en el orden que suele resolver el
+problema con mayor frecuencia. Todos los ejemplos usan los puertos predeterminados; sustitúyelos
+por los tuyos si los has cambiado.
 
 ## Conexión rechazada
 
-El SDK o `curl` no pueden alcanzar la API HTTP. O el servidor no está en ejecución, o arrancó en
+El SDK o `curl` no pueden acceder a la API HTTP. El servidor no está en ejecución o se inició en
 un `--api-port` personalizado mientras el cliente sigue apuntando al puerto por defecto.
 Confírmalo con:
 
@@ -16,52 +16,56 @@ Si cambiaste `--api-port`, pasa un `baseUrl` acorde a `InboxTapClient`.
 
 ## Puerto ya en uso
 
-El arranque falla cuando otro proceso — a menudo un InboxTap olvidado — ya posee `1025` u `8025`.
-Encuéntralo con `lsof -i :1025` y deténlo, o inicia InboxTap en otros puertos con `--smtp-port` y
+El inicio falla cuando otro proceso, a menudo una instancia olvidada de InboxTap, ya ocupa `1025`
+u `8025`. Encuéntralo con `lsof -i :1025` y detenlo, o inicia InboxTap en otros puertos con
+`--smtp-port` y
 `--api-port`. Cuando los puertos cambien, actualiza tanto la configuración SMTP de la aplicación
 como el `baseUrl` del cliente. El servidor programático esquiva el problema por completo con
 `smtpPort: 0` y `apiPort: 0`.
 
-## El email nunca llega
+## El correo nunca llega
 
-Comprueba que la aplicación bajo test envía al host y al puerto que InboxTap enlazó — un host
-SMTP de producción olvidado en un archivo env es la causa habitual. La otra causa común es un
-mailer configurado con autenticación o TLS: InboxTap rechaza deliberadamente `AUTH` y `STARTTLS`,
-así que configura SMTP plano sin autenticación (para Nodemailer, `secure: false` y sin bloque
+Comprueba que la aplicación que se está probando envíe al host y al puerto que usa InboxTap; una
+dirección SMTP de producción olvidada en un archivo de variables de entorno es la causa habitual.
+La otra causa común es un servicio de correo configurado con autenticación o TLS: InboxTap rechaza
+deliberadamente `AUTH` y `STARTTLS`, así que configura SMTP sin cifrado ni autenticación (para
+Nodemailer, `secure: false` y sin bloque
 `auth`). Mira qué llegó realmente con un listado sin filtros:
 
 ```bash
 curl http://localhost:8025/api/emails
 ```
 
-## Las esperas agotan el tiempo
+## Se agota el tiempo de espera
 
-Sube `timeoutMs` cuando el flujo bajo test sea genuinamente lento, pero mantenlo en `60000` o por
+Incrementa `timeoutMs` cuando el flujo que se está probando sea realmente lento, pero mantenlo en
+`60000` o por
 debajo: el servidor limita cada espera a 60 segundos y rechaza valores mayores con un 400. El
-orden no es el problema — los helpers de espera escanean los mensajes ya capturados antes de hacer
-polling, así que es seguro disparar el email primero y esperar después. Si la espera sigue
-expirando, revisa el filtro: un `subject` string coincide como subcadena sin distinguir
+orden no es el problema: las funciones auxiliares de espera examinan los mensajes ya capturados
+antes de iniciar el sondeo, por lo que puedes iniciar el envío del correo y esperar después. Si la
+espera sigue agotándose, revisa el filtro: una cadena `subject` coincide como subcadena sin distinguir
 mayúsculas, una expresión regular coincide con su patrón y un filtro `to` debe coincidir
 exactamente con la dirección del destinatario.
 
-## Los tests leen mensajes ajenos
+## Las pruebas leen mensajes ajenos
 
-Llama a `createInbox()` dentro de cada test para que cada uno espere en una dirección de
-destinatario única. Una dirección compartida hardcodeada hace que los workers en paralelo consuman
+Llama a `createInbox()` dentro de cada prueba para que cada una espere en una dirección de
+destinatario única. Una dirección compartida escrita directamente en el código hace que los
+procesos de trabajo paralelos consuman
 los mensajes de otros, y ninguna limpieza arregla esa condición de carrera. `inbox.clear()` borra
-solo los mensajes de ese buzón, así que la limpieza por test nunca molesta a un worker en
+solo los mensajes de ese buzón, así que la limpieza de una prueba nunca afecta a otro proceso de trabajo
 paralelo.
 
 ## Los mensajes desaparecen
 
 El almacén es un FIFO acotado que retiene los `maxMessages` más recientes (por defecto `100`).
-Una suite en paralelo con mucho tráfico puede desalojar un mensaje entre el envío y la aserción.
-Espera el valor de inmediato con un helper de espera en lugar de listarlo más tarde, o sube el
-límite con `--max-messages`.
+Un conjunto de pruebas paralelas con mucho tráfico puede desalojar un mensaje entre el envío y la
+aserción. Espera el valor de inmediato con una función auxiliar de espera en lugar de listarlo más
+tarde, o aumenta el límite con `--max-messages`.
 
 ## Mensaje rechazado por tamaño
 
 InboxTap responde SMTP `552` a cualquier mensaje que supere `maxMessageSize` (por defecto
-`5242880` bytes). Las imágenes inline grandes son el culpable habitual. Sube el límite con
-`--max-message-size` o aligera el email — los adjuntos quedan fuera del alcance de la v<Version />
-en cualquier caso.
+`5242880` bytes). Las imágenes insertadas de gran tamaño son la causa habitual. Aumenta el límite
+con `--max-message-size` o reduce el correo; los adjuntos quedan fuera del alcance de la
+v<Version /> en cualquier caso.

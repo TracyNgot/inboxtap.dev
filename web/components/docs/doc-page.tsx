@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { JsonLd } from "@/components/shared/json-ld";
 import { getDocContent } from "@/lib/content";
 import type { DocKey } from "@/lib/docs-config";
-import { examplesLanding, isExampleDocKey } from "@/lib/example-registry";
+import { isExampleDocKey } from "@/lib/example-registry";
 import { getAdjacentDocs, getDictionary, getLocalizedDoc } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
 import { docJsonLd } from "@/lib/seo/json-ld";
@@ -43,18 +43,7 @@ export function DocPage({ docKey, locale }: { docKey: DocKey; locale: Locale }) 
           </div>
         </header>
         <div className={`docs-prose${isExample ? " docs-example-readme" : ""}`}>
-          {isExample ? (
-            <>
-              <p className="docs-example-notice" lang={locale}>
-                {examplesLanding[locale].notice}
-              </p>
-              <div lang="en">
-                <Content components={{ pre }} />
-              </div>
-            </>
-          ) : (
-            <Content components={{ pre }} />
-          )}
+          <Content components={{ pre }} />
         </div>
         <nav aria-label={t.pagerAria} className="docs-pager">
           {adjacent.previous ? (

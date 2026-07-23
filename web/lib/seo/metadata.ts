@@ -24,7 +24,10 @@ function alternateOgLocales(locale: Locale): string[] {
 }
 
 export function rootMetadata(locale: Locale): Metadata {
-  const meta = getDictionary(locale).meta;
+  const dictionary = getDictionary(locale);
+  const meta = dictionary.meta;
+  const contributorName = `${SITE_NAME} — ${dictionary.docsChrome.contributors}`;
+  const hasLocalizedSocialImage = locale === "en";
   const paths = Object.fromEntries(
     locales.map((candidate) => [candidate, homePath(candidate)]),
   ) as Record<Locale, string>;
@@ -32,14 +35,14 @@ export function rootMetadata(locale: Locale): Metadata {
     metadataBase: new URL(SITE_ORIGIN),
     title: { default: meta.title, template: meta.titleTemplate },
     description: meta.description,
-    authors: [{ name: "InboxTap contributors", url: CONTRIBUTORS_URL }],
-    creator: "InboxTap contributors",
+    authors: [{ name: contributorName, url: CONTRIBUTORS_URL }],
+    creator: contributorName,
     publisher: SITE_NAME,
     alternates: { canonical: paths[locale], languages: languageAlternates(paths) },
     openGraph: {
       alternateLocale: alternateOgLocales(locale),
       description: meta.ogDescription,
-      images: [`${SITE_ORIGIN}/opengraph-image.png`],
+      ...(hasLocalizedSocialImage ? { images: [`${SITE_ORIGIN}/opengraph-image.png`] } : {}),
       locale: ogLocales[locale],
       siteName: SITE_NAME,
       title: meta.title,
@@ -47,9 +50,9 @@ export function rootMetadata(locale: Locale): Metadata {
       url: paths[locale],
     },
     twitter: {
-      card: "summary_large_image",
+      card: hasLocalizedSocialImage ? "summary_large_image" : "summary",
       description: meta.twitterDescription,
-      images: [`${SITE_ORIGIN}/twitter-image.png`],
+      ...(hasLocalizedSocialImage ? { images: [`${SITE_ORIGIN}/twitter-image.png`] } : {}),
       title: SITE_NAME,
     },
   };
@@ -61,17 +64,20 @@ export function docsLayoutMetadata(locale: Locale): Metadata {
 }
 
 export function docMetadata(locale: Locale, key: DocKey): Metadata {
+  const dictionary = getDictionary(locale);
   const doc = getLocalizedDoc(locale, key);
   const paths = docAlternatePaths(key);
+  const hasLocalizedSocialImage = locale === "en";
+  const contributorName = `${SITE_NAME} — ${dictionary.docsChrome.contributors}`;
   return {
     alternates: { canonical: paths[locale], languages: languageAlternates(paths) },
-    authors: [{ name: "InboxTap contributors", url: CONTRIBUTORS_URL }],
-    creator: "InboxTap contributors",
+    authors: [{ name: contributorName, url: CONTRIBUTORS_URL }],
+    creator: contributorName,
     description: doc.description,
     openGraph: {
       alternateLocale: alternateOgLocales(locale),
       description: doc.description,
-      images: [`${SITE_ORIGIN}/opengraph-image.png`],
+      ...(hasLocalizedSocialImage ? { images: [`${SITE_ORIGIN}/opengraph-image.png`] } : {}),
       locale: ogLocales[locale],
       siteName: SITE_NAME,
       title: doc.title,
@@ -81,9 +87,9 @@ export function docMetadata(locale: Locale, key: DocKey): Metadata {
     title: doc.title,
     publisher: SITE_NAME,
     twitter: {
-      card: "summary_large_image",
+      card: hasLocalizedSocialImage ? "summary_large_image" : "summary",
       description: doc.description,
-      images: [`${SITE_ORIGIN}/twitter-image.png`],
+      ...(hasLocalizedSocialImage ? { images: [`${SITE_ORIGIN}/twitter-image.png`] } : {}),
       title: doc.title,
     },
   };

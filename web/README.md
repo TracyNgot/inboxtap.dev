@@ -31,13 +31,14 @@ the other locales use localized URL slugs (for example `/fr/docs/demarrage-rapid
 - UI strings and page metadata live in `lib/i18n/dictionaries/`; docs titles, descriptions,
   localized slugs, and table-of-contents anchors live in `lib/i18n/docs/`.
 - Docs bodies live in `content/docs/{en,fr,es}/` with identical filenames per locale.
-- Example detail pages are the exception: one explicit registry in
-  `lib/example-registry.ts` imports each `examples/<directory>/README.md` directly. The
-  README body remains English on every locale route and is marked with `lang="en"` beneath
-  localized page chrome, descriptions, URLs, navigation, and an availability notice.
-- Every example directory with a README must be registered. `test/examples.test.ts` checks
-  registry completeness, one README H1, matching table-of-contents anchors, and rejects
-  unresolved relative file or image links. Anchor links and absolute URLs remain valid.
+- One explicit registry in `lib/example-registry.ts` imports each example's English
+  `README.md` plus its `README.fr.md` and `README.es.md` counterparts. Every example route
+  renders one locale only, including its README body, metadata, table of contents, and
+  surrounding page chrome.
+- Every example directory with a README must be registered and provide all three locale
+  variants. `test/examples.test.ts` checks registry and translation completeness, one H1,
+  localized table-of-contents anchors, byte-identical code fences, and rejects unresolved
+  relative file or image links. Anchor links and absolute URLs remain valid.
 - Any change to an English doc or UI string must update the French and Spanish counterparts
   in the same pull request. The `Record<DocKey, …>` dictionary types and the parity tests
   keep the structure complete; keeping the translated content current is on the author.
@@ -46,7 +47,8 @@ the other locales use localized URL slugs (for example `/fr/docs/demarrage-rapid
   `bun run verify` fails if they drift. Published localized slugs must never change.
 - Alignment is enforced by `bun test`: `test/content-parity.test.ts` requires every English
   doc to have fr/es counterparts with byte-identical code fences and the same section count,
-  and the dictionary `Record` types make a missing translated string a compile error.
+  `test/examples.test.ts` applies the same rule to example READMEs, and the dictionary
+  `Record` types make a missing translated string a compile error.
 - To add a locale: extend `locales` in `lib/i18n/config.ts`, then add
   `lib/i18n/dictionaries/<locale>.ts`, `lib/i18n/docs/<locale>.ts`, `lib/content/<locale>.ts`,
   and `content/docs/<locale>/`. Every `Record<Locale, …>` map stops compiling until the new

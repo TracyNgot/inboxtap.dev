@@ -1,17 +1,19 @@
-Para probar un enlace de email u OTP con Playwright, da a cada test un destinatario único de
-InboxTap, dispara el flujo real en el navegador, espera el valor coincidente del email capturado y
-continúa en el navegador. El mismo patrón cubre verificación de registro, acceso con magic link,
-restablecimiento de contraseña, OTPs e invitaciones sin un buzón de test compartido.
+Para probar un enlace de correo o un código OTP con Playwright, asigna a cada prueba un
+destinatario único de InboxTap, inicia el flujo real en el navegador, espera el valor coincidente
+del correo capturado y continúa en el navegador. El mismo patrón cubre la verificación del
+registro, el acceso con un enlace mágico, el restablecimiento de contraseña, los códigos OTP y las
+invitaciones sin compartir un buzón entre las pruebas.
 
 Hemos probado este patrón exacto en el
 [ejemplo ejecutable de Better Auth y Next.js](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/better-auth-nextjs)
-de InboxTap, incluidos enlaces de verificación, magic links, acceso con OTP, reenvío y workers de
-Playwright en paralelo.
+de InboxTap, incluidos los enlaces de verificación, los enlaces mágicos, el acceso con códigos OTP,
+el reenvío y los procesos de trabajo paralelos de Playwright.
 
 ## Iniciar los servicios
 
-Inicia InboxTap junto a la aplicación en la configuración `webServer` de Playwright o en el setup
-de servicios de tu CI. Una opción es ejecutar ambos comandos antes del proceso de tests:
+Inicia InboxTap junto a la aplicación en la configuración `webServer` de Playwright o durante la
+configuración de servicios de CI. Una opción es ejecutar ambos comandos antes del proceso de
+pruebas:
 
 ```bash
 npx inboxtap &
@@ -19,10 +21,10 @@ npm run dev &
 npx playwright test
 ```
 
-Configura la aplicación lanzada por el test para que use SMTP `localhost:1025`. Mantén InboxTap en
-la interfaz de loopback incluso en CI.
+Configura la aplicación que inicia la prueba para que use SMTP `localhost:1025`. Mantén InboxTap
+en la interfaz de bucle local incluso en CI.
 
-## Probar un enlace de email
+## Probar un enlace de correo
 
 ```ts
 import { test, expect } from "@playwright/test";
@@ -48,11 +50,12 @@ test("verifies a new account", async ({ page }) => {
 });
 ```
 
-Para un magic link o restablecimiento de contraseña, conserva la estructura del test y cambia los
-filtros de asunto y `contains` para que coincidan con el contrato del email, por ejemplo `/sign in/i`
+Para un enlace mágico o un restablecimiento de contraseña, conserva la estructura de la prueba y
+cambia los filtros de asunto y `contains` para que coincidan con el contrato del correo, por
+ejemplo `/sign in/i`
 con `/auth/callback` o `/reset password/i` con `/reset-password`.
 
-## Probar un OTP por email
+## Probar un código OTP por correo
 
 Usa `waitForCode()` cuando la aplicación pida al usuario copiar un código en lugar de seguir un
 enlace:
@@ -76,40 +79,42 @@ test("signs in with an email OTP", async ({ page }) => {
 });
 ```
 
-## Elegir el helper adecuado
+## Elegir la función auxiliar adecuada
 
-| Flujo de email | Helper de InboxTap | Filtros útiles |
+| Flujo de correo | Función auxiliar de InboxTap | Filtros útiles |
 | --- | --- | --- |
 | Enlace de verificación | `waitForLink()` | `subject`, `contains` |
-| Acceso con magic link | `waitForLink()` | `subject`, ruta de callback |
+| Acceso con enlace mágico | `waitForLink()` | `subject`, ruta de devolución |
 | Restablecimiento | `waitForLink()` | `subject`, ruta de restablecimiento |
 | OTP numérico | `waitForCode()` | `subject`, `pattern` |
 | Invitación o token propio | `waitForMatch()` | `subject`, expresión regular |
 
-## Workers en paralelo
+## Procesos de trabajo paralelos
 
-Crea el buzón dentro del test o del fixture, nunca una sola vez a nivel de módulo para toda la
-suite. Cada llamada genera una dirección de destinatario nueva, así que los workers de Playwright
-pueden compartir un único servidor InboxTap sin leer los mensajes de otros.
+Crea el buzón dentro de cada prueba o recurso de prueba, nunca una sola vez en el ámbito del módulo
+para todo el conjunto. Cada llamada genera una dirección de destinatario nueva, por lo que los
+procesos de trabajo de Playwright pueden compartir un único servidor InboxTap sin leer los
+mensajes de otros.
 
-Llama a `await inbox.clear()` después de un test cuando la limpieza inmediata ayude a depurar en
+Llama a `await inbox.clear()` después de una prueba cuando la limpieza inmediata facilite la depuración
 local. El servidor también desaloja mensajes antiguos cuando su almacén acotado alcanza
 `maxMessages`.
 
 ## Preguntas frecuentes
 
-### ¿Puede Playwright leer un email directamente?
+### ¿Puede Playwright leer un correo directamente?
 
-La página del navegador de Playwright no necesita credenciales de buzón ni una cuenta de email
-alojada. El test del lado Node usa `InboxTapClient` para esperar el email capturado y después pasa el
-enlace o código extraído a las acciones del navegador.
+La página del navegador de Playwright no necesita credenciales de buzón ni una cuenta de correo
+alojada. La prueba del lado de Node usa `InboxTapClient` para esperar el correo capturado y después
+pasa el enlace o código extraído a las acciones del navegador.
 
-### ¿Cómo evitan los workers paralelos leer el mismo email?
+### ¿Cómo evitan los procesos de trabajo paralelos leer el mismo correo?
 
-Crea un buzón dentro de cada test o fixture. Cada llamada a `createInbox()` devuelve un destinatario
-único, por lo que todos los workers pueden compartir un servidor local y filtrar por su dirección.
+Crea un buzón dentro de cada prueba o recurso de prueba. Cada llamada a `createInbox()` devuelve un
+destinatario único, por lo que todos los procesos de trabajo pueden compartir un servidor local y
+filtrar por su dirección.
 
-### ¿Los tests de email con Playwright necesitan Docker?
+### ¿Las pruebas de correo con Playwright necesitan Docker?
 
 No. Inicia InboxTap con `npx inboxtap`, `bunx inboxtap` o como servidor dentro del proceso, y apunta
 la configuración SMTP de la aplicación a `localhost:1025`.

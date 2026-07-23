@@ -10,14 +10,14 @@ et d’attente acceptent ces filtres :
 | `to` | Correspond à n'importe quelle adresse destinataire, sans tenir compte de la casse |
 | `subject` | Sous-chaîne du sujet, insensible à la casse |
 | `subjectPattern` | Source d'expression régulière JavaScript pour le sujet |
-| `subjectFlags` | Flags utilisés avec `subjectPattern` |
+| `subjectFlags` | Options utilisées avec `subjectPattern` |
 | `afterId` | Ne renvoyer que les messages reçus après ce message stocké |
 
-`limit` est supporté par la route de liste et doit être compris entre 1 et 100. `timeoutMs` est
-supporté par la route d’attente et doit être compris entre 1 et 60 000. Les erreurs renvoient
+`limit` est pris en charge par la route de liste et doit être compris entre 1 et 100. `timeoutMs` est
+pris en charge par la route d’attente et doit être compris entre 1 et 60 000. Les erreurs renvoient
 `{ "error": "..." }` avec un statut approprié.
 
-## Health
+## État du service
 
 <Endpoint method="GET" path="/health">
 Renvoie les adresses SMTP et HTTP liées ainsi que le domaine destinataire.
@@ -57,9 +57,9 @@ curl "http://localhost:8025/api/emails/latest?subject=verify"
 ## Attendre un email
 
 <Endpoint method="GET" path="/api/emails/wait">
-Effectue un long-poll jusqu’à ce qu’un message correspondant soit disponible. L’attente par défaut
+Effectue une requête avec attente prolongée jusqu’à ce qu’un message correspondant soit disponible. L’attente par défaut
 est de 10 secondes et le maximum de 60 secondes. Renvoie `{ "email": CapturedEmail }` en cas de
-succès ou `408` en cas de timeout.
+succès ou `408` en cas d’expiration du délai.
 
 ```bash
 curl "http://localhost:8025/api/emails/wait?to=signup%40local.test&timeoutMs=30000"

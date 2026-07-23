@@ -28,13 +28,7 @@ export function SiteFooter({ locale, t }: { locale: Locale; t: Dictionary["chrom
           rel="noopener noreferrer"
           target="_blank"
         >
-          {/* biome-ignore lint/performance/noImgElement: Product Hunt serves this dynamic remote badge directly. */}
-          <img
-            alt="InboxTap - Test email flows locally, without risking real inboxes | Product Hunt"
-            height={54}
-            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202940&theme=light&t=1784674110630"
-            width={250}
-          />
+          {t.productHuntLabel} ↗
         </a>
       </div>
     </footer>

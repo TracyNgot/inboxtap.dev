@@ -1,4 +1,4 @@
-Esta guía captura un email de registro y sigue su enlace de verificación desde un test de
+Esta guía captura un correo de registro y sigue su enlace de verificación desde una prueba de
 navegador.
 
 ## Iniciar InboxTap
@@ -14,8 +14,8 @@ destinatarios `local.test`.
 
 ## Crear un buzón aislado
 
-Crea una dirección para el test actual. El cliente descubre el dominio del servidor y añade un
-sufijo aleatorio al alias, de modo que los tests en paralelo no leen los mensajes de otros.
+Crea una dirección para la prueba actual. El cliente descubre el dominio del servidor y añade un
+sufijo aleatorio al alias, de modo que las pruebas en paralelo no leen los mensajes de otras.
 
 ```ts
 import { InboxTapClient } from "inboxtap/client";
@@ -27,7 +27,7 @@ const inbox = await inboxTap.createInbox({ alias: "signup" });
 Una dirección tiene la forma `signup-f2a737d0-d1e@local.test`. No hace falta registrarla en el
 servidor antes de usarla.
 
-## Disparar el email
+## Iniciar el envío del correo
 
 Pasa `inbox.address` por el mismo flujo de aplicación que sigue un usuario:
 
@@ -51,8 +51,9 @@ const verificationUrl = await inbox.waitForLink({
 await page.goto(verificationUrl);
 ```
 
-Los helpers de extracción devuelven strings. Usa `waitForMessage()` cuando la aserción necesite el
-email capturado completo, o `messages()` para inspeccionar todo lo ya recibido por la dirección.
+Las funciones auxiliares de extracción devuelven cadenas. Usa `waitForMessage()` cuando la
+aserción necesite el correo capturado completo, o `messages()` para inspeccionar todo lo que ya ha
+recibido la dirección.
 
 ```ts
 const code = await inbox.waitForCode({ subject: /security code/i });

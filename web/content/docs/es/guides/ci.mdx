@@ -1,32 +1,34 @@
 InboxTap es un proceso Node 20+ normal: sin imagen Docker, sin contenedor de servicio, nada que
-cachear. Todos los proveedores de CI lo ejecutan igual — instalar, iniciar, esperar al health,
-ejecutar los tests.
+almacenar en caché. Todos los proveedores de CI lo ejecutan igual: instalar, iniciar, esperar a la
+comprobación de estado y ejecutar las pruebas.
 
 ## Dos formas de ejecutarlo
 
-- **Paso en segundo plano.** Inicia la CLI antes del paso de tests. Esto replica el desarrollo
-  local y da a todos los tests del job un servidor compartido en los puertos por defecto.
+- **Paso en segundo plano.** Inicia la CLI antes del paso de pruebas. Esto reproduce el entorno de
+  desarrollo local y proporciona a todas las pruebas de la tarea un servidor compartido en los
+  puertos predeterminados.
 - **Servidor programático.** Inicia `InboxTapServer` con `apiPort: 0` y `smtpPort: 0` desde el
-  setup global del runner, como se muestra en la
-  [guía de runners de tests](/es/docs/guias/ejecutores-de-tests). No hay paso extra de CI y los
+  proceso de configuración global del ejecutor de pruebas, como se muestra en la
+  [guía de ejecutores de pruebas](/es/docs/guias/ejecutores-de-pruebas). No hay pasos adicionales de
+  CI y los
   puertos asignados automáticamente nunca pueden colisionar.
 
 El resto de esta página muestra el patrón del paso en segundo plano.
 
-## Esperar al health check
+## Esperar a la comprobación de estado
 
-Consulta `/health` antes de ceder el control al paso de tests. Fallar rápido aquí es mejor que
-depurar el timeout del primer test:
+Consulta `/health` antes de ceder el control al paso de pruebas. Detectar un fallo aquí de
+inmediato es mejor que depurar el tiempo de espera agotado de la primera prueba:
 
 ```bash
 npx inboxtap &
 timeout 10 bash -c 'until curl -fsS http://localhost:8025/health > /dev/null; do sleep 0.1; done'
 ```
 
-`/health` responde una vez que los listeners SMTP y HTTP están ambos enlazados, e informa de las
-direcciones y del dominio de destinatarios en uso.
+`/health` responde cuando los procesos de escucha SMTP y HTTP están enlazados, e informa de las
+direcciones y del dominio de destinatarios que están en uso.
 
-## Workflow de GitHub Actions
+## Flujo de trabajo de GitHub Actions
 
 ```yaml
 name: e2e
@@ -53,14 +55,15 @@ jobs:
           SMTP_PORT: "1025"
 ```
 
-El proceso en segundo plano vive durante el resto del job y el runner lo recoge cuando el job
-termina — no hace falta ningún paso de teardown.
+El proceso en segundo plano permanece activo durante el resto de la tarea y el ejecutor lo detiene
+cuando termina; no hace falta ningún paso de cierre.
 
 ## Puertos y otros proveedores
 
-Los puertos por defecto `1025` y `8025` están libres en los runners alojados de GitHub, GitLab y
-CircleCI. Mantén InboxTap en la interfaz de loopback en CI; no hay motivo para ampliar
-`--smtp-host` ni `--api-host` en una ejecución de tests. En runners self-hosted compartidos donde
-jobs concurrentes puedan colisionar, pasa valores explícitos de `--smtp-port` y `--api-port` por
-job, o cambia al servidor programático con puerto `0`. Sea cual sea el proveedor, la secuencia es
-la misma de tres pasos: instalar, iniciar con un health check, probar.
+Los puertos predeterminados `1025` y `8025` están libres en los ejecutores alojados de GitHub,
+GitLab y CircleCI. Mantén InboxTap en la interfaz de bucle local en CI; no hay motivo para ampliar
+`--smtp-host` ni `--api-host` durante una ejecución de pruebas. En ejecutores autogestionados
+compartidos donde puedan colisionar tareas concurrentes, pasa valores explícitos de `--smtp-port`
+y `--api-port` para cada tarea, o cambia al servidor programático con el puerto `0`. Sea cual sea
+el proveedor, la secuencia tiene los mismos tres pasos: instalar, iniciar con una comprobación de
+estado y probar.

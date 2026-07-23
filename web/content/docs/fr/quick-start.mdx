@@ -52,7 +52,7 @@ const verificationUrl = await inbox.waitForLink({
 await page.goto(verificationUrl);
 ```
 
-Les helpers d’extraction renvoient des chaînes. Utilisez `waitForMessage()` quand l’assertion a
+Les méthodes utilitaires d’extraction renvoient des chaînes. Utilisez `waitForMessage()` quand l’assertion a
 besoin de l’email capturé complet, ou `messages()` pour inspecter tout ce que l’adresse a déjà
 reçu.
 

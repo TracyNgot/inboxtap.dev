@@ -1,7 +1,7 @@
-Cypress ejecuta el código de las specs dentro del navegador, así que el SDK de Node no puede
-importarse en un archivo de spec. Registra en su lugar unos cuantos handlers `cy.task` en
-`setupNodeEvents`: las tasks son las dueñas del SDK en el proceso Node de la configuración y las
-specs las llaman con valores planos.
+Cypress ejecuta el código de las pruebas dentro del navegador, por lo que el SDK de Node no puede
+importarse en un archivo de prueba. En su lugar, registra varios controladores `cy.task` en
+`setupNodeEvents`: las tareas administran el SDK en el proceso de Node de la configuración y las
+pruebas las llaman con valores simples.
 
 ## Iniciar los servicios
 
@@ -13,9 +13,9 @@ npm run dev &
 npx cypress run
 ```
 
-Configura la aplicación bajo test para enviar SMTP a `localhost:1025`.
+Configura la aplicación que se está probando para enviar SMTP a `localhost:1025`.
 
-## Registrar las tasks
+## Registrar las tareas
 
 ```ts
 // cypress.config.ts
@@ -48,17 +48,17 @@ export default defineConfig({
 });
 ```
 
-La task de creación devuelve la dirección del buzón como string, y cada task de espera reconstruye
-un `TestInbox` a partir de la dirección que recibe.
+La tarea de creación devuelve la dirección del buzón como una cadena, y cada tarea de espera
+reconstruye un `TestInbox` a partir de la dirección que recibe.
 
 <Callout title="Frontera JSON">
-  Los argumentos y resultados de las tasks deben ser serializables a JSON. Pasa los asuntos y los
-  patrones de código como strings — un asunto string coincide como subcadena sin distinguir
-  mayúsculas, y un patrón string se compila a una expresión regular — pero nunca pases un objeto
-  RegExp a través de la frontera.
+  Los argumentos y resultados de las tareas deben poder serializarse como JSON. Pasa los asuntos y
+  los patrones de código como cadenas: un asunto expresado como cadena coincide como subcadena sin
+  distinguir mayúsculas y un patrón expresado como cadena se compila como expresión regular. No
+  pases nunca un objeto RegExp a través de la frontera.
 </Callout>
 
-## Escribir el test
+## Escribir la prueba
 
 ```ts
 describe("sign up", () => {
@@ -81,22 +81,23 @@ describe("sign up", () => {
 });
 ```
 
-Da a la opción `timeout` de Cypress más tiempo que a `timeoutMs`, para que un email lento falle
-dentro de la task con el mensaje de error de InboxTap y no como un timeout genérico de task. Usa
-la task `inboxtap:waitForCode` cuando la aplicación pida un OTP en lugar de un enlace.
+Da a la opción `timeout` de Cypress más tiempo que a `timeoutMs`, para que un correo lento falle
+dentro de la tarea con el mensaje de error de InboxTap y no como un tiempo de espera genérico de
+Cypress. Usa la tarea `inboxtap:waitForCode` cuando la aplicación pida un código OTP en lugar de
+un enlace.
 
 ## Aislamiento en paralelo
 
-Crea el buzón dentro de cada test, nunca una sola vez para toda la suite. Cada llamada a una task
-genera una dirección de destinatario nueva, así que las specs en paralelo pueden compartir un
-único servidor InboxTap sin leer los mensajes de otras. El almacén acotado desaloja los mensajes
-antiguos por sí solo; añade una task de limpieza solo si la limpieza inmediata ayuda a depurar en
-local.
+Crea el buzón dentro de cada prueba, nunca una sola vez para todo el conjunto. Cada llamada a una
+tarea genera una dirección de destinatario nueva, por lo que las pruebas paralelas pueden compartir
+un único servidor InboxTap sin leer los mensajes de otras. El almacén acotado elimina por sí solo
+los mensajes antiguos; añade una tarea de limpieza únicamente si la limpieza inmediata facilita
+la depuración local.
 
 ## Acceso HTTP directo
 
-`cy.request` se ejecuta desde el proxy del lado Node de Cypress, así que puede alcanzar la API de
-loopback directamente sin registrar ninguna task:
+`cy.request` se ejecuta desde el proxy del lado de Node de Cypress, por lo que puede acceder
+directamente a la API de bucle local sin registrar ninguna tarea:
 
 ```ts
 cy.request(
@@ -106,6 +107,6 @@ cy.request(
   .should("not.be.empty");
 ```
 
-Esto renuncia al escaneo multi-mensaje y a la extracción de valores del SDK, así que prefiere las
-tasks para cualquier cosa más allá de una comprobación puntual. La lista completa de endpoints
-está en la [referencia de la API HTTP](/es/docs/referencia/api-http).
+Esto prescinde del examen de varios mensajes y de la extracción de valores del SDK, por lo que
+conviene usar las tareas para cualquier operación que vaya más allá de una comprobación puntual.
+La lista completa de rutas está en la [referencia de la API HTTP](/es/docs/referencia/api-http).

@@ -26,7 +26,7 @@ problème avec `smtpPort: 0` et `apiPort: 0`.
 
 Vérifiez que l’application testée envoie vers l’hôte et le port qu’InboxTap a liés — un hôte SMTP
 de production resté dans un fichier d’environnement est la cause habituelle. L’autre cause
-fréquente est un mailer configuré pour l’authentification ou TLS : InboxTap rejette volontairement
+fréquente est un système d’envoi configuré pour l’authentification ou TLS : InboxTap rejette volontairement
 `AUTH` et `STARTTLS`, configurez donc du SMTP simple non authentifié (pour Nodemailer,
 `secure: false` et pas de bloc `auth`). Voyez ce qui est réellement arrivé avec une liste non
 filtrée :
@@ -39,7 +39,7 @@ curl http://localhost:8025/api/emails
 
 Augmentez `timeoutMs` quand le parcours testé est réellement lent, mais restez à `60000` ou
 moins : le serveur plafonne une attente à 60 secondes et rejette les valeurs supérieures avec un
-400. L’ordre n’est pas le problème — les helpers d’attente balaient les messages déjà capturés
+400. L’ordre n’est pas le problème — les méthodes d’attente balaient les messages déjà capturés
 avant d’interroger le serveur, il est donc sûr de déclencher l’email d’abord et d’attendre
 ensuite. Si l’attente expire encore, vérifiez le filtre : un `subject` chaîne correspond comme
 sous-chaîne insensible à la casse, une expression régulière correspond à son motif, et un filtre
@@ -48,20 +48,20 @@ sous-chaîne insensible à la casse, une expression régulière correspond à so
 ## Les tests lisent les messages des autres
 
 Appelez `createInbox()` dans chaque test pour que chacun attende sur une adresse destinataire
-unique. Une adresse partagée codée en dur fait que les workers parallèles consomment les messages
+unique. Une adresse partagée codée en dur fait que les processus parallèles consomment les messages
 des autres, et aucun vidage ne corrige cette course. `inbox.clear()` ne supprime que les messages
-de cette boîte, donc le nettoyage par test ne perturbe jamais un worker parallèle.
+de cette boîte, donc le nettoyage par test ne perturbe jamais un processus parallèle.
 
 ## Les messages disparaissent
 
 Le stockage est une FIFO bornée qui conserve les `maxMessages` plus récents (par défaut `100`).
 Une suite parallèle chargée peut évincer un message entre l’envoi et l’assertion. Attendez la
-valeur immédiatement avec un helper d’attente au lieu de lister plus tard, ou augmentez la limite
+valeur immédiatement avec une méthode d’attente au lieu de lister plus tard, ou augmentez la limite
 avec `--max-messages`.
 
 ## Message rejeté car trop volumineux
 
 InboxTap répond SMTP `552` pour tout message dépassant `maxMessageSize` (par défaut `5242880`
-octets). Les grosses images inline sont le coupable habituel. Augmentez la limite avec
+octets). Les grosses images intégrées sont généralement en cause. Augmentez la limite avec
 `--max-message-size`, ou allégez l’email — les pièces jointes sont de toute façon hors périmètre
 pour la v<Version />.

@@ -1,11 +1,25 @@
 import type { ComponentType } from "react";
-import BetterAuthNextjs from "../../examples/better-auth-nextjs/README.md";
-import ExpressNodemailer from "../../examples/express-nodemailer/README.md";
-import FaultInjectionVitest from "../../examples/fault-injection-vitest/README.md";
-import TestFixtureBun from "../../examples/test-fixture-bun/README.md";
-import TestFixturePlaywright from "../../examples/test-fixture-playwright/README.md";
-import TestFixtureVitest from "../../examples/test-fixture-vitest/README.md";
-import TestReportingVitest from "../../examples/test-reporting-vitest/README.md";
+import BetterAuthNextjsEs from "../../examples/better-auth-nextjs/README.es.md";
+import BetterAuthNextjsFr from "../../examples/better-auth-nextjs/README.fr.md";
+import BetterAuthNextjsEn from "../../examples/better-auth-nextjs/README.md";
+import ExpressNodemailerEs from "../../examples/express-nodemailer/README.es.md";
+import ExpressNodemailerFr from "../../examples/express-nodemailer/README.fr.md";
+import ExpressNodemailerEn from "../../examples/express-nodemailer/README.md";
+import FaultInjectionVitestEs from "../../examples/fault-injection-vitest/README.es.md";
+import FaultInjectionVitestFr from "../../examples/fault-injection-vitest/README.fr.md";
+import FaultInjectionVitestEn from "../../examples/fault-injection-vitest/README.md";
+import TestFixtureBunEs from "../../examples/test-fixture-bun/README.es.md";
+import TestFixtureBunFr from "../../examples/test-fixture-bun/README.fr.md";
+import TestFixtureBunEn from "../../examples/test-fixture-bun/README.md";
+import TestFixturePlaywrightEs from "../../examples/test-fixture-playwright/README.es.md";
+import TestFixturePlaywrightFr from "../../examples/test-fixture-playwright/README.fr.md";
+import TestFixturePlaywrightEn from "../../examples/test-fixture-playwright/README.md";
+import TestFixtureVitestEs from "../../examples/test-fixture-vitest/README.es.md";
+import TestFixtureVitestFr from "../../examples/test-fixture-vitest/README.fr.md";
+import TestFixtureVitestEn from "../../examples/test-fixture-vitest/README.md";
+import TestReportingVitestEs from "../../examples/test-reporting-vitest/README.es.md";
+import TestReportingVitestFr from "../../examples/test-reporting-vitest/README.fr.md";
+import TestReportingVitestEn from "../../examples/test-reporting-vitest/README.md";
 import type { Locale } from "./i18n/config";
 import type { DocStrings, TocItem } from "./i18n/types";
 
@@ -20,27 +34,24 @@ export const examplesLanding = {
       "Runnable projects that show InboxTap at the real SMTP boundary with popular application and test stacks.",
     intro:
       "Each walkthrough below is rendered directly from the example's README, so the documentation stays aligned with the code you can run.",
-    notice: "This example README is currently available in English.",
     openExample: "Open example",
     slug: "examples",
     title: "Examples",
   },
   es: {
     description:
-      "Proyectos ejecutables que muestran InboxTap en el límite SMTP real con stacks populares de aplicación y testing.",
+      "Proyectos ejecutables que muestran InboxTap en el límite SMTP real con entornos populares de aplicaciones y pruebas.",
     intro:
-      "Cada guía se genera directamente desde el README del ejemplo, para que la documentación siga alineada con el código ejecutable.",
-    notice: "El README de este ejemplo está disponible actualmente en inglés.",
+      "Cada guía se muestra directamente desde el README localizado del ejemplo, para que la documentación siga alineada con el código ejecutable.",
     openExample: "Abrir ejemplo",
     slug: "ejemplos",
     title: "Ejemplos",
   },
   fr: {
     description:
-      "Des projets exécutables qui montrent InboxTap à la vraie frontière SMTP avec des stacks d’application et de test courantes.",
+      "Des projets exécutables qui montrent InboxTap à la véritable frontière SMTP avec des environnements d’application et de test courants.",
     intro:
-      "Chaque guide est rendu directement depuis le README de l’exemple, afin que la documentation reste alignée sur le code exécutable.",
-    notice: "Le README de cet exemple est actuellement disponible en anglais.",
+      "Chaque guide est affiché directement depuis le README localisé de l’exemple, afin que la documentation reste alignée sur le code exécutable.",
     openExample: "Ouvrir l’exemple",
     slug: "exemples",
     title: "Exemples",
@@ -50,7 +61,6 @@ export const examplesLanding = {
   {
     description: string;
     intro: string;
-    notice: string;
     openExample: string;
     slug: string;
     title: string;
@@ -64,14 +74,14 @@ const sharedToc = {
     { id: "run-the-tests", label: "Run the tests" },
   ],
   es: [
-    { id: "prerequisites", label: "Requisitos previos" },
-    { id: "setup", label: "Configuración" },
-    { id: "run-the-tests", label: "Ejecutar los tests" },
+    { id: "requisitos-previos", label: "Requisitos previos" },
+    { id: "configuración", label: "Configuración" },
+    { id: "ejecutar-las-pruebas", label: "Ejecutar las pruebas" },
   ],
   fr: [
-    { id: "prerequisites", label: "Prérequis" },
-    { id: "setup", label: "Installation" },
-    { id: "run-the-tests", label: "Lancer les tests" },
+    { id: "prérequis", label: "Prérequis" },
+    { id: "installation", label: "Installation" },
+    { id: "lancer-les-tests", label: "Lancer les tests" },
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
 
@@ -84,15 +94,15 @@ const fixtureToc = {
   ],
   es: [
     ...sharedToc.es,
-    { id: "how-it-works", label: "Cómo funciona" },
-    { id: "isolation-and-cleanup", label: "Aislamiento y limpieza" },
-    { id: "troubleshooting", label: "Solución de problemas" },
+    { id: "cómo-funciona", label: "Cómo funciona" },
+    { id: "aislamiento-y-limpieza", label: "Aislamiento y limpieza" },
+    { id: "solución-de-problemas", label: "Solución de problemas" },
   ],
   fr: [
     ...sharedToc.fr,
-    { id: "how-it-works", label: "Fonctionnement" },
-    { id: "isolation-and-cleanup", label: "Isolation et nettoyage" },
-    { id: "troubleshooting", label: "Dépannage" },
+    { id: "fonctionnement", label: "Fonctionnement" },
+    { id: "isolation-et-nettoyage", label: "Isolation et nettoyage" },
+    { id: "dépannage", label: "Dépannage" },
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
 
@@ -108,21 +118,30 @@ const faultInjectionToc = {
   ],
   es: [
     ...sharedToc.es,
-    { id: "what-the-example-proves", label: "Qué demuestra el ejemplo" },
-    { id: "transient-retry", label: "Reintento transitorio" },
-    { id: "pause-and-release", label: "Pausa y liberación" },
-    { id: "disconnect-recovery", label: "Recuperación tras desconexión" },
-    { id: "ownership-boundaries", label: "Límites de responsabilidad" },
-    { id: "troubleshooting", label: "Solución de problemas" },
+    { id: "qué-demuestra-el-ejemplo", label: "Qué demuestra el ejemplo" },
+    { id: "reintento-transitorio", label: "Reintento transitorio" },
+    { id: "pausar-y-liberar", label: "Pausar y liberar" },
+    {
+      id: "recuperación-tras-una-desconexión",
+      label: "Recuperación tras una desconexión",
+    },
+    { id: "límites-de-responsabilidad", label: "Límites de responsabilidad" },
+    { id: "solución-de-problemas", label: "Solución de problemas" },
   ],
   fr: [
     ...sharedToc.fr,
-    { id: "what-the-example-proves", label: "Ce que démontre l’exemple" },
-    { id: "transient-retry", label: "Nouvelle tentative transitoire" },
-    { id: "pause-and-release", label: "Pause et libération" },
-    { id: "disconnect-recovery", label: "Reprise après déconnexion" },
-    { id: "ownership-boundaries", label: "Limites de responsabilité" },
-    { id: "troubleshooting", label: "Dépannage" },
+    { id: "ce-que-démontre-lexemple", label: "Ce que démontre l’exemple" },
+    {
+      id: "nouvelle-tentative-après-une-erreur-transitoire",
+      label: "Nouvelle tentative après une erreur transitoire",
+    },
+    { id: "mise-en-pause-et-libération", label: "Mise en pause et libération" },
+    {
+      id: "rétablissement-après-une-déconnexion",
+      label: "Rétablissement après une déconnexion",
+    },
+    { id: "limites-de-responsabilité", label: "Limites de responsabilité" },
+    { id: "dépannage", label: "Dépannage" },
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
 
@@ -139,32 +158,41 @@ const testReportingToc = {
   ],
   es: [
     ...sharedToc.es,
-    { id: "what-the-example-proves", label: "Qué demuestra el ejemplo" },
-    { id: "collect-matcher-observations", label: "Recopilar observaciones de matchers" },
-    { id: "add-messages-and-assertions", label: "Añadir mensajes y aserciones" },
-    { id: "write-html-and-json", label: "Escribir HTML y JSON" },
-    { id: "redaction-boundaries", label: "Límites de la redacción" },
-    { id: "artifact-lifecycle", label: "Ciclo de vida de los artefactos" },
-    { id: "troubleshooting", label: "Solución de problemas" },
+    { id: "qué-demuestra-el-ejemplo", label: "Qué demuestra el ejemplo" },
+    {
+      id: "recopilar-observaciones-de-los-matchers",
+      label: "Recopilar observaciones de los matchers",
+    },
+    { id: "añadir-mensajes-y-aserciones", label: "Añadir mensajes y aserciones" },
+    { id: "escribir-html-y-json", label: "Escribir HTML y JSON" },
+    {
+      id: "alcance-de-la-ocultación-de-datos-sensibles",
+      label: "Alcance de la ocultación de datos sensibles",
+    },
+    { id: "ciclo-de-vida-de-los-artefactos", label: "Ciclo de vida de los artefactos" },
+    { id: "solución-de-problemas", label: "Solución de problemas" },
   ],
   fr: [
     ...sharedToc.fr,
-    { id: "what-the-example-proves", label: "Ce que démontre l’exemple" },
+    { id: "ce-que-démontre-lexemple", label: "Ce que démontre l’exemple" },
     {
-      id: "collect-matcher-observations",
+      id: "recueillir-les-observations-des-matchers",
       label: "Collecter les observations des matchers",
     },
-    { id: "add-messages-and-assertions", label: "Ajouter des messages et assertions" },
-    { id: "write-html-and-json", label: "Écrire le HTML et le JSON" },
-    { id: "redaction-boundaries", label: "Limites de l’expurgation" },
-    { id: "artifact-lifecycle", label: "Cycle de vie des artefacts" },
-    { id: "troubleshooting", label: "Dépannage" },
+    {
+      id: "ajouter-des-messages-et-des-assertions",
+      label: "Ajouter des messages et assertions",
+    },
+    { id: "écrire-les-fichiers-html-et-json", label: "Écrire les fichiers HTML et JSON" },
+    { id: "limites-de-lexpurgation", label: "Limites de l’expurgation" },
+    { id: "cycle-de-vie-des-artefacts", label: "Cycle de vie des artefacts" },
+    { id: "dépannage", label: "Dépannage" },
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
 
 export const exampleReadmes = [
   {
-    Content: BetterAuthNextjs,
+    content: { en: BetterAuthNextjsEn, es: BetterAuthNextjsEs, fr: BetterAuthNextjsFr },
     directory: "better-auth-nextjs",
     strings: {
       en: {
@@ -174,12 +202,12 @@ export const exampleReadmes = [
       },
       es: {
         description:
-          "Ejecuta flujos de verificación, magic link y OTP de Better Auth mediante InboxTap con Playwright.",
+          "Ejecuta flujos de verificación, enlace mágico y OTP de Better Auth mediante InboxTap con Playwright.",
         title: "Better Auth + Next.js + InboxTap",
       },
       fr: {
         description:
-          "Testez les flux de vérification, magic link et OTP de Better Auth via InboxTap avec Playwright.",
+          "Testez les flux de vérification, lien magique et OTP de Better Auth via InboxTap avec Playwright.",
         title: "Better Auth + Next.js + InboxTap",
       },
     },
@@ -192,20 +220,20 @@ export const exampleReadmes = [
       ],
       es: [
         ...sharedToc.es,
-        { id: "run-it-interactively", label: "Ejecutarlo de forma interactiva" },
-        { id: "how-it-works", label: "Cómo funciona" },
-        { id: "troubleshooting", label: "Solución de problemas" },
+        { id: "ejecutar-en-modo-interactivo", label: "Ejecutar en modo interactivo" },
+        { id: "cómo-funciona", label: "Cómo funciona" },
+        { id: "solución-de-problemas", label: "Solución de problemas" },
       ],
       fr: [
         ...sharedToc.fr,
-        { id: "run-it-interactively", label: "Lancer en mode interactif" },
-        { id: "how-it-works", label: "Fonctionnement" },
-        { id: "troubleshooting", label: "Dépannage" },
+        { id: "lancer-lexemple-en-mode-interactif", label: "Lancer en mode interactif" },
+        { id: "fonctionnement", label: "Fonctionnement" },
+        { id: "dépannage", label: "Dépannage" },
       ],
     },
   },
   {
-    Content: ExpressNodemailer,
+    content: { en: ExpressNodemailerEn, es: ExpressNodemailerEs, fr: ExpressNodemailerFr },
     directory: "express-nodemailer",
     strings: {
       en: {
@@ -234,28 +262,32 @@ export const exampleReadmes = [
       ],
       es: [
         ...sharedToc.es,
-        { id: "run-interactively", label: "Ejecutar de forma interactiva" },
-        { id: "how-it-works", label: "Cómo funciona" },
-        { id: "register-the-matchers", label: "Registrar los matchers" },
-        { id: "troubleshooting", label: "Solución de problemas" },
+        { id: "ejecutar-en-modo-interactivo", label: "Ejecutar en modo interactivo" },
+        { id: "cómo-funciona", label: "Cómo funciona" },
+        { id: "registrar-los-matchers", label: "Registrar los matchers" },
+        { id: "solución-de-problemas", label: "Solución de problemas" },
       ],
       fr: [
         ...sharedToc.fr,
-        { id: "run-interactively", label: "Lancer en mode interactif" },
-        { id: "how-it-works", label: "Fonctionnement" },
-        { id: "register-the-matchers", label: "Enregistrer les matchers" },
-        { id: "troubleshooting", label: "Dépannage" },
+        { id: "lancer-lexemple-en-mode-interactif", label: "Lancer en mode interactif" },
+        { id: "fonctionnement", label: "Fonctionnement" },
+        { id: "enregistrer-les-matchers", label: "Enregistrer les matchers" },
+        { id: "dépannage", label: "Dépannage" },
       ],
     },
   },
   {
-    Content: FaultInjectionVitest,
+    content: {
+      en: FaultInjectionVitestEn,
+      es: FaultInjectionVitestEs,
+      fr: FaultInjectionVitestFr,
+    },
     directory: "fault-injection-vitest",
     strings: {
       en: {
         description:
           "Test transient SMTP failures, paused deliveries, and connection recovery with Vitest.",
-        title: "SMTP fault injection + Vitest",
+        title: "SMTP fault injection with Vitest",
       },
       es: {
         description:
@@ -265,13 +297,13 @@ export const exampleReadmes = [
       fr: {
         description:
           "Testez les erreurs SMTP transitoires, les livraisons en pause et la reprise de connexion avec Vitest.",
-        title: "Injection de pannes SMTP + Vitest",
+        title: "Injection de pannes SMTP avec Vitest",
       },
     },
     toc: faultInjectionToc,
   },
   {
-    Content: TestFixtureBun,
+    content: { en: TestFixtureBunEn, es: TestFixtureBunEs, fr: TestFixtureBunFr },
     directory: "test-fixture-bun",
     strings: {
       en: {
@@ -281,19 +313,19 @@ export const exampleReadmes = [
       },
       es: {
         description:
-          "Usa los hooks de ciclo de vida de Bun con un servidor InboxTap dinámico y un buzón nuevo por test.",
+          "Usa las funciones del ciclo de vida de Bun con un servidor InboxTap dinámico y un buzón nuevo por prueba.",
         title: "Fixtures de Bun + InboxTap",
       },
       fr: {
         description:
-          "Utilisez les hooks de cycle de vie de Bun avec un serveur InboxTap dynamique et une nouvelle boîte par test.",
-        title: "Fixtures Bun test + InboxTap",
+          "Utilisez les fonctions de cycle de vie de Bun avec un serveur InboxTap dynamique et une nouvelle boîte par test.",
+        title: "Fixtures de test Bun avec InboxTap",
       },
     },
     toc: fixtureToc,
   },
   {
-    Content: TestFixtureVitest,
+    content: { en: TestFixtureVitestEn, es: TestFixtureVitestEs, fr: TestFixtureVitestFr },
     directory: "test-fixture-vitest",
     strings: {
       en: {
@@ -303,19 +335,23 @@ export const exampleReadmes = [
       },
       es: {
         description:
-          "Ejecuta casos concurrentes de Vitest con un servidor InboxTap por archivo y buzones aislados por test.",
+          "Ejecuta pruebas Vitest en paralelo con un servidor InboxTap por archivo y buzones aislados para cada prueba.",
         title: "Fixtures de Vitest + InboxTap",
       },
       fr: {
         description:
           "Exécutez des cas Vitest concurrents avec un serveur InboxTap par fichier et des boîtes isolées par test.",
-        title: "Fixtures Vitest + InboxTap",
+        title: "Fixtures Vitest avec InboxTap",
       },
     },
     toc: fixtureToc,
   },
   {
-    Content: TestFixturePlaywright,
+    content: {
+      en: TestFixturePlaywrightEn,
+      es: TestFixturePlaywrightEs,
+      fr: TestFixturePlaywrightFr,
+    },
     directory: "test-fixture-playwright",
     strings: {
       en: {
@@ -325,41 +361,45 @@ export const exampleReadmes = [
       },
       es: {
         description:
-          "Compón fixtures worker de Playwright para que una aplicación use la configuración SMTP dinámica de InboxTap.",
+          "Configura los procesos de Playwright para que una aplicación use la configuración SMTP dinámica de InboxTap.",
         title: "Fixtures de Playwright + InboxTap",
       },
       fr: {
         description:
-          "Composez des fixtures worker Playwright pour qu’une application utilise la configuration SMTP dynamique d’InboxTap.",
-        title: "Fixtures Playwright + InboxTap",
+          "Composez les configurations de processus Playwright pour qu’une application utilise les paramètres SMTP dynamiques d’InboxTap.",
+        title: "Fixtures Playwright avec InboxTap",
       },
     },
     toc: fixtureToc,
   },
   {
-    Content: TestReportingVitest,
+    content: {
+      en: TestReportingVitestEn,
+      es: TestReportingVitestEs,
+      fr: TestReportingVitestFr,
+    },
     directory: "test-reporting-vitest",
     strings: {
       en: {
         description:
           "Generate redacted HTML and JSON artifacts from matcher observations, captured messages, and application assertions.",
-        title: "Redacted test reports + Vitest",
+        title: "Redacted test reports with Vitest",
       },
       es: {
         description:
-          "Genera artefactos HTML y JSON redactados a partir de observaciones de matchers, mensajes capturados y aserciones de la aplicación.",
-        title: "Informes de prueba redactados + Vitest",
+          "Genera archivos HTML y JSON sin datos sensibles a partir de observaciones de aserciones, mensajes capturados y comprobaciones de la aplicación.",
+        title: "Informes de prueba con datos sensibles ocultos + Vitest",
       },
       fr: {
         description:
-          "Générez des artefacts HTML et JSON expurgés à partir d’observations de matchers, de messages capturés et d’assertions de l’application.",
-        title: "Rapports de test expurgés + Vitest",
+          "Générez des fichiers HTML et JSON expurgés à partir d’observations d’assertion, de messages capturés et de vérifications de l’application.",
+        title: "Rapports de test expurgés avec Vitest",
       },
     },
     toc: testReportingToc,
   },
 ] as const satisfies readonly {
-  Content: ComponentType;
+  content: Record<Locale, ComponentType>;
   directory: string;
   strings: Record<Locale, ExampleStrings>;
   toc: Record<Locale, readonly TocItem[]>;

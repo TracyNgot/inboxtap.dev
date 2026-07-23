@@ -1,7 +1,20 @@
 import { expectedRoutes } from "./export-routes";
+import { parseChangelog } from "../lib/changelog";
+import { getDictionary } from "../lib/i18n";
 
 const outputRoot = new URL("../out/", import.meta.url);
 const routes = expectedRoutes();
+const changelog = parseChangelog(
+  await Bun.file(new URL("../../CHANGELOG.md", import.meta.url)).text(),
+);
+const englishChangelogCopy = changelog.flatMap((release) => [
+  ...release.notes,
+  ...release.categories.flatMap((category) => [
+    ...(category.title ? [category.title] : []),
+    ...category.items.map((item) => item.text),
+  ]),
+  ...release.extras,
+]);
 
 const requiredFiles = [
   ...routes.map((route) => route.file),
@@ -35,9 +48,14 @@ function requireTag(html: string, tag: string, route: string, label: string) {
   }
 }
 
+function escapeHtmlText(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
 const routePaths = new Set(routes.map((route) => route.path));
 for (const route of routes) {
   const html = await Bun.file(new URL(route.file, outputRoot)).text();
+  const dictionary = getDictionary(route.locale);
 
   requireTag(html, `<html lang="${route.htmlLang}"`, route.path, "html lang");
   requireTag(
@@ -56,18 +74,36 @@ for (const route of routes) {
     );
   }
   requireTag(html, `property="og:locale" content="${route.ogLocale}"`, route.path, "og:locale");
-  requireTag(
-    html,
-    'property="og:image" content="https://inboxtap.dev/opengraph-image.png"',
-    route.path,
-    "Open Graph image",
-  );
-  requireTag(
-    html,
-    'name="twitter:image" content="https://inboxtap.dev/twitter-image.png"',
-    route.path,
-    "Twitter image",
-  );
+  requireTag(html, dictionary.chrome.productHuntLabel, route.path, "localized Product Hunt link");
+  if (html.includes("api.producthunt.com/widgets/embed-image")) {
+    throw new Error(`English Product Hunt badge leaked into ${route.path}`);
+  }
+  if (html.includes("/buy-me-a-coffee-button.svg")) {
+    throw new Error(`English Buy Me a Coffee artwork leaked into ${route.path}`);
+  }
+  if (route.locale === "en") {
+    requireTag(
+      html,
+      'property="og:image" content="https://inboxtap.dev/opengraph-image.png"',
+      route.path,
+      "Open Graph image",
+    );
+    requireTag(
+      html,
+      'name="twitter:image" content="https://inboxtap.dev/twitter-image.png"',
+      route.path,
+      "Twitter image",
+    );
+  } else {
+    for (const marker of [
+      'property="og:image" content="https://inboxtap.dev/opengraph-image.png"',
+      'name="twitter:image" content="https://inboxtap.dev/twitter-image.png"',
+    ]) {
+      if (html.includes(marker)) {
+        throw new Error(`English social image leaked into ${route.path}: ${marker}`);
+      }
+    }
+  }
   for (const type of route.jsonLdTypes) {
     requireTag(html, `"@type":"${type}"`, route.path, "JSON-LD type");
   }
@@ -75,15 +111,39 @@ for (const route of routes) {
     for (const marker of ["story-track", "story-stacked", "test@example.com"]) {
       requireTag(html, marker, route.path, "landing story");
     }
+    for (const marker of Object.values(dictionary.landing.demo)) {
+      requireTag(html, marker, route.path, "localized landing demo");
+    }
+    if (route.locale !== "en") {
+      for (const marker of Object.values(getDictionary("en").landing.demo)) {
+        if (html.includes(marker)) {
+          throw new Error(`English landing demo copy leaked into ${route.path}: ${marker}`);
+        }
+      }
+    }
   }
   if (route.kind === "example") {
     const h1Count = html.match(/<h1(?:\s|>)/g)?.length ?? 0;
     if (h1Count !== 1) {
       throw new Error(`Example page ${route.path} has ${h1Count} H1 elements instead of one`);
     }
-    requireTag(html, '<div lang="en">', route.path, "English README language");
     requireTag(html, 'class="shiki', route.path, "highlighted README code fence");
-    requireTag(html, '"inLanguage":"en"', route.path, "English TechArticle language");
+    requireTag(
+      html,
+      `"inLanguage":"${route.locale}"`,
+      route.path,
+      "localized TechArticle language",
+    );
+    if (route.locale !== "en" && html.includes('<div lang="en">')) {
+      throw new Error(`English README wrapper leaked into ${route.path}`);
+    }
+  }
+  if (route.locale !== "en" && route.path.endsWith("/docs/changelog")) {
+    for (const marker of englishChangelogCopy) {
+      if (html.includes(escapeHtmlText(marker))) {
+        throw new Error(`English changelog copy leaked into ${route.path}: ${marker}`);
+      }
+    }
   }
   for (const id of route.tocIds) {
     if (!html.includes(`id="${id}"`)) {
@@ -144,9 +204,27 @@ requireTag(
   "/404",
   "viewport meta",
 );
-for (const marker of ["not in the inbox", "boîte de réception", "bandeja de entrada"]) {
+for (const marker of [
+  'data-not-found-locale="en"',
+  'data-locale="en"',
+  'data-locale="fr"',
+  'data-locale="es"',
+]) {
   if (!notFoundHtml.includes(marker)) {
-    throw new Error(`404.html is missing the "${marker}" copy`);
+    throw new Error(`404.html is missing the "${marker}" locale guard`);
+  }
+}
+const notFoundHeadEnd = notFoundHtml.indexOf("</head>");
+if (notFoundHeadEnd < 0) {
+  throw new Error("404.html is missing its document head");
+}
+const notFoundHead = notFoundHtml.slice(0, notFoundHeadEnd);
+for (const marker of [
+  "document.documentElement.lang = locale",
+  "document.documentElement.dataset.notFoundLocale = locale",
+]) {
+  if (!notFoundHead.includes(marker)) {
+    throw new Error(`404.html head is missing the executable "${marker}" locale guard`);
   }
 }
 

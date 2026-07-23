@@ -1,5 +1,5 @@
-Importa el cliente de test desde `inboxtap/client`. Se comunica con la API HTTP local y crea
-direcciones de destinatario únicas en el proceso de test.
+Importa el cliente de pruebas desde `inboxtap/client`. Se comunica con la API HTTP local y crea
+direcciones de destinatario únicas en el proceso de pruebas.
 
 ## Crear un cliente
 
@@ -11,8 +11,8 @@ const inboxTap = new InboxTapClient({
 });
 ```
 
-`baseUrl` tiene como valor por defecto `http://localhost:8025`. Un `domain` opcional evita la
-petición inicial de health cuando el test ya conoce el dominio de destinatarios configurado.
+`baseUrl` tiene como valor predeterminado `http://localhost:8025`. Un valor `domain` opcional evita
+la petición inicial de estado cuando la prueba ya conoce el dominio de destinatarios configurado.
 
 ## Crear un buzón
 
@@ -24,41 +24,43 @@ console.log(inbox.address);
 El alias se normaliza a letras minúsculas, dígitos y guiones, y después se añade un sufijo
 aleatorio de 12 caracteres. El alias por defecto es `test`.
 
-## Puntos de entrada de fixtures
+## Puntos de entrada para recursos de prueba
 
-Las fixtures de runners se publican detrás de subpaths aislados para que el servidor raíz y el SDK
-cliente no carguen dependencias de test opcionales.
+Los recursos de los ejecutores de pruebas se publican mediante rutas secundarias aisladas, para que
+el servidor raíz y el SDK cliente no carguen dependencias de prueba opcionales.
 
-| Import | Export principal | Ciclo de vida |
+| Importación | Exportación principal | Ciclo de vida |
 | --- | --- | --- |
 | `inboxtap/fixtures` | `startInboxTapFixture()` | Inicio explícito y `close()` idempotente |
-| `inboxtap/fixtures/bun` | `setupInboxTap()` | Preparación y limpieza del archivo mediante hooks de Bun |
-| `inboxtap/fixtures/vitest` | `extendInboxTap()` | Servidor por archivo, buzón por test |
-| `inboxtap/fixtures/playwright` | `extendInboxTap()` | Servidor por worker, buzón por test |
+| `inboxtap/fixtures/bun` | `setupInboxTap()` | Preparación y limpieza del archivo mediante las funciones del ciclo de vida de Bun |
+| `inboxtap/fixtures/vitest` | `extendInboxTap()` | Servidor por archivo, buzón por prueba |
+| `inboxtap/fixtures/playwright` | `extendInboxTap()` | Servidor por proceso de trabajo, buzón por prueba |
 
-`startInboxTapFixture()` usa `0` en ambos puertos por defecto y devuelve `server`, `client`, un
-`transport` verificado de Nodemailer, los datos de conexión `smtp`, `createInbox()` y `close()`.
-Todos los adaptadores usan el mismo objeto fixture. Instala Nodemailer 9 y, además, Vitest 4.1 o
-Playwright 1.61 al usar sus subpaths específicos. El valor `smtp` contiene
+`startInboxTapFixture()` usa `0` en ambos puertos de forma predeterminada y devuelve `server`,
+`client`, un transporte verificado de Nodemailer, los datos de conexión `smtp`, `createInbox()` y
+`close()`. Todos los adaptadores usan el mismo objeto de recursos. Instala Nodemailer 9 y, además,
+Vitest 4.1 o Playwright 1.61 cuando uses sus rutas secundarias específicas. El valor `smtp`
+contiene
 `{ host, port, secure: false, ignoreTLS: true }` para configurar la aplicación que se está probando.
 
-Crea un buzón nuevo para cada test. Una fixture puede compartir el servidor de captura y el
-transport en su alcance documentado, pero un buzón global para toda la suite permitiría que los
-tests en paralelo leyeran el mismo destinatario.
+Crea un buzón nuevo para cada prueba. Un recurso puede compartir el servidor de captura y el
+transporte dentro de su alcance documentado, pero un buzón global para todo el conjunto permitiría
+que las pruebas paralelas leyeran el mismo destinatario.
 
-## Puntos de entrada de matchers
+## Puntos de entrada para comparadores
 
-Los matchers de aserción se publican por separado del servidor, el cliente y las fixtures:
+Los comparadores de aserción se publican por separado del servidor, el cliente y los recursos de
+prueba:
 
-| Import | Exports principales | Comportamiento |
+| Importación | Exportaciones principales | Comportamiento |
 | --- | --- | --- |
-| `inboxtap/matchers` | `inboxTapMatchers`, `createInboxTapMatchers()` | Implementaciones sin peers y tipos públicos de observación |
+| `inboxtap/matchers` | `inboxTapMatchers`, `createInboxTapMatchers()` | Implementaciones sin dependencias opcionales y tipos públicos de observación |
 | `inboxtap/matchers/bun` | `extendInboxTapExpect(expect)` | Amplía en el mismo lugar el `expect` inyectado por Bun |
 | `inboxtap/matchers/vitest` | `extendInboxTapExpect(expect)` | Amplía en el mismo lugar el `expect` inyectado por Vitest |
 | `inboxtap/matchers/playwright` | `extendInboxTapExpect(expect)` | Devuelve un nuevo `expect` tipado de Playwright |
 
 Importar `inboxtap`, `inboxtap/client` o `inboxtap/matchers` no requiere Nodemailer, Vitest ni
-Playwright. Solo un adaptador específico de runner necesita el peer correspondiente.
+Playwright. Solo un adaptador específico de un ejecutor necesita la dependencia correspondiente.
 
 ```ts
 import { expect } from "vitest";
@@ -77,23 +79,24 @@ expect(email).toContainLink("/reset-password");
 expect(email).toHaveUnsubscribeHeader({ oneClick: true });
 ```
 
-| Matcher | Semántica |
+| Comparador | Semántica |
 | --- | --- |
-| `toHaveDeliveredOnce({ subject?, quietMs? })` | Toma una instantánea inmediata del buzón y exige exactamente un mensaje coincidente. Un string `subject` es una subcadena que no distingue mayúsculas; una expresión regular se prueba sin cambiar su `lastIndex`. `quietMs` es un entero de `0` a `60000` y su valor predeterminado es `0`. |
+| `toHaveDeliveredOnce({ subject?, quietMs? })` | Toma una instantánea inmediata del buzón y exige exactamente un mensaje coincidente. Un valor `subject` de tipo cadena se interpreta como una subcadena sin distinguir mayúsculas; una expresión regular se prueba sin cambiar su `lastIndex`. `quietMs` es un entero de `0` a `60000` y su valor predeterminado es `0`. |
 | `toHaveRecipient(address)` | Compara de forma exacta y sin distinguir mayúsculas los destinatarios del sobre SMTP; no usa el campo de dirección de presentación analizado. |
-| `toContainLink(stringOrRegex)` | Comprueba los enlaces HTTP(S) extraídos. Un string es una subcadena; una expresión regular clonada mantiene intacto el estado del llamador. |
+| `toContainLink(stringOrRegex)` | Comprueba los enlaces HTTP(S) extraídos. Una cadena se interpreta como una subcadena; una expresión regular clonada mantiene intacto el estado del llamador. |
 | `toHaveUnsubscribeHeader({ oneClick? })` | Analiza solo las cabeceras RFC en bruto de nivel superior, incluidos nombres con distintas mayúsculas y valores plegados. Por defecto exige un `List-Unsubscribe` no vacío; con `oneClick: true`, también exige un destino HTTPS entre corchetes angulares y el valor exacto, sin distinguir mayúsculas, `List-Unsubscribe-Post: List-Unsubscribe=One-Click`. |
 
-`toHaveDeliveredOnce()` no espera un mensaje inicial. Cuando su primera instantánea es válida,
+`toHaveDeliveredOnce()` no espera a que llegue un mensaje inicial. Cuando su primera instantánea es válida,
 `quietMs` observa solo el intervalo siguiente; no demuestra que sea imposible un reintento
-posterior. El matcher one-click solo comprueba la forma de las cabeceras RFC 8058. No verifica
-firmas DKIM, la cobertura de la firma ni el comportamiento del endpoint de baja.
+posterior. El comparador de un solo clic solo comprueba la forma de las cabeceras RFC 8058. No
+verifica firmas DKIM, la cobertura de la firma ni el comportamiento del punto de acceso para
+cancelar la suscripción.
 
-Los resultados de los matchers omiten deliberadamente `actual`, `expected`, los cuerpos del
+Los resultados de los comparadores omiten deliberadamente `actual`, `expected`, los cuerpos del
 mensaje, los valores de destinatario y enlace, los patrones con tokens y las cabeceras en bruto.
 Los fallos solo exponen conteos y estados booleanos seguros.
 
-Para recopilar un informe, pasa un recorder síncrono a la fábrica pura:
+Para recopilar un informe, pasa un recopilador síncrono a la función de creación:
 
 ```ts
 import {
@@ -111,16 +114,17 @@ const matchers = createInboxTapMatchers({
 });
 ```
 
-Cada observación tiene versión de esquema y registra el nombre del matcher, la negación y el
+Cada observación tiene una versión de esquema y registra el nombre del comparador, la negación y el
 estado de éxito, el ID opcional del mensaje capturado y conteos o booleanos sin contenido sensible.
 Nunca contiene el destinatario esperado, el asunto, el patrón del enlace, el valor de una cabecera
-ni el cuerpo capturado. Pasa `matchers` al `expect.extend()` de un runner compatible; los
-adaptadores específicos de runner llaman a la misma fábrica.
+ni el cuerpo capturado. Pasa `matchers` al método `expect.extend()` de un ejecutor compatible; los
+adaptadores específicos de cada ejecutor llaman a la misma función de creación.
 
 ## Informes de prueba
 
-Importa `InboxTapReport` desde el subpath sin peers `inboxtap/reports`. El recopilador implementa
-`InboxTapMatcherRecorder`, por lo que puedes pasarlo directamente a un adaptador de runner o a
+Importa `InboxTapReport` desde la ruta secundaria `inboxtap/reports`, que no requiere dependencias
+opcionales. El recopilador implementa `InboxTapMatcherRecorder`, por lo que puedes pasarlo
+directamente a un adaptador de ejecutor o a
 `createInboxTapMatchers({ recorder })`. Añade explícitamente los mensajes capturados y las
 aserciones de la aplicación:
 
@@ -159,18 +163,18 @@ test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
 });
 ```
 
-Escribir desde `finally` conserva la evidencia más reciente cuando falla un matcher o una aserción
+Escribir desde `finally` conserva la evidencia más reciente cuando falla un comparador o una aserción
 de la aplicación.
 
 | Método | Comportamiento |
 | --- | --- |
 | `addMessage(message)` | Añade un `CapturedEmail`, elimina duplicados por ID y devuelve el recopilador para encadenar llamadas. |
-| `addAssertion({ name, passed, message?, messageId?, details? })` | Añade una aserción de la aplicación y devuelve el recopilador. Los strings opcionales y los `details` estructurados pasan por la misma canalización acotada de redacción. |
-| `recordMatcherObservation(observation)` | Implementa `InboxTapMatcherRecorder`; los adaptadores de runner lo llaman por cada matcher completado. |
-| `render({ format: "json" \| "html" })` | Devuelve el artefacto determinista como string. |
+| `addAssertion({ name, passed, message?, messageId?, details? })` | Añade una aserción de la aplicación y devuelve el recopilador. Las cadenas opcionales y los valores estructurados de `details` pasan por el mismo proceso acotado para ocultar datos sensibles. |
+| `recordMatcherObservation(observation)` | Implementa `InboxTapMatcherRecorder`; los adaptadores de los ejecutores lo llaman por cada comparador completado. |
+| `render({ format: "json" \| "html" })` | Devuelve el artefacto determinista como cadena. |
 | `write(filePath, { format? })` | Escribe el artefacto de forma asíncrona e infiere el formato desde la extensión cuando se omite. |
 
-`render({ format })` devuelve JSON determinista o HTML estático y autocontenido para las mismas
+`render({ format })` devuelve JSON determinista o HTML estático y autónomo para las mismas
 entradas ordenadas. El JSON incluye una versión de esquema. `write(filePath, { format? })` infiere
 el formato a partir de una extensión `.json` o `.html` cuando se omite y crea los directorios padre
 que falten. Ninguna de las dos operaciones llama al servidor de InboxTap.
@@ -180,43 +184,45 @@ El documento JSON de versión 1 expone `title`, `protection`, `summary`, `messag
 acortados, los bytes UTF-8 omitidos y el límite de bytes del artefacto.
 `utf8BytesOmittedExact` vale `true` cuando `utf8BytesOmitted` es exacto. Vale `false` cuando un
 recorrido acotado termina antes de inspeccionar todo el valor; en ese caso, el conteo es un límite
-inferior medido y el HTML distingue los casos con `exactly` y `at least`.
+inferior medido; el HTML distingue ambos casos mediante los valores `exactly` y `at least`.
 
-El ámbito del recorder sigue al objeto `expect` ampliado. El ejemplo usa el `expect` de Vitest
-vinculado a la prueba, de modo que cada informe recibe solo las observaciones de matchers de esa
+El ámbito del recopilador sigue al objeto `expect` ampliado. El ejemplo usa el objeto `expect` de
+Vitest vinculado a la prueba, de modo que cada informe recibe solo las observaciones de los
+comparadores de esa
 prueba. No conectes recopiladores distintos por prueba a un mismo `expect` compartido de Bun o
 Vitest mientras las pruebas se ejecutan en paralelo. En ese caso, usa llamadas explícitas a
-`addMessage()` y `addAssertion()`, o recopila deliberadamente un único informe para la suite. El
+`addMessage()` y `addAssertion()`, o recopila deliberadamente un único informe para el conjunto de
+pruebas. El
 adaptador de Playwright devuelve un nuevo `expect` ampliado que puede limitarse a un informe.
 
-La canalización de redacción predeterminada:
+El proceso predeterminado para ocultar datos sensibles:
 
 - excluye la fuente RFC en bruto;
 - asigna a cada dirección de correo un seudónimo coherente dentro del informe;
-- elimina las credenciales de URL y redacta todos los valores de consulta, los fragmentos, los
+- elimina las credenciales de las URL y oculta todos los valores de consulta, los fragmentos, los
   valores de ruta similares a secretos, `Authorization`, `Cookie`, `Proxy-Authorization`,
   `Set-Cookie`, `X-API-Key`, `X-Auth-Token` y los valores similares a tokens en texto y HTML; y
-- escapa el HTML capturado en vez de renderizarlo y nunca ejecuta scripts capturados ni carga
+- escapa el HTML capturado en vez de representarlo y nunca ejecuta scripts capturados ni carga
   imágenes, estilos o píxeles de seguimiento capturados o remotos.
 
 Usa `redaction.patterns` y `redaction.additionalSensitiveHeaders` para secretos específicos del
 proyecto. Si un patrón personalizado se solapa con una URL, InboxTap sustituye la URL completa para
 que una mutación mediante expresiones regulares no exponga valores adyacentes de consulta o
 fragmento. La recopilación está limitada a 100 mensajes y 1.000 aserciones, y cada artefacto
-renderizado tiene un máximo de 10 MiB. Cuando se alcanza un límite, la salida registra marcadores de
+generado tiene un máximo de 10 MiB. Cuando se alcanza un límite, la salida registra marcadores de
 truncamiento explícitos en vez de crecer sin límite.
 
-La redacción es un esfuerzo de protección y no puede garantizar la detección de datos personales o
-secretos arbitrarios. Revisa el artefacto antes de compartirlo. `includeRaw: true` conserva una
-copia redactada con el mismo criterio de esfuerzo de la fuente RFC en bruto y solo debe usarse
-cuando el valor diagnóstico adicional justifique un riesgo de divulgación sustancialmente mayor.
+La ocultación de datos sensibles reduce el riesgo, pero no puede garantizar que detecte cualquier
+dato personal o secreto. Revisa el artefacto antes de compartirlo. `includeRaw: true` conserva una
+copia protegida de la fuente RFC en bruto y solo debe usarse cuando el valor diagnóstico adicional
+justifique un riesgo de divulgación sustancialmente mayor.
 
 ## Controlador de fallos SMTP
 
 Cada servidor programático expone un `SmtpFaultController` como `server.faults`; quienes usan
-fixtures acceden a él mediante `inboxTap.server.faults`. Los tipos públicos del controlador, las
-opciones, la compuerta y el estado se exportan desde `inboxtap`. No hace falta ningún flag de
-activación.
+recursos de prueba acceden a él mediante `inboxTap.server.faults`. Los tipos públicos del
+controlador, las opciones, la compuerta y el estado se exportan desde `inboxtap`. No hace falta
+ninguna opción de activación.
 
 ```ts
 interface SmtpFaultController {
@@ -232,8 +238,8 @@ Registra una regla antes de activar la aplicación. Por orden de registro, una r
 siguiente transacción SMTP coincidente que alcance `DATA`, y solo se aplica una regla a cada
 transacción. Si se omite `to`, coincide cualquier destinatario; en caso contrario, la comparación
 no distingue mayúsculas en el sobre SMTP. Si cualquier destinatario coincide en una transacción
-con varios destinatarios, el fallo se aplica a toda la transacción. Los listeners SMTP IPv4 e IPv6
-consumen la misma cola del controlador.
+con varios destinatarios, el fallo se aplica a toda la transacción. Los procesos de escucha SMTP
+de IPv4 e IPv6 consumen la misma cola del controlador.
 
 | Método | Opciones y límites | Resultado |
 | --- | --- | --- |
@@ -246,7 +252,7 @@ consumen la misma cola del controlador.
 `times` debe ser un entero de `1` a `100` y tiene por defecto `1`. Las aplicaciones expandidas de
 las reglas comparten un límite de `100`, contando las que están en cola y las activas. Un `to`
 proporcionado debe ser una cadena no vacía; se ignoran los espacios alrededor. Los umbrales de
-desconexión se observan en los límites de chunks del stream en vez de byte por byte. InboxTap cierra
+desconexión se observan en los límites de los fragmentos del flujo, en vez de byte por byte. InboxTap cierra
 al final de `DATA` cuando un mensaje es más corto que `afterBytes`, para que la transacción
 inyectada falle de todos modos. Las entregas fallidas o desconectadas nunca entran en el almacén.
 Las entregas retrasadas o pausadas solo aparecen después de completar correctamente la entrega
@@ -259,10 +265,10 @@ SMTP.
 | `pending` | La regla está en cola y no ha alcanzado un comando `DATA` coincidente |
 | `paused` | Una transacción SMTP coincidente está retenida |
 | `released` | `release()` canceló una regla pendiente o reanudó una transacción pausada |
-| `expired` | El timeout absoluto terminó; una transacción activa recibe SMTP `451` y no se captura |
+| `expired` | Se agotó el tiempo de espera absoluto; una transacción activa recibe SMTP `451` y no se captura |
 | `aborted` | `reset()` o la parada del servidor canceló la compuerta |
 
-El timeout empieza al llamar a `pauseNext()`, por lo que acota tanto el tiempo en cola como el de
+El tiempo de espera empieza al llamar a `pauseNext()`, por lo que acota tanto el tiempo en cola como el de
 pausa activa. La compuerta pasa a `paused` después de que el cuerpo del mensaje supere el análisis
 y la validación de tamaño y entre en la espera. `waitUntilPaused()` se resuelve entonces y
 permanece resuelta aunque la compuerta termine después. Rechaza si la compuerta alcanza un estado
@@ -285,7 +291,7 @@ await delivery;
 
 `reset()` no borra los mensajes capturados. La parada del servidor proporciona la misma limpieza
 acotada de las compuertas: las que están en cola o activas pasan a `aborted` y se limpian sus
-temporizadores. Los controles de fallos son solo programáticos: no existen rutas HTTP, flags de
+temporizadores. Los controles de fallos son solo programáticos: no existen rutas HTTP, opciones de
 CLI, historial ni estadísticas de fallos.
 
 ## Métodos de TestInbox
@@ -297,10 +303,10 @@ CLI, historial ni estadísticas de fallos.
 | `waitForMessage(options)` | `CapturedEmail` | Espera el mensaje coincidente completo |
 | `waitForLink(options)` | `string` | Espera el primer enlace, opcionalmente filtrado por texto contenido |
 | `waitForCode(options)` | `string` | Espera un código que coincida con un patrón; por defecto seis dígitos |
-| `waitForMatch(options)` | `string` | Espera una coincidencia obligatoria de string o expresión regular |
+| `waitForMatch(options)` | `string` | Espera una coincidencia obligatoria de cadena o expresión regular |
 
 Las opciones de espera aceptan `subject`, `timeoutMs` y `afterId`. `subject` puede ser una
-subcadena de string sin distinguir mayúsculas o una expresión regular. Las esperas de extracción
+subcadena sin distinguir mayúsculas o una expresión regular. Las esperas de extracción
 tienen un valor por defecto de 10 segundos.
 
 ```ts
@@ -314,7 +320,7 @@ const code = await inbox.waitForCode({
 ## Métodos de bajo nivel
 
 `InboxTapClient` también expone `health`, `listEmails`, `latestEmail`, `waitForEmail`,
-`clearEmails` y el método genérico `request`. Prefiere `TestInbox` dentro de tests en paralelo
+`clearEmails` y el método genérico `request`. Prefiere `TestInbox` dentro de pruebas en paralelo
 porque aplica automáticamente el filtro de destinatario único.
 
 ## CapturedEmail
@@ -336,11 +342,11 @@ interface CapturedEmail {
 }
 ```
 
-`links` y `codes` son arrays. InboxTap no asigna nombres semánticos como `magic` o `verification`
+`links` y `codes` son listas. InboxTap no asigna nombres semánticos como `magic` o `verification`
 a los valores extraídos.
 
 ## Errores
 
-Las peticiones fallidas y los timeouts de extracción lanzan `InboxTapError`. Su propiedad `status`
-contiene el estado al estilo HTTP, incluido `408` para un timeout y `404` para un mensaje
-inexistente.
+Las peticiones fallidas y los tiempos de espera agotados durante la extracción lanzan
+`InboxTapError`. Su propiedad `status` contiene el estado al estilo HTTP, incluido `408` cuando se
+agota el tiempo de espera y `404` cuando el mensaje no existe.

@@ -1,5 +1,5 @@
 InboxTap puede ejecutarse directamente desde el paquete npm o instalarse como dependencia de
-desarrollo en el proyecto que contiene tus tests.
+desarrollo en el proyecto que contiene tus pruebas.
 
 ## Requisitos
 
@@ -26,7 +26,7 @@ para detenerlo.
 
 ## Instalar el SDK
 
-Añade InboxTap al proyecto que contiene tu suite de tests:
+Añade InboxTap al proyecto que contiene tu conjunto de pruebas:
 
 ```bash
 bun add --dev inboxtap
@@ -38,7 +38,7 @@ o:
 npm install --save-dev inboxtap
 ```
 
-Importa el cliente desde su subpath público:
+Importa el cliente desde su ruta secundaria pública:
 
 ```ts
 import { InboxTapClient } from "inboxtap/client";
@@ -46,7 +46,7 @@ import { InboxTapClient } from "inboxtap/client";
 
 ## Configurar tu aplicación
 
-Configura la aplicación bajo test para que use el listener SMTP local:
+Configura la aplicación que se está probando para que use el proceso de escucha SMTP local:
 
 ```env
 SMTP_HOST=localhost
@@ -54,5 +54,5 @@ SMTP_PORT=1025
 SMTP_SECURE=false
 ```
 
-Mantén estos valores en un entorno de desarrollo o de test. InboxTap deliberadamente no implementa
+Mantén estos valores en un entorno de desarrollo o de pruebas. InboxTap no implementa
 autenticación ni TLS y no debe exponerse a una red.
