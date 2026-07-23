@@ -31,7 +31,9 @@ export interface Dictionary {
     navDocs: string;
     footerTagline: string;
     footerGitHubAria: string;
+    npmLabel: string;
     supportLabel: string;
+    trustLabel: string;
     languageSwitcherAria: string;
     themeToggleAria: string;
     themeSwitchToLight: string;
@@ -47,6 +49,9 @@ export interface Dictionary {
     pagerAria: string;
     previous: string;
     next: string;
+    maintainedBy: string;
+    contributors: string;
+    lastUpdated: string;
     copy: string;
     copied: string;
     copyAria: string;

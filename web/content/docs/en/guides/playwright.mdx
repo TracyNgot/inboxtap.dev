@@ -1,5 +1,12 @@
-InboxTap gives each Playwright test its own recipient address while the browser exercises the real
-sign-up, password-reset, or sign-in flow.
+To test an email link or OTP with Playwright, give each test a unique InboxTap recipient, trigger
+the real browser flow, await the matching value from the captured email, and continue in the
+browser. The same pattern covers sign-up verification, magic-link sign-in, password resets, email
+OTPs, and invitations without a shared test inbox.
+
+We tested this exact pattern in InboxTap's
+[runnable Better Auth and Next.js example](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/better-auth-nextjs),
+including verification links, magic links, OTP sign-in, resend behavior, and parallel Playwright
+workers.
 
 ## Start the services
 
@@ -15,7 +22,7 @@ npx playwright test
 Configure the application launched by the test to use SMTP `localhost:1025`. Keep InboxTap on the
 loopback interface even in CI.
 
-## Write the test
+## Test an email link
 
 ```ts
 import { test, expect } from "@playwright/test";
@@ -41,7 +48,42 @@ test("verifies a new account", async ({ page }) => {
 });
 ```
 
-Use `waitForCode()` when the application asks the user to copy an OTP rather than follow a link.
+For a magic link or password reset, keep the test structure and change the subject and `contains`
+filters to match the email contract, such as `/sign in/i` with `/auth/callback` or `/reset
+password/i` with `/reset-password`.
+
+## Test an email OTP
+
+Use `waitForCode()` when the application asks the user to copy a code rather than follow a link:
+
+```ts
+test("signs in with an email OTP", async ({ page }) => {
+  const inbox = await inboxTap.createInbox({ alias: "signin" });
+
+  await page.goto("/sign-in");
+  await page.getByLabel("Email").fill(inbox.address);
+  await page.getByRole("button", { name: "Send code" }).click();
+
+  const otp = await inbox.waitForCode({
+    subject: /sign-in code/i,
+    timeoutMs: 20_000,
+  });
+
+  await page.getByLabel("One-time code").fill(otp);
+  await page.getByRole("button", { name: "Verify" }).click();
+  await expect(page.getByText("Signed in")).toBeVisible();
+});
+```
+
+## Choose the right helper
+
+| Email flow | InboxTap helper | Useful filters |
+| --- | --- | --- |
+| Verification link | `waitForLink()` | `subject`, `contains` |
+| Magic-link sign-in | `waitForLink()` | `subject`, callback path |
+| Password reset | `waitForLink()` | `subject`, reset path |
+| Numeric email OTP | `waitForCode()` | `subject`, `pattern` |
+| Invitation or custom token | `waitForMatch()` | `subject`, regular expression |
 
 ## Parallel workers
 
@@ -51,3 +93,21 @@ reading one another's messages.
 
 Call `await inbox.clear()` after a test when immediate cleanup helps local debugging. The server also
 evicts old messages when its bounded store reaches `maxMessages`.
+
+## Frequently asked questions
+
+### Can Playwright read an email directly?
+
+Playwright's browser page does not need inbox credentials or a hosted email account. The Node-side
+test uses `InboxTapClient` to await the captured email, then passes the extracted link or code back
+into browser actions.
+
+### How do parallel Playwright workers avoid reading the same email?
+
+Create an inbox inside each test or fixture. Every `createInbox()` call returns a unique recipient,
+so all workers can share one local InboxTap server while filtering messages by their own address.
+
+### Do Playwright email tests need Docker?
+
+No. Start InboxTap with `npx inboxtap`, `bunx inboxtap`, or as an in-process server, then point the
+application's SMTP configuration at `localhost:1025`.

@@ -53,7 +53,7 @@ export function expectedRoutes(): ExpectedRoute[] {
         file: `${doc.path.slice(1)}/index.html`,
         hreflangs: hreflangsFor(docAlternatePaths(doc.key)),
         htmlLang: locale,
-        jsonLdTypes: ["TechArticle", "BreadcrumbList"],
+        jsonLdTypes: ["TechArticle", "Organization", "BreadcrumbList"],
         kind: "doc",
         locale,
         ogLocale: ogLocales[locale],

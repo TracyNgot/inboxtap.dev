@@ -51,15 +51,32 @@ export const docsEn: DocsDictionary = {
       ],
     },
     alternatives: {
-      description: "How InboxTap compares to Mailpit, MailHog, smtp4dev, and hosted mail testing.",
+      description:
+        "Compare InboxTap with MailHog, Mailpit, smtp4dev, Mailtrap, and Ethereal for local email testing.",
       slug: "alternatives",
-      title: "Alternatives",
+      title: "InboxTap vs MailHog, Mailpit, and Mailtrap",
       toc: [
         { id: "at-a-glance", label: "At a glance" },
+        {
+          id: "is-inboxtap-a-no-docker-mailhog-alternative",
+          label: "No-Docker MailHog alternative",
+        },
         { id: "mailpit-and-mailhog", label: "Mailpit and MailHog" },
         { id: "smtp4dev", label: "smtp4dev" },
         { id: "hosted-services", label: "Hosted services" },
         { id: "when-not-to-use-inboxtap", label: "When not to use InboxTap" },
+      ],
+    },
+    trust: {
+      description:
+        "Verify InboxTap's source, npm package, maintenance, security policy, and documentation corrections process.",
+      slug: "trust",
+      title: "Trust and maintenance",
+      toc: [
+        { id: "verify-the-project", label: "Verify the project" },
+        { id: "maintenance-and-security", label: "Maintenance and security" },
+        { id: "documentation-and-corrections", label: "Docs and corrections" },
+        { id: "recommendation-boundaries", label: "Recommendation boundaries" },
       ],
     },
     "reference/http-api": {
@@ -90,19 +107,23 @@ export const docsEn: DocsDictionary = {
       ],
     },
     "guides/playwright": {
-      description: "Use an isolated InboxTap address in a Playwright browser test.",
+      description:
+        "Capture and test verification links, magic links, password resets, and email OTPs with Playwright.",
       slug: "guides/playwright",
-      title: "Playwright",
+      title: "Test magic links and email OTPs with Playwright",
       toc: [
         { id: "start-the-services", label: "Start the services" },
-        { id: "write-the-test", label: "Write the test" },
+        { id: "test-an-email-link", label: "Test an email link" },
+        { id: "test-an-email-otp", label: "Test an email OTP" },
+        { id: "choose-the-right-helper", label: "Choose a helper" },
         { id: "parallel-workers", label: "Parallel workers" },
+        { id: "frequently-asked-questions", label: "FAQ" },
       ],
     },
     "guides/cypress": {
       description: "Drive email verification flows from Cypress specs with cy.task and the SDK.",
       slug: "guides/cypress",
-      title: "Cypress",
+      title: "Test verification emails with Cypress",
       toc: [
         { id: "start-the-services", label: "Start the services" },
         { id: "register-the-tasks", label: "Register the tasks" },
@@ -114,7 +135,7 @@ export const docsEn: DocsDictionary = {
     "guides/test-runners": {
       description: "Run InboxTap programmatically with Bun test, Vitest, Jest, or another runner.",
       slug: "guides/test-runners",
-      title: "Bun, Vitest, and Jest",
+      title: "Test emails with Bun, Vitest, and Jest",
       toc: [
         { id: "runner-agnostic-setup", label: "Runner-agnostic setup" },
         { id: "start-and-stop-in-tests", label: "Test lifecycle" },
@@ -124,7 +145,7 @@ export const docsEn: DocsDictionary = {
     "guides/better-auth": {
       description: "Verify Better Auth sign-up emails in a Next.js app with Playwright.",
       slug: "guides/better-auth",
-      title: "Better Auth",
+      title: "Test Better Auth verification emails",
       toc: [
         { id: "wire-better-auth-to-inboxtap", label: "Wire Better Auth" },
         { id: "drive-the-flows-with-playwright", label: "Drive the flows" },
@@ -134,7 +155,7 @@ export const docsEn: DocsDictionary = {
     "guides/nodemailer": {
       description: "Test Nodemailer delivery from an Express API with Vitest.",
       slug: "guides/nodemailer",
-      title: "Nodemailer",
+      title: "Test Nodemailer emails with Vitest",
       toc: [
         { id: "point-nodemailer-at-inboxtap", label: "Point Nodemailer at InboxTap" },
         { id: "test-with-vitest", label: "Test with Vitest" },

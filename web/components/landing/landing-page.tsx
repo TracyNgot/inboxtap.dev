@@ -158,7 +158,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
           </Reveal>
         </section>
       </main>
-      <SiteFooter t={dictionary.chrome} />
+      <SiteFooter locale={locale} t={dictionary.chrome} />
     </>
   );
 }

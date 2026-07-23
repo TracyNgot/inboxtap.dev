@@ -1,6 +1,6 @@
 # InboxTap
 
-InboxTap is an open-source SMTP capture server for deterministic email-flow tests. Point your application at a local SMTP address, then await the verification link, OTP, or key directly from your test.
+InboxTap is a local email capture server and TypeScript SDK for testing verification links, magic links, OTPs, invitations, and password-reset emails. Point your application at its local SMTP address, then await the link, code, or custom match directly from your automated test—without Docker or an external mail service.
 
 ```bash
 bunx inboxtap
@@ -117,7 +117,7 @@ Each example is standalone: install and test it from its own directory. Guided w
 
 InboxTap binds only the loopback addresses (`127.0.0.1` and `::1`, so `localhost` works out of the box) by default and intentionally disables SMTP authentication and STARTTLS. Keep it local; it is not an outbound relay or production mail server.
 
-Version 0.1 is in-memory only. It does not include persistence, a dashboard, attachments, webhooks, Docker, or configurable extraction files.
+InboxTap 1.x is in-memory only. It does not include persistence, a dashboard, attachments, webhooks, Docker, or configurable extraction files.
 
 ## Support
 

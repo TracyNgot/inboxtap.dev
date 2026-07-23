@@ -4,7 +4,11 @@ export const dynamic = "force-static";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { allow: "/", userAgent: "*" },
+    rules: [
+      { allow: "/", userAgent: "OAI-SearchBot" },
+      { allow: "/", userAgent: "ChatGPT-User" },
+      { allow: "/", userAgent: "*" },
+    ],
     sitemap: "https://inboxtap.dev/sitemap.xml",
   };
 }

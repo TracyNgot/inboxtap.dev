@@ -1,7 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "InboxTap",
-  "description": "A local-only SMTP capture server and TypeScript test SDK for deterministic email-flow tests.",
+  "description": "A local email capture server and TypeScript SDK for testing verification links, magic links, OTPs, invitations, and password-reset emails.",
   "folders": ["web/content/docs/en"],
   "excludeFiles": [
     "AGENTS.md",

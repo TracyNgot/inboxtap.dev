@@ -1,7 +1,14 @@
 import type { DocKey } from "../docs-config";
 import { getDictionary, getLocalizedDoc } from "../i18n";
 import { docPath, homePath, type Locale, withTrailingSlash } from "../i18n/config";
-import { CONTENT_UPDATED_AT, GITHUB_URL, NPM_URL, SITE_NAME, SITE_ORIGIN } from "../site-config";
+import {
+  CONTENT_PUBLISHED_AT,
+  CONTENT_UPDATED_AT,
+  GITHUB_URL,
+  NPM_URL,
+  SITE_NAME,
+  SITE_ORIGIN,
+} from "../site-config";
 
 const ORG_ID = `${SITE_ORIGIN}/#org`;
 
@@ -52,13 +59,25 @@ export function docJsonLd(locale: Locale, key: DocKey): object {
     "@graph": [
       {
         "@type": "TechArticle",
+        author: { "@id": ORG_ID },
+        datePublished: CONTENT_PUBLISHED_AT.toISOString(),
         dateModified: CONTENT_UPDATED_AT.toISOString(),
         description: doc.description,
         headline: doc.title,
         inLanguage: locale,
+        isAccessibleForFree: true,
+        license: `${GITHUB_URL}/blob/main/LICENSE`,
         mainEntityOfPage: url,
         publisher: { "@id": ORG_ID },
         url,
+      },
+      {
+        "@id": ORG_ID,
+        "@type": "Organization",
+        logo: `${SITE_ORIGIN}/icon.svg`,
+        name: SITE_NAME,
+        sameAs: [GITHUB_URL, NPM_URL],
+        url: `${SITE_ORIGIN}/`,
       },
       {
         "@type": "BreadcrumbList",

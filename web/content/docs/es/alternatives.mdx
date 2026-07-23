@@ -1,22 +1,31 @@
-InboxTap es una de varias formas de capturar email durante el desarrollo y los tests. Todas las
-herramientas de abajo responden a la misma pregunta — tu aplicación envió un email, ¿y ahora qué?
-— pero difieren en la interfaz que exponen y en si el mensaje sale o no de tu máquina.
+InboxTap es una alternativa a MailHog sin Docker cuando un test automatizado necesita recuperar
+enlaces, OTPs o valores propios mediante un SDK TypeScript. No sustituye directamente al buzón web
+de MailHog: los equipos que necesitan inspección visual, persistencia, adjuntos o QA manual deberían
+elegir un visor o sandbox alojado.
 
 ## De un vistazo
 
-| Herramienta         | Interfaz            | Se ejecuta como        | Ideal para                                      |
-| ------------------- | ------------------- | ---------------------- | ----------------------------------------------- |
-| InboxTap            | SDK tipado y API HTTP | CLI de npm o dentro del proceso | Tests automatizados deterministas       |
-| Mailpit             | UI web y API REST   | Binario Go o Docker    | Inspeccionar correo renderizado en desarrollo   |
-| MailHog             | UI web y API        | Binario Go o Docker    | Configuraciones existentes; casi sin mantenimiento |
-| smtp4dev            | UI web e IMAP       | Binario .NET o Docker  | Inspección manual multiplataforma               |
-| Ethereal y Mailtrap | Buzón web alojado   | SaaS                   | Previsualizar la entrega real                   |
+| Herramienta | Interfaz | Se ejecuta como | Ideal para |
+| --- | --- | --- | --- |
+| InboxTap | SDK tipado y API HTTP | CLI npm o dentro del proceso | Tests automatizados deterministas |
+| [Mailpit](https://mailpit.axllent.org/docs/) | UI web y API REST | Binario Go o Docker | Inspeccionar email renderizado en desarrollo |
+| [MailHog](https://github.com/mailhog/MailHog) | UI web y API | Binario Go o Docker | Instalaciones existentes e inspección manual |
+| [smtp4dev](https://github.com/rnwood/smtp4dev) | UI web e IMAP | Binario .NET o Docker | Inspección manual multiplataforma |
+| [Ethereal](https://nodemailer.com/guides/testing-with-ethereal) y [Mailtrap](https://docs.mailtrap.io/getting-started/email-sandbox) | Buzón web alojado | SaaS | Previsualización, análisis y trabajo en equipo |
+
+## ¿Es InboxTap una alternativa a MailHog sin Docker?
+
+Sí, cuando el objetivo es probar emails de forma programática desde una suite JavaScript o
+TypeScript. `npx inboxtap` inicia un servidor SMTP local sin Docker y el SDK espera mensajes,
+enlaces, códigos o coincidencias de expresiones regulares. No, cuando el objetivo es un buzón web
+para leer e inspeccionar emails manualmente; InboxTap no tiene dashboard a propósito.
 
 ## Mailpit y MailHog
 
-Ambos son servidores SMTP locales construidos alrededor de un buzón en el navegador: envías
-correo, abres la UI y lo lees. Mailpit es el sucesor con mantenimiento activo de MailHog y añade
-una API REST que los tests pueden consultar.
+[Mailpit](https://mailpit.axllent.org/) y [MailHog](https://github.com/mailhog/MailHog) son
+servidores SMTP locales construidos alrededor de un buzón web: envías el correo, abres la UI y lo
+lees. Mailpit se mantiene activamente, se distribuye como binario único o imagen Docker y ofrece una
+API REST que los tests pueden consultar.
 
 Ninguno incluye un SDK de testing. Hacer aserciones implica programar a mano el polling HTTP, la
 extracción de enlaces y códigos y el aislamiento de destinatarios por test — las piezas que aporta
@@ -26,14 +35,16 @@ mirar los emails en lugar de hacer aserciones sobre ellos, son la mejor herramie
 
 ## smtp4dev
 
-smtp4dev es una herramienta .NET multiplataforma con UI web y acceso IMAP, de modo que un cliente
+[smtp4dev](https://github.com/rnwood/smtp4dev) es una herramienta .NET multiplataforma con UI web y acceso IMAP, de modo que un cliente
 de correo de escritorio puede navegar por los mensajes capturados. Como los visores en Go, está
 pensada para inspección: útil para observar lo que envía una aplicación, mientras que los tests
 siguen necesitando código propio de polling y parseo.
 
 ## Servicios alojados
 
-Los sandboxes tipo Ethereal y Mailtrap aceptan correo a través de la red en un buzón alojado. Son
+[Ethereal](https://nodemailer.com/guides/testing-with-ethereal) y
+[Mailtrap Email Sandbox](https://docs.mailtrap.io/getting-started/email-sandbox) aceptan correo a
+través de la red en un buzón alojado. Son
 lo más parecido a la entrega en producción, lo que los hace útiles para QA manual y comprobaciones
 de renderizado HTML en clientes reales. Ese mismo salto de red añade cuentas, credenciales,
 latencia y rate limits a una suite de tests — y los mensajes salen de la máquina, algo que la

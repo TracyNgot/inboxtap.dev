@@ -116,6 +116,18 @@ if (xDefaultLinks < routes.length) {
   throw new Error(`Sitemap has ${xDefaultLinks} x-default alternates for ${routes.length} URLs`);
 }
 
+const robots = await Bun.file(new URL("robots.txt", outputRoot)).text();
+for (const marker of [
+  "User-Agent: OAI-SearchBot",
+  "User-Agent: ChatGPT-User",
+  "User-Agent: *",
+  "Sitemap: https://inboxtap.dev/sitemap.xml",
+]) {
+  if (!robots.includes(marker)) {
+    throw new Error(`robots.txt is missing "${marker}"`);
+  }
+}
+
 const notFoundHtml = await Bun.file(new URL("404.html", outputRoot)).text();
 requireTag(
   notFoundHtml,

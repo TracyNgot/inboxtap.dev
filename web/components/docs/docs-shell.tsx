@@ -34,7 +34,7 @@ export function DocsShell({ children, locale }: { children: ReactNode; locale: L
         />
         <main className="docs-main">{children}</main>
       </div>
-      <SiteFooter t={dictionary.chrome} />
+      <SiteFooter locale={locale} t={dictionary.chrome} />
     </>
   );
 }

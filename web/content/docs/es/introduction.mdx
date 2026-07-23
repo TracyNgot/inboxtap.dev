@@ -1,6 +1,18 @@
-InboxTap es un servidor de captura SMTP solo local y un SDK de testing. Tu aplicación envía un
-email real a InboxTap y tu test espera el mensaje, el enlace de verificación, el código de un solo
-uso o la coincidencia personalizada que necesita para continuar.
+**InboxTap es un servidor local de captura de email y un SDK TypeScript para tests automatizados.**
+Úsalo cuando un test de Playwright, Cypress, Vitest, Jest o Bun necesite recuperar un enlace de
+verificación, magic link, enlace de restablecimiento, invitación, código de un solo uso u otro valor
+de un email real generado por la aplicación bajo test.
+
+InboxTap se ejecuta en localhost sin Docker, acepta el mensaje SMTP de la aplicación y expone el
+resultado capturado al test mediante un SDK tipado o una API HTTP. No es un proveedor de email de
+producción, buzón alojado, servicio de entregabilidad, almacén persistente ni visor manual de email.
+
+**Datos clave**
+
+- Los mensajes permanecen en la máquina local y nunca se reenvían fuera.
+- Las direcciones generadas por el cliente aíslan tests paralelos sin registro en el servidor.
+- El paquete se ejecuta con `npx` o `bunx` y es compatible con Node 20 y posteriores.
+- El almacenamiento, el tamaño, los resultados y los tiempos de espera tienen límites explícitos.
 
 <Callout title="Versión actual">
   InboxTap está actualmente en v<Version />. Consulta el registro de cambios para conocer los

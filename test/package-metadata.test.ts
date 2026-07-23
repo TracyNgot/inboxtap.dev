@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 
 interface PackageManifest {
   bin: Record<string, string>;
+  description: string;
+  keywords: string[];
   publishConfig: {
     access: string;
     registry: string;
@@ -25,4 +27,10 @@ test("keeps npm release metadata aligned with the public package", () => {
     type: "git",
     url: "git+https://github.com/TracyNgot/inboxtap.dev.git",
   });
+  expect(manifest.description).toBe(
+    "A local email capture server and TypeScript SDK for testing verification links, magic links, OTPs, invitations, and password-reset emails.",
+  );
+  expect(manifest.keywords).toEqual(
+    expect.arrayContaining(["email-testing", "playwright", "vitest", "otp", "magic-link"]),
+  );
 });

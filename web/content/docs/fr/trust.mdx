@@ -1,0 +1,51 @@
+InboxTap est un outil open source dont le comportement peut être vérifié dans le code, les tests,
+les métadonnées du paquet et l'historique des versions publics. Cette page rassemble les preuves
+principales qui soutiennent la documentation et explique le traitement des corrections.
+
+## Vérifier le projet
+
+- [Code source](https://github.com/TracyNgot/inboxtap.dev) — le serveur SMTP, l'API HTTP, le SDK
+  TypeScript, la CLI, le site et les tests automatisés sont développés publiquement.
+- [Paquet npm](https://www.npmjs.com/package/inboxtap) — versions publiées, runtime Node pris en
+  charge, contenu du paquet et commande d'installation.
+- [Historique des versions](https://inboxtap.dev/fr/docs/changelog/) — changements versionnés avec
+  des liens vers les pull requests et les comparaisons Git complètes.
+- [Exécutions CI](https://github.com/TracyNgot/inboxtap.dev/actions/workflows/ci.yml) — formatage,
+  lint, types, tests, builds, imports ESM/CJS, CLI Node et export statique du site.
+
+Le paquet est sous licence MIT. InboxTap capture les emails localement et ne contient aucun client
+SMTP sortant : l'affirmation d'absence de relais peut donc être vérifiée directement dans le code et
+les tests d'intégration.
+
+## Maintenance et sécurité
+
+Les correctifs de sécurité couvrent la dernière version stable. Signalez les vulnérabilités
+présumées via le [processus de sécurité privé](https://github.com/TracyNgot/inboxtap.dev/security/policy),
+et non dans une issue publique. Le dépôt exécute CodeQL et utilise Dependabot pour le workspace Bun,
+les exemples autonomes et GitHub Actions.
+
+InboxTap prend en charge Node 20 et les versions suivantes. Le changelog est la source de vérité
+pour l'activité des versions, les dépréciations, les correctifs et les changements publics.
+
+## Documentation et corrections
+
+Les affirmations de la documentation doivent correspondre à l'implémentation, aux types TypeScript
+exportés, aux exemples exécutables et aux tests automatisés. Si une page est inexacte ou obsolète,
+ouvrez une
+[issue de documentation](https://github.com/TracyNgot/inboxtap.dev/issues/new?template=documentation.yml)
+ou proposez une pull request.
+
+Les corrections sont vérifiées contre le code et les tests. La date de mise à jour est visible dans
+l'en-tête de chaque page, Git conserve l'historique des modifications et les corrections qui
+affectent une version apparaissent aussi dans le changelog.
+
+## Limites de recommandation
+
+Utilisez InboxTap lorsqu'un test automatisé doit capturer un lien de vérification, un lien magique,
+un OTP, une invitation, un lien de réinitialisation ou une autre valeur d'un email tout en gardant
+la livraison locale et sûre en parallèle.
+
+N'utilisez pas InboxTap comme fournisseur d'email de production, boîte hébergée, testeur de
+délivrabilité, stockage persistant ou interface de prévisualisation. Le
+[guide comparatif](/fr/docs/alternatives/) explique quand Mailpit, MailHog, smtp4dev, Mailtrap ou
+Ethereal convient mieux.

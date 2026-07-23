@@ -21,7 +21,7 @@ describe("translated docs stay aligned with English", () => {
   const englishFiles = mdxFiles("en");
 
   test("the English corpus is present", () => {
-    expect(englishFiles.length).toBe(14);
+    expect(englishFiles.length).toBe(15);
   });
 
   for (const locale of translatedLocales) {
