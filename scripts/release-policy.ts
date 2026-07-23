@@ -1,6 +1,16 @@
 export type ReleaseLevel = "patch" | "minor" | "major";
 
+export const LIBRARY_RELEASE_PATHS = ["src/**"] as const;
+
 const LEVEL_RANK: Record<ReleaseLevel, number> = { patch: 0, minor: 1, major: 2 };
+
+export function isLibraryReleasePath(path: string): boolean {
+  return path.startsWith("src/");
+}
+
+export function hasLibraryChanges(paths: string[]): boolean {
+  return paths.some(isLibraryReleasePath);
+}
 
 export function releaseLevelForBranch(branch: string): ReleaseLevel {
   const [prefix] = branch.split("/", 1);
@@ -37,7 +47,13 @@ export function bumpVersion(current: string, level: ReleaseLevel): string {
 }
 
 if (import.meta.main) {
-  const branches = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  if (args[0] === "--has-library-changes") {
+    console.log(hasLibraryChanges(args.slice(1)));
+    process.exit(0);
+  }
+
+  const branches = args;
   if (branches.length === 0)
     throw new Error("Usage: bun scripts/release-policy.ts <branch> [branch...]");
   console.log(maxReleaseLevel(branches));

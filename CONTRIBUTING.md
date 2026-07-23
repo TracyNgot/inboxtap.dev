@@ -15,7 +15,8 @@ Create a focused branch from `main`:
 git switch -c feat/short-description
 ```
 
-The source branch determines the release created after the pull request merges:
+For pull requests that change `src/`, the source branch
+determines the release created after the pull request merges:
 
 | Branch prefix | Release |
 | --- | --- |
@@ -24,9 +25,16 @@ The source branch determines the release created after the pull request merges:
 | `fix/`, `docs/`, `refactor/`, `test/`, `chore/` | Patch |
 
 Unrecognized prefixes also produce a patch release, and when several merges
-release together the highest bump among them wins. A major release additionally
-requires the `breaking` label on the pull request. An issue number may be
-included in the branch name, but is not required.
+release together the highest bump among the `src/`-changing pull requests wins.
+A major release additionally requires the `breaking` label on the pull request.
+An issue number may be included in the branch name, but is not required.
+
+A merge triggers a library release only when it changes `src/`. Documentation,
+website, example, test-only, package metadata, build configuration, and
+release-tooling changes wait for the next source release. Use the manual
+workflow dispatch when a metadata- or build-only change must be published
+without a source change. The next release notes still include all merged pull
+requests since the previous tag, so deferred changes are not omitted.
 
 ## Coding style
 
@@ -89,8 +97,9 @@ Use `Refs #123` in the commit body when helpful. Do not add Linear identifiers.
   to keep a pull request out of the release notes.
 - Complete every section of the pull request template.
 - Run `bun run verify` before requesting review.
-- Expect a successful merge into `main` to publish the corresponding npm
-  release; closing a pull request without merging does not release anything.
+- Expect a successful `src/`-changing merge into `main` to publish the
+  corresponding npm release. Documentation- or website-only merges do not
+  publish, and closing a pull request without merging does not release anything.
 
 ## Security reports
 

@@ -1,5 +1,59 @@
 import { expect, test } from "bun:test";
-import { bumpVersion, maxReleaseLevel, releaseLevelForBranch } from "../scripts/release-policy.js";
+import { readFileSync } from "node:fs";
+import {
+  bumpVersion,
+  hasLibraryChanges,
+  isLibraryReleasePath,
+  LIBRARY_RELEASE_PATHS,
+  maxReleaseLevel,
+  releaseLevelForBranch,
+} from "../scripts/release-policy.js";
+
+test.each(["src/api.ts", "src/client/index.ts"])("%s is a library release path", (path) => {
+  expect(isLibraryReleasePath(path)).toBeTrue();
+});
+
+test.each([
+  "AGENTS.md",
+  "LICENSE",
+  "README.md",
+  "RELEASING.md",
+  "bun.lock",
+  "docs/OVERVIEW.md",
+  "examples/express-nodemailer/package.json",
+  "package.json",
+  "scripts/release-policy.ts",
+  "test/inboxtap.test.ts",
+  "tsconfig.json",
+  "tsup.config.ts",
+  "web/package.json",
+])("%s does not trigger a library release", (path) => {
+  expect(isLibraryReleasePath(path)).toBeFalse();
+});
+
+test("detects a library change among deferred website and documentation changes", () => {
+  expect(hasLibraryChanges(["web/app/page.tsx", "docs/OVERVIEW.md", "src/server.ts"])).toBeTrue();
+  expect(hasLibraryChanges(["web/package.json", "bun.lock", "README.md"])).toBeFalse();
+});
+
+test("the release workflow path filter matches the release policy", () => {
+  const workflow = readFileSync(".github/workflows/release.yml", "utf8");
+  const eventStart = workflow.indexOf("  pull_request_target:");
+  const eventEnd = workflow.indexOf("  workflow_dispatch:");
+  const eventConfiguration = workflow.slice(eventStart, eventEnd);
+  const pathsBlock = eventConfiguration.match(/\n {4}paths:\n((?: {6}- .+\n)+)/)?.[1];
+  const workflowPaths = pathsBlock
+    ?.trim()
+    .split("\n")
+    .map((line) =>
+      line
+        .trim()
+        .replace(/^-\s+"?/, "")
+        .replace(/"?$/, ""),
+    );
+
+  expect(workflowPaths).toEqual([...LIBRARY_RELEASE_PATHS]);
+});
 
 test.each(["breaking/remove-legacy-api", "major/next-generation"])(
   "%s selects a major release",

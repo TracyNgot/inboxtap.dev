@@ -4,6 +4,10 @@ on:
   pull_request_target:
     branches:
       - main
+    # Keep this list aligned with LIBRARY_RELEASE_PATHS in
+    # scripts/release-policy.ts.
+    paths:
+      - "src/**"
     types:
       - closed
   workflow_dispatch:
@@ -109,22 +113,46 @@ jobs:
             level="$MANUAL_BUMP"
           else
             # Derive the bump from every pull request merged since the last
-            # release tag, not only the triggering one: GitHub keeps a single
-            # pending run per concurrency group, so a canceled queued run must
-            # not lose its pull request's minor or major bump.
+            # release tag that changed src/, not only the triggering
+            # one. Release notes remain unfiltered so deferred website and
+            # documentation changes are included in the next release. GitHub
+            # keeps only one pending run per concurrency group, so replaced
+            # queued runs must not lose their release level.
             branches=()
             breaking_labeled=false
+            declare -A seen_prs=()
             last_tag=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
             if [[ -n "$last_tag" ]]; then
               while IFS= read -r sha; do
-                while IFS=$'\t' read -r ref labels; do
+                while IFS=$'\t' read -r number ref labels; do
+                  if [[ -z "$number" ]]; then
+                    continue
+                  fi
+                  if [[ -n "${seen_prs[$number]:-}" ]]; then
+                    continue
+                  fi
+                  seen_prs["$number"]=true
+
+                  files=()
+                  while IFS= read -r file; do
+                    files+=("$file")
+                  done < <(
+                    gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${number}/files" \
+                      --jq '.[].filename'
+                  )
+                  if [[ "$(
+                    bun scripts/release-policy.ts --has-library-changes "${files[@]}"
+                  )" != "true" ]]; then
+                    continue
+                  fi
+
                   branches+=("$ref")
                   if [[ ",${labels}," == *",breaking,"* ]]; then
                     breaking_labeled=true
                   fi
                 done < <(
                   gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
-                    --jq '.[] | select(.base.ref == "main" and .merged_at != null) | [.head.ref, ([.labels[].name] | join(","))] | @tsv'
+                    --jq '.[] | select(.base.ref == "main" and .merged_at != null) | [.number, .head.ref, ([.labels[].name] | join(","))] | @tsv'
                 )
               done < <(git log "${last_tag}..HEAD" --format=%H)
             fi
