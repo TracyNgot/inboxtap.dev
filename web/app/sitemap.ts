@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { docAlternatePaths, getLocalizedDocs } from "@/lib/i18n";
 import { homePath, type Locale, locales, withTrailingSlash } from "@/lib/i18n/config";
-import { CONTENT_UPDATED_AT, SITE_ORIGIN } from "@/lib/site-config";
+import { getLocalizedResources, resourceAlternatePaths } from "@/lib/resources";
+import { CONTENT_UPDATED_AT, RESOURCE_UPDATED_AT, SITE_ORIGIN } from "@/lib/site-config";
 
 export const dynamic = "force-static";
 
@@ -39,6 +40,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: CONTENT_UPDATED_AT,
         priority: doc.slug ? 0.7 : 0.9,
         url: absoluteUrl(doc.path),
+      });
+    }
+    for (const resource of getLocalizedResources(locale)) {
+      entries.push({
+        alternates: {
+          languages: languageAlternates(resourceAlternatePaths(resource.key)),
+        },
+        changeFrequency: "monthly",
+        lastModified: RESOURCE_UPDATED_AT,
+        priority: 0.8,
+        url: absoluteUrl(resource.path),
       });
     }
   }

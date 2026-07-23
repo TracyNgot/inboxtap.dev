@@ -1,6 +1,7 @@
 import type { DocKey } from "../docs-config";
 import { getDictionary, getLocalizedDoc } from "../i18n";
 import { docPath, homePath, type Locale, withTrailingSlash } from "../i18n/config";
+import { getLocalizedResource, type ResourcePageKey } from "../resources";
 import {
   CONTENT_PUBLISHED_AT,
   CONTENT_UPDATED_AT,
@@ -8,6 +9,8 @@ import {
   NPM_URL,
   SITE_NAME,
   SITE_ORIGIN,
+  RESOURCE_PUBLISHED_AT,
+  RESOURCE_UPDATED_AT,
 } from "../site-config";
 
 const ORG_ID = `${SITE_ORIGIN}/#org`;
@@ -87,6 +90,56 @@ export function docJsonLd(locale: Locale, key: DocKey): object {
           name: crumb.name,
           position: index + 1,
         })),
+      },
+    ],
+  };
+}
+
+export function resourceJsonLd(locale: Locale, key: ResourcePageKey): object {
+  const resource = getLocalizedResource(locale, key);
+  const meta = getDictionary(locale).meta;
+  const url = absoluteUrl(resource.path);
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        author: { "@id": ORG_ID },
+        datePublished: RESOURCE_PUBLISHED_AT.toISOString(),
+        dateModified: RESOURCE_UPDATED_AT.toISOString(),
+        description: resource.description,
+        headline: resource.title,
+        inLanguage: locale,
+        isAccessibleForFree: true,
+        license: `${GITHUB_URL}/blob/main/LICENSE`,
+        mainEntityOfPage: url,
+        publisher: { "@id": ORG_ID },
+        url,
+      },
+      {
+        "@id": ORG_ID,
+        "@type": "Organization",
+        logo: `${SITE_ORIGIN}/icon.svg`,
+        name: SITE_NAME,
+        sameAs: [GITHUB_URL, NPM_URL],
+        url: `${SITE_ORIGIN}/`,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            item: absoluteUrl(homePath(locale)),
+            name: meta.breadcrumbHome,
+            position: 1,
+          },
+          {
+            "@type": "ListItem",
+            item: url,
+            name: resource.title,
+            position: 2,
+          },
+        ],
       },
     ],
   };

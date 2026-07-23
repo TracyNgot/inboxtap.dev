@@ -6,3 +6,5 @@ export const BUY_ME_A_COFFEE_URL = "https://buymeacoffee.com/yolaine";
 export const CONTRIBUTORS_URL = `${GITHUB_URL}/graphs/contributors`;
 export const CONTENT_PUBLISHED_AT = new Date("2026-07-21T00:00:00.000Z");
 export const CONTENT_UPDATED_AT = new Date("2026-07-23T00:00:00.000Z");
+export const RESOURCE_PUBLISHED_AT = new Date("2026-07-24T00:00:00.000Z");
+export const RESOURCE_UPDATED_AT = new Date("2026-07-24T00:00:00.000Z");

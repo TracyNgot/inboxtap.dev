@@ -4,6 +4,7 @@ import {
   getExamplesLandingStrings,
   isExampleDocKey,
 } from "../example-registry";
+import { getResourceRouteAlternates } from "../resources";
 import { docPath, homePath, type Locale, locales } from "./config";
 import { en } from "./dictionaries/en";
 import { es } from "./dictionaries/es";
@@ -99,5 +100,6 @@ export function getRouteAlternates(): Record<string, Record<Locale, string>> {
     const alternates = docAlternatePaths(key);
     for (const locale of locales) map[alternates[locale]] = alternates;
   }
+  Object.assign(map, getResourceRouteAlternates());
   return map;
 }

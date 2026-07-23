@@ -108,6 +108,19 @@ export interface Dictionary {
     closingLede: string;
     closingCta: string;
   };
+  resourcesChrome: {
+    cardCta: string;
+    groups: {
+      compare: string;
+      guides: string;
+      integrations: string;
+    };
+    landingEyebrow: string;
+    landingHeading: string;
+    landingLede: string;
+    relatedHeading: string;
+    tocHeading: string;
+  };
   meta: {
     title: string;
     titleTemplate: string;

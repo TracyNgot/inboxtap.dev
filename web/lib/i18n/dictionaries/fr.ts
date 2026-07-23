@@ -125,6 +125,20 @@ export const fr: Dictionary = {
       },
     },
   },
+  resourcesChrome: {
+    cardCta: "Lire la page",
+    groups: {
+      compare: "Comparatifs",
+      guides: "Guides pratiques",
+      integrations: "Intégrations",
+    },
+    landingEyebrow: "Ressources pratiques pour tester les emails",
+    landingHeading: "Intégrations, guides et comparatifs transparents.",
+    landingLede:
+      "Reliez InboxTap à vos outils, vérifiez les parcours d’authentification complets et choisissez la solution locale adaptée à votre équipe.",
+    relatedHeading: "Ressources associées",
+    tocHeading: "Sur cette page",
+  },
   meta: {
     breadcrumbDocs: "Documentation",
     breadcrumbHome: "Accueil",
