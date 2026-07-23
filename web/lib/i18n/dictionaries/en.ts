@@ -118,6 +118,20 @@ export const en: Dictionary = {
       },
     },
   },
+  resourcesChrome: {
+    cardCta: "Read the page",
+    groups: {
+      compare: "Comparisons",
+      guides: "Testing guides",
+      integrations: "Integrations",
+    },
+    landingEyebrow: "Practical email-testing resources",
+    landingHeading: "Integrations, guides, and honest comparisons.",
+    landingLede:
+      "Connect InboxTap to your test stack, prove complete authentication flows, and choose the local email tool that fits your team.",
+    relatedHeading: "Related resources",
+    tocHeading: "On this page",
+  },
   meta: {
     breadcrumbDocs: "Documentation",
     breadcrumbHome: "Home",

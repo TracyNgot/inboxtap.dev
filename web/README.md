@@ -31,6 +31,10 @@ the other locales use localized URL slugs (for example `/fr/docs/demarrage-rapid
 - UI strings and page metadata live in `lib/i18n/dictionaries/`; docs titles, descriptions,
   localized slugs, and table-of-contents anchors live in `lib/i18n/docs/`.
 - Docs bodies live in `content/docs/{en,fr,es}/` with identical filenames per locale.
+- Integration, task-guide, and comparison pages live in
+  `lib/resources/content/{en,fr,es}/`. Their typed registry publishes complete,
+  locale-specific content at `/integrations`, `/guides`, and `/compare` route
+  families without falling back to English.
 - One explicit registry in `lib/example-registry.ts` imports each example's English
   `README.md` plus its `README.fr.md` and `README.es.md` counterparts. Every example route
   renders one locale only, including its README body, metadata, table of contents, and
@@ -47,9 +51,12 @@ the other locales use localized URL slugs (for example `/fr/docs/demarrage-rapid
   `bun run verify` fails if they drift. Published localized slugs must never change.
 - Alignment is enforced by `bun test`: `test/content-parity.test.ts` requires every English
   doc to have fr/es counterparts with byte-identical code fences and the same section count,
-  `test/examples.test.ts` applies the same rule to example READMEs, and the dictionary
-  `Record` types make a missing translated string a compile error.
+  `test/examples.test.ts` applies the same rule to example READMEs, and
+  `test/resources.test.ts` requires all 12 resource pages in all three locales
+  with matching structures and code. The dictionary `Record` types make a
+  missing translated string a compile error.
 - To add a locale: extend `locales` in `lib/i18n/config.ts`, then add
   `lib/i18n/dictionaries/<locale>.ts`, `lib/i18n/docs/<locale>.ts`, `lib/content/<locale>.ts`,
-  and `content/docs/<locale>/`. Every `Record<Locale, …>` map stops compiling until the new
-  locale is covered, and `bun run verify` checks the exported routes end-to-end.
+  `content/docs/<locale>/`, and `lib/resources/content/<locale>/`. Every
+  `Record<Locale, …>` map stops compiling until the new locale is covered, and
+  `bun run verify` checks the exported routes end-to-end.

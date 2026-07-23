@@ -1,6 +1,11 @@
 import { isExampleDocKey } from "../lib/example-registry";
 import { docAlternatePaths, getLocalizedDocs } from "../lib/i18n";
 import { homePath, type Locale, locales, ogLocales, withTrailingSlash } from "../lib/i18n/config";
+import {
+  getLocalizedResources,
+  type ResourcePageKey,
+  resourceAlternatePaths,
+} from "../lib/resources";
 import { SITE_ORIGIN } from "../lib/site-config";
 
 export interface ExpectedRoute {
@@ -10,8 +15,9 @@ export interface ExpectedRoute {
   canonical: string;
   hreflangs: Record<Locale | "x-default", string>;
   htmlLang: Locale;
-  kind: "home" | "doc" | "example";
+  kind: "home" | "doc" | "example" | "resource";
   ogLocale: string;
+  resourceKey?: ResourcePageKey;
   tocIds: readonly string[];
   jsonLdTypes: readonly string[];
 }
@@ -60,6 +66,21 @@ export function expectedRoutes(): ExpectedRoute[] {
         ogLocale: ogLocales[locale],
         path: doc.path,
         tocIds: doc.toc.map((item) => item.id),
+      });
+    }
+    for (const resource of getLocalizedResources(locale)) {
+      routes.push({
+        canonical: absoluteUrl(resource.path),
+        file: `${resource.path.slice(1)}/index.html`,
+        hreflangs: hreflangsFor(resourceAlternatePaths(resource.key)),
+        htmlLang: locale,
+        jsonLdTypes: ["TechArticle", "Organization", "BreadcrumbList"],
+        kind: "resource",
+        locale,
+        ogLocale: ogLocales[locale],
+        path: resource.path,
+        resourceKey: resource.key,
+        tocIds: resource.sections.map((section) => section.id),
       });
     }
   }

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { exampleReadmes, examplesLanding } from "@/lib/example-registry";
 import { getDictionary, getDocsDictionary } from "@/lib/i18n";
+import { getLocalizedResource, getLocalizedResources } from "@/lib/resources";
 
 const webRoot = join(import.meta.dir, "..");
 const repositoryRoot = join(webRoot, "..");
@@ -95,6 +96,34 @@ function collectStringValues(value: unknown): string[] {
   return [];
 }
 
+function resourceNaturalCopy(
+  locale: "en" | "es" | "fr",
+  key: Parameters<typeof getLocalizedResource>[1],
+) {
+  const resource = getLocalizedResource(locale, key);
+  return [
+    resource.title,
+    resource.description,
+    resource.eyebrow,
+    resource.intro,
+    resource.cta.title,
+    resource.cta.description,
+    resource.cta.label,
+    ...resource.sections.flatMap((section) => [
+      section.title,
+      ...section.paragraphs,
+      ...(section.bullets ?? []),
+      ...(section.table?.headers ?? []),
+      ...(section.table?.rows.flat() ?? []),
+      ...(section.links?.map((link) => link.label) ?? []),
+    ]),
+  ].join("\n\n");
+}
+
+function withoutResourceApiIdentifiers(source: string): string {
+  return source.replace(/\binbox(?:\.address)?\b/gu, "");
+}
+
 describe("localized pages contain one natural language", () => {
   const englishDocsRoot = join(webRoot, "content", "docs", "en");
 
@@ -131,6 +160,19 @@ describe("localized pages contain one natural language", () => {
         site: getDictionary(locale),
       }).join("\n");
       expectLocalizedTerms(copy, locale, `${locale} dictionaries`);
+    });
+
+    test(`${locale} resource pages contain no copied English prose or known false friends`, () => {
+      for (const resource of getLocalizedResources(locale)) {
+        const english = resourceNaturalCopy("en", resource.key);
+        const translated = resourceNaturalCopy(locale, resource.key);
+        expectNoCopiedEnglish(english, translated, `${locale}/${resource.key}`);
+        expectLocalizedTerms(
+          withoutResourceApiIdentifiers(translated),
+          locale,
+          `${locale}/${resource.key}`,
+        );
+      }
     });
   }
 });

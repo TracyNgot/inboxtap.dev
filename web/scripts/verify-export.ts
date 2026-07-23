@@ -1,6 +1,7 @@
-import { expectedRoutes } from "./export-routes";
 import { parseChangelog } from "../lib/changelog";
 import { getDictionary } from "../lib/i18n";
+import { getLocalizedResource } from "../lib/resources";
+import { expectedRoutes } from "./export-routes";
 
 const outputRoot = new URL("../out/", import.meta.url);
 const routes = expectedRoutes();
@@ -115,7 +116,9 @@ for (const route of routes) {
       requireTag(html, marker, route.path, "localized landing demo");
     }
     if (route.locale !== "en") {
+      const localizedDemoValues = new Set(Object.values(dictionary.landing.demo));
       for (const marker of Object.values(getDictionary("en").landing.demo)) {
+        if (marker.length < 8 || localizedDemoValues.has(marker)) continue;
         if (html.includes(marker)) {
           throw new Error(`English landing demo copy leaked into ${route.path}: ${marker}`);
         }
@@ -136,6 +139,29 @@ for (const route of routes) {
     );
     if (route.locale !== "en" && html.includes('<div lang="en">')) {
       throw new Error(`English README wrapper leaked into ${route.path}`);
+    }
+  }
+  if (route.kind === "resource") {
+    if (!route.resourceKey) {
+      throw new Error(`Resource route ${route.path} has no stable key`);
+    }
+    const h1Count = html.match(/<h1(?:\s|>)/g)?.length ?? 0;
+    if (h1Count !== 1) {
+      throw new Error(`Resource page ${route.path} has ${h1Count} H1 elements instead of one`);
+    }
+    requireTag(
+      html,
+      `"inLanguage":"${route.locale}"`,
+      route.path,
+      "localized TechArticle language",
+    );
+    if (route.locale !== "en") {
+      const english = getLocalizedResource("en", route.resourceKey);
+      for (const marker of [english.title, english.description, english.intro]) {
+        if (html.includes(escapeHtmlText(marker))) {
+          throw new Error(`English resource copy leaked into ${route.path}: ${marker}`);
+        }
+      }
     }
   }
   if (route.locale !== "en" && route.path.endsWith("/docs/changelog")) {
@@ -166,7 +192,9 @@ for (const route of routes) {
     }
   }
 
-  for (const match of html.matchAll(/href="(\/(?:docs|fr|es)(?:\/[^"?#]*)?)(?:[?#][^"]*)?"/g)) {
+  for (const match of html.matchAll(
+    /href="(\/(?:compare|docs|guides|integrations|fr|es)(?:\/[^"?#]*)?)(?:[?#][^"]*)?"/g,
+  )) {
     const href = (match[1] ?? "").replace(/\/$/, "") || "/";
     if (!routePaths.has(href)) {
       throw new Error(`Broken internal link ${href} in ${route.path}`);

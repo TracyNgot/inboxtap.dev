@@ -122,6 +122,20 @@ export const es: Dictionary = {
       },
     },
   },
+  resourcesChrome: {
+    cardCta: "Leer la página",
+    groups: {
+      compare: "Comparativas",
+      guides: "Guías prácticas",
+      integrations: "Integraciones",
+    },
+    landingEyebrow: "Recursos prácticos para probar correos",
+    landingHeading: "Integraciones, guías y comparativas transparentes.",
+    landingLede:
+      "Conecta InboxTap con tus herramientas, comprueba flujos completos de autenticación y elige la solución local adecuada para tu equipo.",
+    relatedHeading: "Recursos relacionados",
+    tocHeading: "En esta página",
+  },
   meta: {
     breadcrumbDocs: "Documentación",
     breadcrumbHome: "Inicio",

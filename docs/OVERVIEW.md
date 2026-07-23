@@ -186,6 +186,11 @@ Explicitly excluded:
   Verification fails for unregistered examples, missing locale variants,
   multiple H1s, mismatched localized section anchors, changed code fences, or
   unresolved relative file and image links.
+- Search-focused integration, task-guide, and comparison pages are implemented
+  inside `web/lib/resources/content/{en,fr,es}/`, not in the repository-only
+  docs folder. A typed registry requires complete locale content, localized
+  paths, reciprocal alternates, and matching section/code structure before the
+  static website can build.
 - Scheduled delivery remains an application-level example rather than a public
   InboxTap API. The example owns a bounded provider fake and injected virtual
   clock, then delivers due messages through Nodemailer into InboxTap because

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { runInNewContext } from "node:vm";
+import { getRouteAlternates } from "@/lib/i18n";
 import { docPath, homePath, isLocale, localePrefix, locales, ogLocales } from "@/lib/i18n/config";
 import { notFoundLocaleBootstrap, notFoundLocaleForPathname } from "@/lib/i18n/not-found";
 
@@ -27,6 +28,20 @@ describe("i18n path helpers", () => {
     expect(isLocale("fr")).toBe(true);
     expect(isLocale("docs")).toBe(false);
     for (const locale of locales) expect(ogLocales[locale]).toMatch(/^[a-z]{2}_[A-Z]{2}$/);
+  });
+
+  test("keeps the language switcher on equivalent resource pages", () => {
+    const alternates = getRouteAlternates();
+    expect(alternates["/integrations/playwright"]).toEqual({
+      en: "/integrations/playwright",
+      es: "/es/integraciones/playwright",
+      fr: "/fr/integrations/playwright",
+    });
+    expect(alternates["/fr/comparer/mailtrap"]).toEqual({
+      en: "/compare/mailtrap",
+      es: "/es/comparar/mailtrap",
+      fr: "/fr/comparer/mailtrap",
+    });
   });
 });
 

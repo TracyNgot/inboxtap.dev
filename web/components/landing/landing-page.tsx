@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ResourceDirectory } from "@/components/resources/resource-directory";
 import { JsonLd } from "@/components/shared/json-ld";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
@@ -151,6 +152,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
             </Link>
           </Reveal>
         </section>
+
+        <ResourceDirectory locale={locale} />
 
         <section className="section-shell closing-section">
           <Reveal className="closing-card">
