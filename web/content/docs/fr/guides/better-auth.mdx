@@ -1,11 +1,11 @@
-Better Auth livre les liens de vérification, les liens magiques et les codes à usage unique en
-SMTP simple, si bien qu’une app Next.js peut le pointer vers InboxTap et tester chaque parcours
+Better Auth envoie les liens de vérification, les liens magiques et les codes à usage unique via
+SMTP, si bien qu’une application Next.js peut les acheminer vers InboxTap et tester chaque parcours
 d’authentification de bout en bout. Le projet complet et exécutable se trouve dans
 [`examples/better-auth-nextjs`](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/better-auth-nextjs).
 
 ## Brancher Better Auth sur InboxTap
 
-Créez un helper Nodemailer pointé vers le port SMTP d’InboxTap. InboxTap parle SMTP simple, donc
+Créez une fonction utilitaire Nodemailer pointée vers le port SMTP d’InboxTap. InboxTap parle SMTP simple, donc
 le transport désactive TLS et n’envoie aucun identifiant :
 
 ```ts
@@ -19,8 +19,8 @@ const transport = createTransport({
 });
 ```
 
-Faites passer chaque callback email de Better Auth par ce helper, en gardant chaque email en texte
-simple avec exactement un lien ou un code à six chiffres pour que l’extraction reste
+Faites passer chaque fonction de rappel d’envoi de Better Auth par cette fonction utilitaire, en
+gardant chaque email en texte simple avec exactement un lien ou un code à six chiffres pour que l’extraction reste
 déterministe :
 
 ```ts
@@ -52,7 +52,7 @@ export const auth = betterAuth({
 ## Piloter les flux avec Playwright
 
 Laissez Playwright gérer les deux processus : `webServer` démarre `npx inboxtap`, attend son
-endpoint de health, puis démarre l’app. En local, il réutilise les serveurs que vous avez déjà
+point de terminaison de contrôle d’état, puis démarre l’application. En local, il réutilise les serveurs que vous avez déjà
 lancés.
 
 ```ts
@@ -101,7 +101,7 @@ Le test de lien magique fonctionne de la même façon avec un filtre de sujet di
 d’OTP remplace `waitForLink()` par `waitForCode()` — l’OTP par défaut de Better Auth fait six
 chiffres, ce qui correspond exactement au motif de code par défaut d’InboxTap.
 
-## Lancer le projet exemple
+## Lancer le projet d’exemple
 
 ```bash
 cd examples/better-auth-nextjs
@@ -112,7 +112,7 @@ npm test
 
 La suite couvre la vérification à l’inscription, la connexion bloquée avant vérification,
 l’auto-inscription par lien magique, la connexion par OTP et le renvoi de code — sans jongler
-entre terminaux, car les tests démarrent eux-mêmes InboxTap et l’app. Le README de l’exemple
+entre terminaux, car les tests démarrent eux-mêmes InboxTap et l’application. Le README de l’exemple
 documente aussi un déroulé interactif : `npx inboxtap` dans un terminal, `npm run dev` dans un
 autre, puis inscrivez-vous et lisez l’email capturé avec
 `curl http://localhost:8025/api/emails/latest`.

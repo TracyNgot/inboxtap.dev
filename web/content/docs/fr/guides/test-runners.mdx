@@ -1,11 +1,11 @@
-InboxTap fournit des fixtures optionnelles et natives pour Bun test, Vitest et Playwright. Chaque
-fixture démarre les listeners SMTP et HTTP locaux sur des ports sélectionnés automatiquement, crée
+InboxTap fournit des configurations de test optionnelles et natives pour Bun test, Vitest et Playwright. Chaque
+configuration démarre les écouteurs SMTP et HTTP locaux sur des ports sélectionnés automatiquement, crée
 un transport Nodemailer prêt à l’emploi et garantit le nettoyage.
 
 ## Installer les dépendances optionnelles
 
-Installez uniquement l’adaptateur du runner utilisé par votre projet. Nodemailer 9 est requis par
-toutes les fixtures ; Vitest 4.1 et Playwright 1.61 sont des dépendances optionnelles de leurs
+Installez uniquement l’adaptateur de l’outil d’exécution utilisé par votre projet. Nodemailer 9 est requis par
+toutes les configurations ; Vitest 4.1 et Playwright 1.61 sont des dépendances optionnelles de leurs
 sous-chemins respectifs.
 
 ```bash
@@ -15,12 +15,12 @@ bun add --dev vitest
 bun add --dev @playwright/test
 ```
 
-Les dépendances des fixtures restent derrière des sous-chemins de paquet isolés. Importer
+Les dépendances des configurations de test restent derrière des sous-chemins de paquet isolés. Importer
 `inboxtap` ou `inboxtap/client` ne nécessite ni Nodemailer, ni Vitest, ni Playwright.
 
-## Fixture partagée
+## Configuration de test partagée
 
-Utilisez `startInboxTapFixture()` lorsqu’un runner possède son propre modèle de cycle de vie. Les
+Utilisez `startInboxTapFixture()` lorsqu’un outil d’exécution possède son propre modèle de cycle de vie. Les
 deux ports valent `0` par défaut : le système d’exploitation choisit donc des ports libres. Le
 démarrage vérifie le transport Nodemailer avant de rendre la main, nettoie les échecs partiels et
 `close()` peut être appelé plusieurs fois sans risque.
@@ -50,8 +50,8 @@ applications qui doivent démarrer avec les ports sélectionnés.
 
 ## Bun test
 
-`setupInboxTap()` enregistre les hooks asynchrones de configuration et de nettoyage de Bun. Bun
-n’injecte pas de contexte de fixture personnalisé : créez donc explicitement une nouvelle boîte
+`setupInboxTap()` enregistre les fonctions asynchrones de configuration et de nettoyage de Bun. Bun
+n’injecte pas de contexte de test personnalisé : créez donc explicitement une nouvelle boîte
 dans chaque test.
 
 ```ts
@@ -76,8 +76,8 @@ test("captures one email", async () => {
 
 ## Vitest
 
-`extendInboxTap()` ajoute à un test de base Vitest une fixture `inboxTap` à portée fichier et une
-fixture `inbox` à portée test. Chaque test reçoit une nouvelle adresse tandis que le fichier
+`extendInboxTap()` ajoute à un test de base Vitest un contexte `inboxTap` à portée fichier et un
+contexte `inbox` à portée test. Chaque test reçoit une nouvelle adresse tandis que le fichier
 réutilise un seul serveur et un transport vérifiés.
 
 ```ts
@@ -101,8 +101,8 @@ test("captures one email", async ({ inboxTap, inbox }) => {
 
 ## Playwright
 
-L’adaptateur Playwright fournit une fixture `inboxTap` à portée worker et une fixture `inbox` à
-portée test. Chaque worker reçoit ses propres ports dynamiques et chaque test sa propre adresse
+L’adaptateur Playwright fournit un contexte `inboxTap` à portée processus et un contexte `inbox` à
+portée test. Chaque processus reçoit ses propres ports dynamiques et chaque test sa propre adresse
 destinataire.
 
 ```ts
@@ -124,16 +124,16 @@ test("captures a verification link", async ({ inboxTap, inbox }) => {
 });
 ```
 
-Si l’application a besoin du port SMTP dynamique, démarrez-la dans une autre fixture worker qui
+Si l’application a besoin du port SMTP dynamique, démarrez-la dans un autre contexte à portée processus qui
 dépend de `inboxTap`, puis lisez `inboxTap.smtp` au lancement du processus. Le `webServer` de
-Playwright démarre avant les fixtures de test : un `webServer` déjà démarré ne peut donc pas
-consommer un port sélectionné plus tard par la fixture worker InboxTap.
+Playwright démarre avant les contextes de test : un `webServer` déjà démarré ne peut donc pas
+consommer un port sélectionné plus tard par le contexte InboxTap à portée processus.
 
-## Matchers natifs des runners
+## Assertions natives des outils d’exécution
 
-InboxTap conserve les implémentations des matchers dans le sous-chemin sans peer
-`inboxtap/matchers` et publie des adaptateurs typés pour chaque runner. Injectez l’`expect` du
-runner dans `extendInboxTapExpect()`. Bun et Vitest étendent cet objet sur place :
+InboxTap conserve les implémentations des assertions dans le sous-chemin sans dépendance optionnelle
+`inboxtap/matchers` et publie des adaptateurs typés pour chaque outil d’exécution. Injectez l’`expect`
+de l’outil dans `extendInboxTapExpect()`. Bun et Vitest étendent cet objet sur place :
 
 ```ts
 import { expect } from "vitest";
@@ -144,7 +144,7 @@ extendInboxTapExpect(expect);
 
 La configuration Bun suit le même modèle avec `bun:test` et `inboxtap/matchers/bun`.
 L’`expect.extend()` natif de Playwright renvoie un nouvel objet : exportez donc la valeur renvoyée
-avec votre fixture de test étendue.
+avec votre contexte de test étendu.
 
 ```ts
 import { expect as baseExpect, test as baseTest } from "@playwright/test";
@@ -155,7 +155,7 @@ export const test = extendInboxTap(baseTest);
 export const expect = extendInboxTapExpect(baseExpect);
 ```
 
-Les matchers s’utilisent avec la boîte propre au test et les messages capturés :
+Les assertions s’utilisent avec la boîte propre au test et les messages capturés :
 
 ```ts
 await expect(inbox).toHaveDeliveredOnce({
@@ -177,14 +177,14 @@ plus tardive n’arrivera.
 
 Utilisez directement `inboxTapMatchers` avec un autre `expect` compatible de style Jest, ou créez
 un nouvel ensemble via `createInboxTapMatchers({ recorder })`. Ces exports n’importent aucun
-runner. Le recorder reçoit des observations structurées sans contenu sensible ; les diagnostics
-des matchers omettent également les corps, les valeurs de destinataire, les liens, les motifs
+outil d’exécution. Le collecteur reçoit des observations structurées sans contenu sensible ; les diagnostics
+des assertions omettent également les corps, les valeurs de destinataire, les liens, les motifs
 porteurs de jetons et les en-têtes bruts.
 
-## Écrire un rapport de test expurgé
+## Écrire un rapport de test avec les données sensibles masquées
 
-`InboxTapReport`, depuis `inboxtap/reports`, sert à la fois de recorder de matchers et de collecteur
-pour les messages capturés et les assertions de l’application. Pour un flux de rapport Vitest non
+`InboxTapReport`, depuis `inboxtap/reports`, recueille à la fois les observations des assertions,
+les messages capturés et les assertions de l’application. Pour un flux de rapport Vitest non
 concurrent, étendez l’`expect` lié au test en cours :
 
 ```ts
@@ -222,7 +222,7 @@ test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
 });
 ```
 
-L’écriture depuis `finally` conserve les preuves les plus récentes lorsqu’un matcher ou une
+L’écriture depuis `finally` conserve les preuves les plus récentes lorsqu’une assertion ou une
 assertion de l’application échoue.
 
 Les mêmes entrées ordonnées produisent un JSON déterministe et versionné ou un HTML statique
@@ -233,13 +233,13 @@ de ressources distantes. La collecte s’arrête à 100 messages et 1 000 assert
 rendu est limité à 10 Mio et consigne explicitement la troncature. Le comptage des octets omis
 distingue les valeurs exactes des limites inférieures mesurées.
 
-La portée du recorder suit l’`expect` étendu. Ne rattachez pas de manière répétée des collecteurs
+La portée du collecteur suit l’`expect` étendu. Ne rattachez pas de manière répétée des collecteurs
 propres aux tests à un même `expect` Bun ou Vitest partagé pendant une exécution concurrente ;
 enregistrez explicitement les messages et les assertions de l’application, ou produisez
 délibérément un seul artefact pour la suite. Playwright peut créer un nouvel `expect` renvoyé pour
-chaque rapport. L’expurgation reste une protection au mieux : vérifiez les artefacts avant de les
-partager. `includeRaw: true` est une option plus risquée, car elle conserve une copie expurgée au
-mieux de la source RFC brute.
+chaque rapport. Le masquage reste une protection non exhaustive : vérifiez les artefacts avant de les
+partager. `includeRaw: true` est une option plus risquée, car elle conserve une copie de la source
+RFC brute dont les données sensibles ne sont masquées que de manière non exhaustive.
 
 ## Isolation et nettoyage
 
@@ -255,7 +255,7 @@ et API omis restent dynamiques.
 
 ## Tester les chemins d’échec
 
-Utilisez le contrôleur de pannes du serveur de la fixture pour tester les nouvelles tentatives de
+Utilisez le contrôleur de pannes du serveur de la configuration de test pour tester les nouvelles tentatives de
 l’application à la vraie frontière SMTP. Ciblez chaque règle sur le destinataire d’enveloppe unique
 du test afin qu’une transaction concurrente ne puisse pas la consommer. Enregistrez la règle juste
 avant de déclencher l’application.
@@ -282,16 +282,16 @@ test("retries a transient SMTP failure", async ({ inboxTap, inbox }) => {
 });
 ```
 
-Une réponse `451` convient aux chemins de nouvelle tentative et de backoff ; utilisez une réponse
-`550` pour le traitement des échecs permanents. `delayNext()` teste les timeouts applicatifs, et
+Une réponse `451` convient aux chemins de nouvelle tentative et d’attente progressive ; utilisez une réponse
+`550` pour le traitement des échecs permanents. `delayNext()` teste les délais d’expiration de l’application, et
 `disconnectNext()` la récupération après une session SMTP interrompue. Les tentatives échouées ou
 déconnectées ne produisent jamais de message capturé partiel.
 
-Pour la concurrence, utilisez `pauseNext()` comme portail explicite au lieu d’une temporisation.
+Pour la concurrence, utilisez `pauseNext()` comme barrière explicite au lieu d’une temporisation.
 Attendez `gate.waitUntilPaused()` avant de lancer l’action concurrente et appelez
-`gate.release()`, idempotente, dans un bloc `finally`. Le timeout absolu de 60 secondes par défaut
+`gate.release()`, idempotente, dans un bloc `finally`. Le délai d’expiration absolu de 60 secondes par défaut
 borne toujours une correspondance ou une libération manquée ; si une pause active expire, SMTP
-renvoie `451` et le message n’est pas capturé. Le nettoyage abandonne les portails restants ; évitez
+renvoie `451` et le message n’est pas capturé. Le nettoyage abandonne les barrières restantes ; évitez
 d’appeler `reset()` depuis un test concurrent, car il affecte les autres règles du serveur partagé.
 
 Une seule règle de panne s’applique à une transaction. Utilisez `times` lorsque plusieurs
@@ -300,7 +300,7 @@ observé la tentative précédente. InboxTap contrôle la livraison SMTP ; la pe
 l’idempotence et la déduplication métier restent des assertions appartenant aux tests de
 l’application.
 
-## Choisir le bon helper
+## Choisir la bonne méthode
 
 - Utilisez `waitForLink()` pour les URL de vérification, de réinitialisation de mot de passe et de
   lien magique.
@@ -311,6 +311,6 @@ l’application.
 - Utilisez `messages()` quand l’email est peut-être déjà arrivé et que vous devez inspecter
   l’ensemble courant.
 
-Tous les helpers d’attente sont bornés. Réglez `timeoutMs` assez haut pour le parcours applicatif,
-mais gardez-le sous le timeout propre du runner pour que les échecs remontent d’abord le contexte
+Toutes les méthodes d’attente sont bornées. Réglez `timeoutMs` assez haut pour le parcours applicatif,
+mais gardez-le sous le délai d’expiration propre à l’outil d’exécution pour que les échecs remontent d’abord le contexte
 InboxTap.

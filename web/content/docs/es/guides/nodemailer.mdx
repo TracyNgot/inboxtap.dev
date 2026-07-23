@@ -1,7 +1,7 @@
-Cualquier backend que envíe email transaccional a través de Nodemailer puede entregarlo a InboxTap
-en lugar de a un proveedor real, haciendo que los emails de bienvenida, los tokens de invitación y
-los OTPs sean comprobables en tests de integración. El proyecto ejecutable completo — una API
-Express probada con Vitest — vive en
+Cualquier servidor que envíe correo transaccional mediante Nodemailer puede entregarlo a InboxTap
+en lugar de a un proveedor real. Así, los correos de bienvenida, los tokens de invitación y los
+códigos OTP pueden comprobarse en pruebas de integración. El proyecto ejecutable completo, una
+API Express probada con Vitest, está en
 [`examples/express-nodemailer`](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/express-nodemailer).
 
 ## Apuntar Nodemailer a InboxTap
@@ -25,9 +25,9 @@ y `html` pasan sin cambios y se capturan tal cual.
 
 ## Probar con Vitest
 
-Inicia InboxTap de forma programática en puertos efímeros en cada archivo de spec, y después
-entrega el host y el puerto SMTP asignados a la aplicación bajo test. Los archivos de spec en
-paralelo obtienen cada uno un stack aislado:
+Inicia InboxTap de forma programática en puertos efímeros para cada archivo de pruebas y, después,
+proporciona el host y el puerto SMTP asignados a la aplicación que se está probando. Cada archivo
+que se ejecuta en paralelo obtiene un conjunto de servicios aislado:
 
 ```ts
 const server = await new InboxTapServer({ apiPort: 0, smtpPort: 0 }).start();
@@ -35,8 +35,8 @@ const inboxTap = new InboxTapClient({ baseUrl: server.apiUrl, domain: server.dom
 const mailer = createMailer({ host: server.smtpHost, port: server.smtpPort });
 ```
 
-Cada test crea su propio buzón y elige el helper de espera que corresponde a lo que lleva el
-email:
+Cada prueba crea su propio buzón y elige la función auxiliar de espera correspondiente al
+contenido del correo:
 
 ```ts
 it("verifies a new user through the emailed link", async () => {
@@ -50,9 +50,10 @@ it("verifies a new user through the emailed link", async () => {
 });
 ```
 
-Las otras specs del ejemplo muestran el resto del toolkit: `waitForMatch()` extrae un token de
+Las demás pruebas del ejemplo muestran el resto del conjunto de herramientas: `waitForMatch()`
+extrae un token de
 invitación personalizado con `pattern: /invite_[a-f0-9]{12}/`, `waitForCode()` obtiene un OTP de
-seis dígitos con su patrón por defecto y `waitForMessage()` devuelve el email capturado completo
+seis dígitos con su patrón por defecto y `waitForMessage()` devuelve el correo capturado completo
 para aserciones de forma sobre destinatarios, HTML y enlaces extraídos.
 
 ## Ejecutar el ejemplo
@@ -63,7 +64,7 @@ npm install
 npm test
 ```
 
-Los tests arrancan InboxTap y la app Express por sí mismos en puertos efímeros — sin otra terminal
-y sin conflictos de puertos con nada que ya esté en ejecución. Para una exploración interactiva,
-ejecuta `npx inboxtap` en una terminal y `npm run dev` en otra, dispara un email con `curl` y
+Las pruebas inician InboxTap y la aplicación Express en puertos efímeros, sin otra terminal ni
+conflictos con los puertos de otros procesos. Para una exploración interactiva, ejecuta
+`npx inboxtap` en una terminal y `npm run dev` en otra, inicia un envío con `curl` y
 léelo desde `http://localhost:8025/api/emails/latest`.

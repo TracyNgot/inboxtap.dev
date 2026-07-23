@@ -1,12 +1,12 @@
-Better Auth entrega enlaces de verificación, magic links y códigos de un solo uso por SMTP plano,
-así que una app Next.js puede apuntarlo a InboxTap y probar cada flujo de autenticación end to
-end. El proyecto ejecutable completo vive en
+Better Auth entrega enlaces de verificación, enlaces mágicos y códigos de un solo uso mediante
+SMTP sin cifrado. Por ello, una aplicación Next.js puede dirigirlo a InboxTap y probar cada flujo
+de autenticación de extremo a extremo. El proyecto ejecutable completo está en
 [`examples/better-auth-nextjs`](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/better-auth-nextjs).
 
 ## Conectar Better Auth con InboxTap
 
-Crea un helper de Nodemailer apuntado al puerto SMTP de InboxTap. InboxTap habla SMTP plano, así
-que el transporte desactiva TLS y no envía credenciales:
+Crea una función auxiliar de Nodemailer que apunte al puerto SMTP de InboxTap. InboxTap usa SMTP
+sin cifrado, por lo que el transporte desactiva TLS y no envía credenciales:
 
 ```ts
 import { createTransport } from "nodemailer";
@@ -19,9 +19,9 @@ const transport = createTransport({
 });
 ```
 
-Canaliza cada callback de email de Better Auth a través de ese helper, manteniendo cada email en
-texto plano con exactamente un enlace o un código de seis dígitos para que la extracción siga
-siendo determinista:
+Canaliza cada función de devolución de llamada de correo de Better Auth mediante esa función
+auxiliar. Mantén cada correo en texto sin formato, con exactamente un enlace o un código de seis
+dígitos, para que la extracción siga siendo determinista:
 
 ```ts
 export const auth = betterAuth({
@@ -51,9 +51,9 @@ export const auth = betterAuth({
 
 ## Manejar los flujos con Playwright
 
-Deja que Playwright gestione ambos procesos: `webServer` inicia `npx inboxtap`, espera a su
-endpoint de health y después inicia la app. En local reutiliza los servidores que ya tengas en
-marcha.
+Deja que Playwright gestione ambos procesos: `webServer` inicia `npx inboxtap`, espera a su punto
+de comprobación de estado y después inicia la aplicación. En local reutiliza los servidores que ya
+estén en marcha.
 
 ```ts
 export default defineConfig({
@@ -75,7 +75,7 @@ export default defineConfig({
 });
 ```
 
-Cada test crea su propio buzón, se registra a través del formulario real y sigue el enlace
+Cada prueba crea su propio buzón, se registra mediante el formulario real y sigue el enlace
 capturado:
 
 ```ts
@@ -98,9 +98,10 @@ test("signs up, verifies via the emailed link, and lands signed in", async ({ pa
 });
 ```
 
-El test de magic link funciona igual con un filtro de asunto distinto, y el test de OTP cambia
-`waitForLink()` por `waitForCode()` — el OTP por defecto de Better Auth es de seis dígitos, que
-coincide exactamente con el patrón de código por defecto de InboxTap.
+La prueba del enlace mágico funciona igual con un filtro de asunto distinto, mientras que la
+prueba del código OTP cambia `waitForLink()` por `waitForCode()`. El código OTP predeterminado de
+Better Auth tiene seis dígitos y coincide exactamente con el patrón de código predeterminado de
+InboxTap.
 
 ## Ejecutar el ejemplo
 
@@ -111,8 +112,9 @@ npx playwright install chromium
 npm test
 ```
 
-La suite cubre la verificación del registro, el inicio de sesión bloqueado antes de verificar, el
-auto-registro por magic link, el inicio de sesión con OTP y el reenvío del código — sin malabares
-con terminales, porque los tests inician InboxTap y la app por sí mismos. El README del ejemplo
+El conjunto de pruebas cubre la verificación del registro, el bloqueo del inicio de sesión antes
+de la verificación, el registro automático mediante un enlace mágico, el inicio de sesión con un
+código OTP y el reenvío del código. No hay que coordinar varias terminales, porque las pruebas
+inician InboxTap y la aplicación. El README del ejemplo
 también documenta un flujo interactivo: `npx inboxtap` en una terminal, `npm run dev` en otra, y
-después regístrate y lee el email capturado con `curl http://localhost:8025/api/emails/latest`.
+después regístrate y lee el correo capturado con `curl http://localhost:8025/api/emails/latest`.

@@ -9,7 +9,8 @@ export const docsFr: DocsDictionary = {
   },
   entries: {
     "": {
-      description: "Ce qu’InboxTap capture, pourquoi il existe et où il peut tourner en sécurité.",
+      description:
+        "Ce qu’InboxTap capture, pourquoi il existe et où il peut être exécuté en toute sécurité.",
       slug: "",
       title: "Introduction",
       toc: [
@@ -26,7 +27,7 @@ export const docsFr: DocsDictionary = {
         { id: "prérequis", label: "Prérequis" },
         { id: "lancer-le-serveur", label: "Lancer le serveur" },
         { id: "installer-le-sdk", label: "Installer le SDK" },
-        { id: "configurer-votre-application", label: "Configurer votre app" },
+        { id: "configurer-votre-application", label: "Configurer votre application" },
       ],
     },
     "quick-start": {
@@ -43,7 +44,7 @@ export const docsFr: DocsDictionary = {
     },
     configuration: {
       description:
-        "Configurez hôtes locaux, ports, domaines destinataires et limites de ressources.",
+        "Configurez les hôtes locaux, les ports, les domaines destinataires et les limites de ressources.",
       slug: "configuration",
       title: "Configuration",
       toc: [
@@ -78,7 +79,7 @@ export const docsFr: DocsDictionary = {
       toc: [
         { id: "vérifier-le-projet", label: "Vérifier le projet" },
         { id: "maintenance-et-sécurité", label: "Maintenance et sécurité" },
-        { id: "documentation-et-corrections", label: "Docs et corrections" },
+        { id: "documentation-et-corrections", label: "Documentation et corrections" },
         { id: "limites-de-recommandation", label: "Limites de recommandation" },
       ],
     },
@@ -88,7 +89,7 @@ export const docsFr: DocsDictionary = {
       title: "API HTTP",
       toc: [
         { id: "conventions-de-requête", label: "Conventions de requête" },
-        { id: "health", label: "Health" },
+        { id: "état-du-service", label: "État du service" },
         { id: "lister-les-emails", label: "Lister les emails" },
         { id: "dernier-email", label: "Dernier email" },
         { id: "attendre-un-email", label: "Attendre un email" },
@@ -98,14 +99,17 @@ export const docsFr: DocsDictionary = {
     },
     "reference/client-sdk": {
       description:
-        "Référence du SDK client, des fixtures, des matchers, des rapports expurgés, des pannes SMTP et des messages capturés.",
+        "Référence du SDK client, des configurations de test, des assertions, des rapports avec données sensibles masquées, des pannes SMTP et des messages capturés.",
       slug: "reference/sdk-client",
       title: "SDK client",
       toc: [
         { id: "créer-un-client", label: "Créer un client" },
         { id: "créer-une-boîte", label: "Créer une boîte" },
-        { id: "fixtures-disponibles", label: "Fixtures disponibles" },
-        { id: "entrées-des-matchers", label: "Entrées des matchers" },
+        {
+          id: "configurations-de-test-disponibles",
+          label: "Configurations de test disponibles",
+        },
+        { id: "entrées-des-assertions", label: "Entrées des assertions" },
         { id: "rapports-de-test", label: "Rapports de test" },
         { id: "contrôleur-de-pannes-smtp", label: "Contrôleur de pannes SMTP" },
         { id: "méthodes-de-testinbox", label: "Méthodes de TestInbox" },
@@ -116,26 +120,26 @@ export const docsFr: DocsDictionary = {
     },
     "guides/playwright": {
       description:
-        "Capturez et testez les liens de vérification, liens magiques, réinitialisations et OTP avec Playwright.",
+        "Capturez et testez les liens de vérification, les liens magiques, les réinitialisations et les OTP avec Playwright.",
       slug: "guides/playwright",
-      title: "Tester les liens magiques et OTP email avec Playwright",
+      title: "Tester les liens magiques et les OTP par email avec Playwright",
       toc: [
         { id: "démarrer-les-services", label: "Démarrer les services" },
         { id: "tester-un-lien-email", label: "Tester un lien" },
         { id: "tester-un-otp-par-email", label: "Tester un OTP" },
-        { id: "choisir-le-bon-helper", label: "Choisir un helper" },
-        { id: "workers-parallèles", label: "Workers parallèles" },
+        { id: "choisir-la-bonne-méthode", label: "Choisir la bonne méthode" },
+        { id: "processus-parallèles", label: "Processus parallèles" },
         { id: "questions-fréquentes", label: "Questions fréquentes" },
       ],
     },
     "guides/cypress": {
       description:
-        "Pilotez les flux de vérification par email depuis des specs Cypress avec cy.task et le SDK.",
+        "Pilotez les flux de vérification par email depuis des fichiers de test Cypress avec cy.task() et le SDK.",
       slug: "guides/cypress",
       title: "Tester les emails de vérification avec Cypress",
       toc: [
         { id: "démarrer-les-services", label: "Démarrer les services" },
-        { id: "enregistrer-les-tasks", label: "Enregistrer les tasks" },
+        { id: "enregistrer-les-tâches", label: "Enregistrer les tâches" },
         { id: "écrire-le-test", label: "Écrire le test" },
         { id: "isolation-parallèle", label: "Isolation parallèle" },
         { id: "accès-http-direct", label: "Accès HTTP direct" },
@@ -143,7 +147,7 @@ export const docsFr: DocsDictionary = {
     },
     "guides/test-runners": {
       description:
-        "Utilisez fixtures, matchers natifs, rapports expurgés et pannes SMTP avec Bun test, Vitest et Playwright.",
+        "Utilisez des configurations de test, des assertions natives, des rapports avec données sensibles masquées et des pannes SMTP avec Bun test, Vitest et Playwright.",
       slug: "guides/lanceurs-de-tests",
       title: "Tester les emails avec Bun, Vitest et Playwright",
       toc: [
@@ -151,29 +155,35 @@ export const docsFr: DocsDictionary = {
           id: "installer-les-dépendances-optionnelles",
           label: "Installer les dépendances",
         },
-        { id: "fixture-partagée", label: "Fixture partagée" },
+        {
+          id: "configuration-de-test-partagée",
+          label: "Configuration de test partagée",
+        },
         { id: "bun-test", label: "Bun test" },
         { id: "vitest", label: "Vitest" },
         { id: "playwright", label: "Playwright" },
-        { id: "matchers-natifs-des-runners", label: "Matchers natifs" },
         {
-          id: "écrire-un-rapport-de-test-expurgé",
+          id: "assertions-natives-des-outils-dexécution",
+          label: "Assertions natives",
+        },
+        {
+          id: "écrire-un-rapport-de-test-avec-les-données-sensibles-masquées",
           label: "Écrire un rapport",
         },
         { id: "isolation-et-nettoyage", label: "Isolation et nettoyage" },
         { id: "tester-les-chemins-déchec", label: "Tester les chemins d’échec" },
-        { id: "choisir-le-bon-helper", label: "Choisir un helper" },
+        { id: "choisir-la-bonne-méthode", label: "Choisir la bonne méthode" },
       ],
     },
     "guides/better-auth": {
       description:
-        "Vérifiez les emails d’inscription Better Auth dans une app Next.js avec Playwright.",
+        "Vérifiez les emails d’inscription Better Auth dans une application Next.js avec Playwright.",
       slug: "guides/better-auth",
       title: "Tester les emails de vérification Better Auth",
       toc: [
         { id: "brancher-better-auth-sur-inboxtap", label: "Brancher Better Auth" },
         { id: "piloter-les-flux-avec-playwright", label: "Piloter les flux" },
-        { id: "lancer-le-projet-exemple", label: "Lancer l’exemple" },
+        { id: "lancer-le-projet-dexemple", label: "Lancer l’exemple" },
       ],
     },
     "guides/nodemailer": {
@@ -188,19 +198,22 @@ export const docsFr: DocsDictionary = {
     },
     "guides/ci": {
       description:
-        "Exécutez InboxTap en CI via une étape d’arrière-plan avec health check ou un serveur programmatique.",
+        "Exécutez InboxTap en CI via une étape d’arrière-plan avec vérification de disponibilité ou un serveur programmatique.",
       slug: "guides/ci",
       title: "CI et GitHub Actions",
       toc: [
         { id: "deux-façons-de-le-lancer", label: "Deux façons de le lancer" },
-        { id: "attendre-le-health-check", label: "Attendre le health check" },
-        { id: "workflow-github-actions", label: "Workflow GitHub Actions" },
+        {
+          id: "attendre-la-vérification-de-disponibilité",
+          label: "Attendre la vérification de disponibilité",
+        },
+        { id: "processus-github-actions", label: "Processus GitHub Actions" },
         { id: "ports-et-autres-fournisseurs", label: "Ports et autres fournisseurs" },
       ],
     },
     "guides/troubleshooting": {
       description:
-        "Diagnostiquez connexions refusées, emails manquants, timeouts et lectures croisées entre tests.",
+        "Diagnostiquez les connexions refusées, les emails manquants, les expirations de délai et les lectures croisées entre tests.",
       slug: "guides/depannage",
       title: "Dépannage",
       toc: [
@@ -214,9 +227,10 @@ export const docsFr: DocsDictionary = {
       ],
     },
     changelog: {
-      description: "Historique des versions d’InboxTap, avec liens vers les pull requests.",
+      description:
+        "Historique des versions d’InboxTap, avec des liens vers les versions GitHub et les comparaisons complètes.",
       slug: "changelog",
-      title: "Changelog",
+      title: "Journal des modifications",
       toc: [],
     },
   },

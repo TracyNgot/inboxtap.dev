@@ -1,59 +1,60 @@
-InboxTap es una alternativa a MailHog sin Docker cuando un test automatizado necesita recuperar
-enlaces, OTPs o valores propios mediante un SDK TypeScript. No sustituye directamente al buzón web
-de MailHog: los equipos que necesitan inspección visual, persistencia, adjuntos o QA manual deberían
-elegir un visor o sandbox alojado.
+InboxTap es una alternativa a MailHog sin Docker cuando una prueba automatizada necesita recuperar
+enlaces, códigos OTP o valores propios mediante un SDK de TypeScript. No sustituye directamente al
+buzón web de MailHog: los equipos que necesitan inspección visual, persistencia, adjuntos o control
+de calidad manual deberían elegir un visor o un entorno aislado alojado.
 
 ## De un vistazo
 
 | Herramienta | Interfaz | Se ejecuta como | Ideal para |
 | --- | --- | --- | --- |
-| InboxTap | SDK tipado y API HTTP | CLI npm o dentro del proceso | Tests automatizados deterministas |
-| [Mailpit](https://mailpit.axllent.org/docs/) | UI web y API REST | Binario Go o Docker | Inspeccionar email renderizado en desarrollo |
-| [MailHog](https://github.com/mailhog/MailHog) | UI web y API | Binario Go o Docker | Instalaciones existentes e inspección manual |
-| [smtp4dev](https://github.com/rnwood/smtp4dev) | UI web e IMAP | Binario .NET o Docker | Inspección manual multiplataforma |
+| InboxTap | SDK tipado y API HTTP | CLI de npm o dentro del proceso | Pruebas automatizadas deterministas |
+| [Mailpit](https://mailpit.axllent.org/docs/) | Interfaz web y API REST | Binario de Go o Docker | Previsualizar correos durante el desarrollo |
+| [MailHog](https://github.com/mailhog/MailHog) | Interfaz web y API | Binario de Go o Docker | Instalaciones existentes e inspección manual |
+| [smtp4dev](https://github.com/rnwood/smtp4dev) | Interfaz web e IMAP | Binario de .NET o Docker | Inspección manual multiplataforma |
 | [Ethereal](https://nodemailer.com/guides/testing-with-ethereal) y [Mailtrap](https://docs.mailtrap.io/getting-started/email-sandbox) | Buzón web alojado | SaaS | Previsualización, análisis y trabajo en equipo |
 
 ## ¿Es InboxTap una alternativa a MailHog sin Docker?
 
-Sí, cuando el objetivo es probar emails de forma programática desde una suite JavaScript o
+Sí, cuando el objetivo es probar correos de forma programática desde un conjunto de pruebas de JavaScript o
 TypeScript. `npx inboxtap` inicia un servidor SMTP local sin Docker y el SDK espera mensajes,
 enlaces, códigos o coincidencias de expresiones regulares. No, cuando el objetivo es un buzón web
-para leer e inspeccionar emails manualmente; InboxTap no tiene dashboard a propósito.
+para leer e inspeccionar correos manualmente; InboxTap no incluye un panel de forma deliberada.
 
 ## Mailpit y MailHog
 
 [Mailpit](https://mailpit.axllent.org/) y [MailHog](https://github.com/mailhog/MailHog) son
-servidores SMTP locales construidos alrededor de un buzón web: envías el correo, abres la UI y lo
+servidores SMTP locales construidos alrededor de un buzón web: envías el correo, abres la interfaz y lo
 lees. Mailpit se mantiene activamente, se distribuye como binario único o imagen Docker y ofrece una
-API REST que los tests pueden consultar.
+API REST que las pruebas pueden consultar.
 
-Ninguno incluye un SDK de testing. Hacer aserciones implica programar a mano el polling HTTP, la
-extracción de enlaces y códigos y el aislamiento de destinatarios por test — las piezas que aporta
+Ninguno incluye un SDK para pruebas. Hacer aserciones implica programar a mano el sondeo HTTP, la
+extracción de enlaces y códigos y el aislamiento de destinatarios por prueba, las funciones que aporta
 el `TestInbox` de InboxTap. Además se ejecutan como binario o contenedor aparte, mientras que
-InboxTap se instala desde npm y puede arrancar dentro del proceso de tests. Si el objetivo es
-mirar los emails en lugar de hacer aserciones sobre ellos, son la mejor herramienta.
+InboxTap se instala desde npm y puede iniciarse dentro del proceso de pruebas. Si el objetivo es
+leer los correos en lugar de hacer aserciones sobre ellos, son la mejor herramienta.
 
 ## smtp4dev
 
-[smtp4dev](https://github.com/rnwood/smtp4dev) es una herramienta .NET multiplataforma con UI web y acceso IMAP, de modo que un cliente
-de correo de escritorio puede navegar por los mensajes capturados. Como los visores en Go, está
-pensada para inspección: útil para observar lo que envía una aplicación, mientras que los tests
-siguen necesitando código propio de polling y parseo.
+[smtp4dev](https://github.com/rnwood/smtp4dev) es una herramienta .NET multiplataforma con interfaz
+web y acceso IMAP, de modo que un cliente de correo de escritorio puede navegar por los mensajes
+capturados. Como los visores escritos en Go, está pensada para la inspección: resulta útil para
+observar lo que envía una aplicación, mientras que las pruebas siguen necesitando código propio de
+sondeo y análisis.
 
 ## Servicios alojados
 
 [Ethereal](https://nodemailer.com/guides/testing-with-ethereal) y
 [Mailtrap Email Sandbox](https://docs.mailtrap.io/getting-started/email-sandbox) aceptan correo a
 través de la red en un buzón alojado. Son
-lo más parecido a la entrega en producción, lo que los hace útiles para QA manual y comprobaciones
+lo más parecido a la entrega en producción, lo que los hace útiles para el control de calidad manual y las comprobaciones
 de renderizado HTML en clientes reales. Ese mismo salto de red añade cuentas, credenciales,
-latencia y rate limits a una suite de tests — y los mensajes salen de la máquina, algo que la
+latencia y límites de frecuencia a un conjunto de pruebas; además, los mensajes salen de la máquina, algo que la
 captura local nunca hace.
 
 ## Cuándo no usar InboxTap
 
-InboxTap no tiene buzón en el navegador, ni persistencia entre reinicios, ni flujo de adjuntos.
+InboxTap no ofrece buzón en el navegador, persistencia entre reinicios ni gestión de adjuntos.
 Elige un visor cuando un equipo quiera un buzón compartido y navegable, o un servicio alojado
-cuando el trabajo sea comprobar la entregabilidad y el renderizado en clientes reales. El carril
-de InboxTap es estrecho a propósito: aserciones de email deterministas y seguras en paralelo,
-ejecutándose junto al test que las disparó.
+cuando el trabajo sea comprobar la entregabilidad y el renderizado en clientes reales. El ámbito
+de InboxTap se mantiene reducido de forma deliberada: aserciones deterministas sobre correos,
+seguras en paralelo y ejecutadas junto a la prueba que inició el envío.

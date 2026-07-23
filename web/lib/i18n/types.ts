@@ -32,6 +32,7 @@ export interface Dictionary {
     footerTagline: string;
     footerGitHubAria: string;
     npmLabel: string;
+    productHuntLabel: string;
     supportLabel: string;
     trustLabel: string;
     languageSwitcherAria: string;
@@ -55,8 +56,14 @@ export interface Dictionary {
     copy: string;
     copied: string;
     copyAria: string;
+    changelogBy: string;
+    changelogChanges: string;
     changelogRelease: string;
     changelogFull: string;
+    changelogIn: string;
+    changelogPullRequest: string;
+    changelogSummary: string;
+    changelogUnpublished: string;
   };
   landing: {
     eyebrow: string;
@@ -85,6 +92,14 @@ export interface Dictionary {
     codeEyebrow: string;
     codeHeading: string;
     codeLede: string;
+    demo: {
+      alias: string;
+      button: string;
+      emailLabel: string;
+      fileName: string;
+      matcher: string;
+      subject: string;
+    };
     installEyebrow: string;
     installReady: string;
     installLink: string;

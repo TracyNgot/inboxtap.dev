@@ -1,13 +1,13 @@
-InboxTap a des drapeaux CLI explicites et des options de serveur programmatiques. Il ne lit pas de
-fichier de configuration en v<Version />.
+InboxTap propose des options de ligne de commande explicites et des options de serveur
+programmatiques. Il ne lit pas de fichier de configuration en v<Version />.
 
 ## Valeurs par défaut
 
 | Réglage | Valeur par défaut |
 | --- | --- |
-| Hôte SMTP | `localhost` (lie `127.0.0.1` et `::1`) |
+| Hôte SMTP | `localhost` (écoute sur `127.0.0.1` et `::1`) |
 | Port SMTP | `1025` |
-| Hôte de l'API HTTP | `localhost` (lie `127.0.0.1` et `::1`) |
+| Hôte de l'API HTTP | `localhost` (écoute sur `127.0.0.1` et `::1`) |
 | Port de l'API HTTP | `8025` |
 | Domaine destinataire | `local.test` |
 | Messages conservés | `100` |
@@ -28,9 +28,10 @@ fichier de configuration en v<Version />.
 Le mot optionnel `start` est accepté, donc `inboxtap` et `inboxtap start` sont équivalents.
 
 <Callout title="Frontière réseau">
-  Par défaut, les deux écouteurs ne lient que les adresses de loopback ; si IPv6 est indisponible,
-  le serveur se rabat sur `127.0.0.1` seul. Déplacer l’un des hôtes hors du loopback expose un
-  service de test non authentifié. Ne le faites que dans un environnement isolé que vous contrôlez.
+  Par défaut, les deux écouteurs ne se lient qu’aux adresses de bouclage ; si IPv6 est indisponible,
+  le serveur se rabat sur `127.0.0.1` seul. Déplacer l’un des hôtes hors de l’interface de bouclage
+  expose un service de test non authentifié. Ne le faites que dans un environnement isolé que vous
+  contrôlez.
 </Callout>
 
 ## Plusieurs instances
@@ -65,5 +66,5 @@ console.log(server.apiUrl);
 await server.stop();
 ```
 
-Les ports liés sont disponibles sur `server.apiPort` et `server.smtpPort` une fois `start()`
-résolu.
+Les ports utilisés sont disponibles sur `server.apiPort` et `server.smtpPort` une fois l’appel à
+`start()` terminé.

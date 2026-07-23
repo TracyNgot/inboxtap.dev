@@ -6,9 +6,10 @@ export const fr: Dictionary = {
     footerTagline: "Licence MIT · Local par conception",
     languageSwitcherAria: "Langue",
     navAria: "Navigation principale",
-    navDocs: "Docs",
+    navDocs: "Documentation",
     navFeatures: "Fonctionnalités",
     npmLabel: "npm",
+    productHuntLabel: "Voir InboxTap sur Product Hunt",
     supportLabel: "Offrez-moi un café",
     trustLabel: "Confiance et corrections",
     themeSwitchToDark: "Passer au thème sombre",
@@ -18,8 +19,15 @@ export const fr: Dictionary = {
   },
   docsChrome: {
     browse: "Parcourir la documentation",
-    changelogFull: "Changelog complet",
-    changelogRelease: "Release GitHub",
+    changelogBy: "par",
+    changelogChanges: "Modifications",
+    changelogFull: "Historique complet",
+    changelogIn: "dans",
+    changelogPullRequest: "demande d’intégration",
+    changelogRelease: "Version sur GitHub",
+    changelogSummary:
+      "Les notes détaillées sont publiées sur GitHub ; cette page en présente une synthèse localisée.",
+    changelogUnpublished: "Cette version n’a jamais été publiée sur npm.",
     closeAria: "Fermer la navigation",
     closeOverlayAria: "Fermer la navigation de la documentation",
     copied: "Copié",
@@ -37,38 +45,46 @@ export const fr: Dictionary = {
   },
   landing: {
     closingCta: "Explorer le dépôt",
-    closingEyebrow: "Gratuit · Open source · Licence MIT",
+    closingEyebrow: "Gratuit · Logiciel libre · Licence MIT",
     closingHeading: "Gardez les emails de test locaux et observables.",
     closingLede: "Utilisez-le, inspectez le code source ou participez à la prochaine version.",
-    codeEyebrow: "De l’action navigateur à l’assertion d’inbox",
+    codeEyebrow: "De l’action dans le navigateur à l’assertion sur la boîte",
     codeHeading: "Tout le parcours, dans un seul test.",
     codeLede:
-      "Créez une adresse isolée, soumettez-la dans votre app, puis attendez la valeur attendue. InboxTap fonctionne avec Playwright, Vitest, Jest et les autres runners Bun ou Node.",
+      "Créez une adresse isolée, soumettez-la dans votre application, puis attendez la valeur attendue. InboxTap fonctionne avec Playwright, Vitest, Jest et les autres outils d’exécution de tests Bun ou Node.",
     ctaPrimary: "Commencez à capturer",
     ctaSecondary: "Voir sur npm",
+    demo: {
+      alias: "inscription",
+      button: "Créer un compte",
+      emailLabel: "Adresse email",
+      fileName: "inscription.spec.ts",
+      matcher: "vérifiez votre adresse email",
+      subject: "Vérifiez votre compte",
+    },
     eyebrow: "Capture SMTP locale pour tests automatisés",
     featuresHeading: "Conçu pour des suites de tests déterministes",
     features: [
       [
         "Local par défaut",
-        "SMTP et HTTP écoutent sur localhost. InboxTap ne relaie jamais de mail.",
+        "Les services SMTP et HTTP écoutent sur localhost. InboxTap ne relaie jamais d’email.",
       ],
       [
-        "Boîtes parallèles sûres",
-        "Des adresses uniques générées côté client isolent les workers de test concurrents.",
+        "Boîtes isolées pour les tests parallèles",
+        "Des adresses uniques générées côté client isolent les processus de test concurrents.",
       ],
       ["API REST", "Listez, récupérez, attendez et videz les messages capturés via HTTP local."],
       [
         "Extraction automatique",
-        "Détecte les liens HTTP(S) et les codes uniques de 4 à 8 chiffres dans le mail parsé.",
+        "Détecte les liens HTTP(S) et les codes uniques de 4 à 8 chiffres dans l’email analysé.",
       ],
       [
         "SDK de test",
-        "Attendez messages, liens, codes et correspondances regex depuis vos tests Bun ou Node.",
+        "Attendez messages, liens, codes et correspondances d’expressions régulières depuis vos tests Bun ou Node.",
       ],
       [
         "Ressources bornées",
-        "Stockage, taille des messages et attentes longues ont des limites prévisibles.",
+        "Le stockage, la taille des messages et les attentes longue durée ont des limites prévisibles.",
       ],
     ],
     headline1: "Testez les emails",
@@ -76,17 +92,17 @@ export const fr: Dictionary = {
     installEyebrow: "Node 20+ · Bun ou npm",
     installLink: "Lire le guide d’installation →",
     installReady: "SMTP sur localhost:1025. API sur localhost:8025. Prêt.",
-    lede: "Déclenchez le vrai flux d’emails de votre app et vérifiez le lien ou le code exact depuis votre test. Tout est capturé sur localhost — pas un message ne quitte votre machine.",
+    lede: "Déclenchez le vrai flux d’emails de votre application et vérifiez le lien ou le code exact depuis votre test. Tout est capturé sur localhost — pas un message ne quitte votre machine.",
     story: {
       acts: [
         {
           eyebrow: "Le problème",
-          line: "Envoyés à des adresses inventées comme test@example.com, ils rebondissent ou disparaissent sans trace. Pire : avec le SMTP de production en dev, une mauvaise seed écrit à de vraies personnes.",
+          line: "Envoyés à des adresses inventées comme test@example.com, ils rebondissent ou disparaissent sans trace. Pire : avec le SMTP de production en développement, un jeu de données de test mal configuré peut envoyer des emails à de vraies personnes.",
           title: "Où partent vos emails de test ?",
         },
         {
           eyebrow: "La capture",
-          line: "Pointez votre app vers localhost:1025. Chaque destinataire est accepté et chaque message reste sur votre machine — rien ne franchit la frontière réseau.",
+          line: "Pointez votre application vers localhost:1025. Chaque destinataire est accepté et chaque message reste sur votre machine — rien ne franchit la frontière réseau.",
           title: "InboxTap capture tout sur localhost",
         },
         {
@@ -97,11 +113,11 @@ export const fr: Dictionary = {
       ],
       ariaLabel: "Comment InboxTap garde les emails de test en local",
       labels: {
-        app: "Votre app",
+        app: "Votre application",
         boundary: "Votre machine",
         captured: "capturé",
         fake: "jamais délivré",
-        inbox: "Boîte locale",
+        inbox: "Boîte de réception locale",
         localhostTag: "localhost:1025",
         passed: "test réussi",
         real: "vraies boîtes",
@@ -113,7 +129,7 @@ export const fr: Dictionary = {
     breadcrumbDocs: "Documentation",
     breadcrumbHome: "Accueil",
     description:
-      "InboxTap capture chaque email envoyé par votre app, sur localhost. Testez liens de vérification et codes OTP de vrais parcours — rien ne quitte votre machine.",
+      "InboxTap capture chaque email envoyé par votre application sur localhost. Testez les liens de vérification et les codes OTP de vrais parcours — rien ne quitte votre machine.",
     docsTitle: "Documentation",
     docsTitleTemplate: "%s · Docs InboxTap",
     ogDescription:
@@ -127,7 +143,7 @@ export const fr: Dictionary = {
     title: "InboxTap — tests de flux d’emails déterministes",
     titleTemplate: "%s · InboxTap",
     twitterDescription:
-      "Capturez les emails de votre app sur localhost. Testez de vrais parcours — rien ne sort de votre machine.",
+      "Capturez les emails de votre application sur localhost. Testez de vrais parcours — rien ne sort de votre machine.",
   },
   notFound: {
     eyebrow: "404 · Message non capturé",

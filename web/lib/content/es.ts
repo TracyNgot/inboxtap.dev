@@ -21,10 +21,7 @@ import { es } from "../i18n/dictionaries/es";
 export const contentEs = {
   "": Introduction,
   alternatives: Alternatives,
-  changelog: localizedChangelog({
-    full: es.docsChrome.changelogFull,
-    release: es.docsChrome.changelogRelease,
-  }),
+  changelog: localizedChangelog("es", es.docsChrome),
   configuration: Configuration,
   "guides/better-auth": BetterAuth,
   "guides/ci": Ci,

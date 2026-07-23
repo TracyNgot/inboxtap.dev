@@ -5,13 +5,13 @@ magique, réinitialisation, OTP et invitation sans boîte de test partagée.
 
 Nous avons testé ce modèle exact dans
 [l'exemple exécutable Better Auth et Next.js](https://github.com/TracyNgot/inboxtap.dev/tree/main/examples/better-auth-nextjs)
-d'InboxTap, avec liens de vérification, liens magiques, connexion OTP, renvoi et workers Playwright
+d'InboxTap, avec liens de vérification, liens magiques, connexion OTP, renvoi et processus Playwright
 parallèles.
 
 ## Démarrer les services
 
 Démarrez InboxTap aux côtés de l’application dans la configuration `webServer` de Playwright ou
-dans la mise en place de vos services CI. Une option consiste à lancer les deux commandes avant le
+dans la configuration de vos services CI. Une option consiste à lancer les deux commandes avant le
 processus de test :
 
 ```bash
@@ -21,7 +21,7 @@ npx playwright test
 ```
 
 Configurez l’application lancée par le test pour utiliser SMTP `localhost:1025`. Gardez InboxTap
-sur l’interface de loopback, même en CI.
+sur l’interface de bouclage, même en CI.
 
 ## Tester un lien email
 
@@ -77,20 +77,20 @@ test("signs in with an email OTP", async ({ page }) => {
 });
 ```
 
-## Choisir le bon helper
+## Choisir la bonne méthode
 
-| Parcours email | Helper InboxTap | Filtres utiles |
+| Parcours email | Méthode InboxTap | Filtres utiles |
 | --- | --- | --- |
 | Lien de vérification | `waitForLink()` | `subject`, `contains` |
-| Connexion par lien magique | `waitForLink()` | `subject`, chemin de callback |
+| Connexion par lien magique | `waitForLink()` | `subject`, chemin de rappel |
 | Réinitialisation | `waitForLink()` | `subject`, chemin de réinitialisation |
 | OTP numérique | `waitForCode()` | `subject`, `pattern` |
 | Invitation ou jeton propre | `waitForMatch()` | `subject`, expression régulière |
 
-## Workers parallèles
+## Processus parallèles
 
-Créez la boîte dans le test ou la fixture, jamais une seule fois au niveau du module pour toute la
-suite. Chaque appel génère une nouvelle adresse destinataire, donc les workers Playwright peuvent
+Créez la boîte dans le test ou sa configuration, jamais une seule fois au niveau du module pour toute la
+suite. Chaque appel génère une nouvelle adresse destinataire, donc les processus Playwright peuvent
 partager un seul serveur InboxTap sans lire les messages des autres.
 
 Appelez `await inbox.clear()` après un test quand un nettoyage immédiat aide au débogage local. Le
@@ -104,12 +104,12 @@ La page navigateur Playwright n'a besoin ni d'identifiants de boîte ni d'un com
 Le test côté Node utilise `InboxTapClient` pour attendre l'email capturé, puis transmet le lien ou le
 code extrait aux actions du navigateur.
 
-### Comment les workers parallèles évitent-ils de lire le même email ?
+### Comment les processus parallèles évitent-ils de lire le même email ?
 
-Créez une boîte dans chaque test ou fixture. Chaque appel à `createInbox()` renvoie un destinataire
-unique : tous les workers partagent ainsi un serveur local tout en filtrant sur leur propre adresse.
+Créez une boîte dans chaque test ou sa configuration. Chaque appel à `createInbox()` renvoie un destinataire
+unique : tous les processus partagent ainsi un serveur local tout en filtrant sur leur propre adresse.
 
 ### Les tests d'email Playwright ont-ils besoin de Docker ?
 
-Non. Démarrez InboxTap avec `npx inboxtap`, `bunx inboxtap` ou comme serveur in-process, puis pointez
+Non. Démarrez InboxTap avec `npx inboxtap`, `bunx inboxtap` ou comme serveur dans le processus, puis pointez
 la configuration SMTP de l'application vers `localhost:1025`.

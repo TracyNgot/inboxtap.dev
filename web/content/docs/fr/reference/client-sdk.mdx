@@ -11,8 +11,8 @@ const inboxTap = new InboxTapClient({
 });
 ```
 
-`baseUrl` vaut `http://localhost:8025` par défaut. Un `domain` optionnel évite la requête health
-initiale quand le test connaît déjà le domaine destinataire configuré.
+`baseUrl` vaut `http://localhost:8025` par défaut. Un `domain` optionnel évite la requête initiale
+de contrôle d’état quand le test connaît déjà le domaine destinataire configuré.
 
 ## Créer une boîte
 
@@ -24,41 +24,41 @@ console.log(inbox.address);
 L’alias est normalisé en lettres minuscules, chiffres et tirets, puis un suffixe aléatoire de
 12 caractères est ajouté. L’alias par défaut est `test`.
 
-## Fixtures disponibles
+## Configurations de test disponibles
 
-Les fixtures des runners sont publiées derrière des sous-chemins isolés afin que le serveur racine
+Les configurations des outils d’exécution sont publiées derrière des sous-chemins isolés afin que le serveur racine
 et le SDK client ne chargent pas les dépendances de test optionnelles.
 
 | Import | Export principal | Cycle de vie |
 | --- | --- | --- |
 | `inboxtap/fixtures` | `startInboxTapFixture()` | Démarrage explicite et `close()` idempotent |
-| `inboxtap/fixtures/bun` | `setupInboxTap()` | Configuration et nettoyage du fichier via les hooks Bun |
+| `inboxtap/fixtures/bun` | `setupInboxTap()` | Configuration et nettoyage du fichier via les fonctions de cycle de vie de Bun |
 | `inboxtap/fixtures/vitest` | `extendInboxTap()` | Serveur par fichier, boîte par test |
-| `inboxtap/fixtures/playwright` | `extendInboxTap()` | Serveur par worker, boîte par test |
+| `inboxtap/fixtures/playwright` | `extendInboxTap()` | Serveur par processus, boîte par test |
 
 `startInboxTapFixture()` affecte `0` aux deux ports par défaut et renvoie `server`, `client`, un
 `transport` Nodemailer vérifié, les informations de connexion `smtp`, `createInbox()` et `close()`.
-Chaque adaptateur utilise le même objet fixture. Installez Nodemailer 9, ainsi que Vitest 4.1 ou
+Chaque adaptateur utilise le même objet de configuration. Installez Nodemailer 9, ainsi que Vitest 4.1 ou
 Playwright 1.61 lors de l’utilisation de leurs sous-chemins spécifiques. La valeur `smtp` contient
 `{ host, port, secure: false, ignoreTLS: true }` pour configurer l’application testée.
 
-Créez une nouvelle boîte pour chaque test. Une fixture peut partager le serveur de capture et le
+Créez une nouvelle boîte pour chaque test. Une configuration peut partager le serveur de capture et le
 transport à sa portée documentée, mais une boîte globale à toute la suite permettrait aux tests
 parallèles de lire le même destinataire.
 
-## Entrées des matchers
+## Entrées des assertions
 
-Les matchers d’assertion sont publiés séparément du serveur, du client et des fixtures :
+Les assertions personnalisées sont publiées séparément du serveur, du client et des configurations de test :
 
 | Import | Exports principaux | Comportement |
 | --- | --- | --- |
-| `inboxtap/matchers` | `inboxTapMatchers`, `createInboxTapMatchers()` | Implémentations sans peer et types publics d’observation |
+| `inboxtap/matchers` | `inboxTapMatchers`, `createInboxTapMatchers()` | Implémentations sans dépendance optionnelle et types publics d’observation |
 | `inboxtap/matchers/bun` | `extendInboxTapExpect(expect)` | Étend sur place l’`expect` injecté par Bun |
 | `inboxtap/matchers/vitest` | `extendInboxTapExpect(expect)` | Étend sur place l’`expect` injecté par Vitest |
 | `inboxtap/matchers/playwright` | `extendInboxTapExpect(expect)` | Renvoie un nouvel `expect` Playwright typé |
 
 Importer `inboxtap`, `inboxtap/client` ou `inboxtap/matchers` ne nécessite ni Nodemailer, ni
-Vitest, ni Playwright. Seul un adaptateur propre à un runner a besoin du peer correspondant.
+Vitest, ni Playwright. Seul un adaptateur propre à un outil d’exécution a besoin de la dépendance correspondante.
 
 ```ts
 import { expect } from "vitest";
@@ -77,7 +77,7 @@ expect(email).toContainLink("/reset-password");
 expect(email).toHaveUnsubscribeHeader({ oneClick: true });
 ```
 
-| Matcher | Sémantique |
+| Assertion | Sémantique |
 | --- | --- |
 | `toHaveDeliveredOnce({ subject?, quietMs? })` | Prend un instantané immédiat de la boîte et exige exactement un message correspondant. Une chaîne `subject` est une sous-chaîne insensible à la casse ; une expression régulière est testée sans modifier son `lastIndex`. `quietMs` est un entier de `0` à `60000` et vaut `0` par défaut. |
 | `toHaveRecipient(address)` | Compare exactement et sans tenir compte de la casse les destinataires de l’enveloppe SMTP ; le champ d’adresse d’affichage analysé n’est pas utilisé. |
@@ -86,15 +86,15 @@ expect(email).toHaveUnsubscribeHeader({ oneClick: true });
 
 `toHaveDeliveredOnce()` n’attend pas un message initial. Quand son premier instantané est valide,
 `quietMs` observe seulement l’intervalle qui suit ; cela ne prouve pas qu’une nouvelle tentative
-plus tardive est impossible. Le matcher one-click vérifie uniquement la forme des en-têtes RFC
-8058. Il ne vérifie ni les signatures DKIM, ni leur couverture, ni le comportement de l’endpoint
+plus tardive est impossible. L’assertion de désinscription en un clic vérifie uniquement la forme des en-têtes RFC
+8058. Elle ne vérifie ni les signatures DKIM, ni leur couverture, ni le comportement du point de terminaison
 de désinscription.
 
-Les résultats des matchers omettent volontairement `actual`, `expected`, les corps de message, les
+Les résultats des assertions omettent volontairement `actual`, `expected`, les corps de message, les
 valeurs de destinataire et de lien, les motifs porteurs de jetons et les en-têtes bruts. Les échecs
 n’exposent que des nombres et états booléens sûrs.
 
-Pour collecter un rapport, transmettez un recorder synchrone à la fabrique pure :
+Pour collecter un rapport, transmettez un collecteur synchrone à la fabrique pure :
 
 ```ts
 import {
@@ -112,16 +112,16 @@ const matchers = createInboxTapMatchers({
 });
 ```
 
-Chaque observation est versionnée et enregistre le nom du matcher, la négation et l’état de
+Chaque observation est versionnée et enregistre le nom de l’assertion, la négation et l’état de
 réussite, l’identifiant facultatif du message capturé, ainsi que des nombres ou booléens sans
 contenu sensible. Elle ne contient jamais le destinataire attendu, le sujet, le motif de lien, la
-valeur d’un en-tête ou le corps capturé. Passez `matchers` à l’`expect.extend()` d’un runner
-compatible ; les adaptateurs propres aux runners appellent la même fabrique.
+valeur d’un en-tête ou le corps capturé. Passez `matchers` à l’`expect.extend()` d’un outil d’exécution
+compatible ; les adaptateurs propres à chaque outil appellent la même fabrique.
 
 ## Rapports de test
 
-Importez `InboxTapReport` depuis le sous-chemin sans peer `inboxtap/reports`. Le collecteur
-implémente `InboxTapMatcherRecorder` : transmettez-le directement à un adaptateur de runner ou à
+Importez `InboxTapReport` depuis le sous-chemin sans dépendance optionnelle `inboxtap/reports`. Le collecteur
+implémente `InboxTapMatcherRecorder` : transmettez-le directement à un adaptateur d’outil d’exécution ou à
 `createInboxTapMatchers({ recorder })`. Ajoutez explicitement les messages capturés et les
 assertions de l’application :
 
@@ -160,14 +160,14 @@ test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
 });
 ```
 
-L’écriture depuis `finally` conserve les preuves les plus récentes lorsqu’un matcher ou une
+L’écriture depuis `finally` conserve les preuves les plus récentes lorsqu’une assertion ou une
 assertion de l’application échoue.
 
 | Méthode | Comportement |
 | --- | --- |
 | `addMessage(message)` | Ajoute un `CapturedEmail`, le déduplique par identifiant et renvoie le collecteur pour permettre le chaînage. |
-| `addAssertion({ name, passed, message?, messageId?, details? })` | Ajoute une assertion de l’application et renvoie le collecteur. Les chaînes facultatives et les `details` structurés passent par le même pipeline d’expurgation borné. |
-| `recordMatcherObservation(observation)` | Implémente `InboxTapMatcherRecorder` ; les adaptateurs de runner l’appellent pour chaque matcher terminé. |
+| `addAssertion({ name, passed, message?, messageId?, details? })` | Ajoute une assertion de l’application et renvoie le collecteur. Les chaînes facultatives et les `details` structurés passent par le même processus borné de masquage des données sensibles. |
+| `recordMatcherObservation(observation)` | Implémente `InboxTapMatcherRecorder` ; les adaptateurs des outils d’exécution l’appellent pour chaque assertion terminée. |
 | `render({ format: "json" \| "html" })` | Renvoie l’artefact déterministe sous forme de chaîne. |
 | `write(filePath, { format? })` | Écrit l’artefact de manière asynchrone et déduit le format de l’extension lorsqu’il est omis. |
 
@@ -183,14 +183,14 @@ raccourcis, les octets UTF-8 omis et la limite d’octets de l’artefact.
 parcours borné s’arrête avant d’avoir inspecté toute la valeur ; le nombre est alors une limite
 inférieure mesurée et le HTML distingue les cas avec `exactly` et `at least`.
 
-La portée du recorder suit l’objet `expect` étendu. L’exemple utilise l’`expect` de Vitest lié au
-test, de sorte que chaque rapport ne reçoit que les observations des matchers de ce test. Ne
+La portée du collecteur suit l’objet `expect` étendu. L’exemple utilise l’`expect` de Vitest lié au
+test, de sorte que chaque rapport ne reçoit que les observations des assertions de ce test. Ne
 rattachez pas différents collecteurs propres aux tests à un même `expect` Bun ou Vitest partagé
 pendant une exécution concurrente. Dans ce cas, utilisez explicitement `addMessage()` et
 `addAssertion()`, ou collectez délibérément un seul rapport pour la suite. L’adaptateur Playwright
 renvoie un nouvel `expect` étendu qui peut être limité à un rapport.
 
-Le pipeline d’expurgation par défaut :
+Le processus de masquage des données sensibles par défaut :
 
 - exclut la source RFC brute ;
 - attribue à chaque adresse e-mail un pseudonyme cohérent dans le rapport ;
@@ -208,16 +208,17 @@ La collecte est limitée à 100 messages et 1 000 assertions, et chaque artefact
 limité à 10 Mio. Lorsqu’une limite est atteinte, la sortie consigne des marqueurs de troncature
 explicites au lieu de croître sans limite.
 
-L’expurgation est une protection au mieux et ne peut garantir la détection de données personnelles
-ou secrètes arbitraires. Vérifiez l’artefact avant de le partager. `includeRaw: true` conserve une
-copie expurgée au mieux de la source RFC brute et ne doit être utilisé que lorsque la valeur
+Le masquage des données sensibles est une protection non exhaustive et ne peut garantir la détection
+de données personnelles ou secrètes arbitraires. Vérifiez l’artefact avant de le partager.
+`includeRaw: true` conserve une copie de la source RFC brute dont les données sensibles ne sont
+masquées que de manière non exhaustive et ne doit être utilisé que lorsque la valeur
 diagnostique supplémentaire justifie un risque de divulgation sensiblement plus élevé.
 
 ## Contrôleur de pannes SMTP
 
 Chaque serveur programmatique expose un `SmtpFaultController` sous `server.faults` ; les
-utilisateurs de fixtures y accèdent via `inboxTap.server.faults`. Les types publics du contrôleur,
-des options, du portail et de l’état sont exportés depuis `inboxtap`. Aucun drapeau d’activation
+utilisateurs des configurations de test y accèdent via `inboxTap.server.faults`. Les types publics du contrôleur,
+des options, de la barrière et de l’état sont exportés depuis `inboxtap`. Aucune option d’activation
 n’est nécessaire.
 
 ```ts
@@ -234,7 +235,7 @@ Enregistrez une règle avant de déclencher l’application. Dans l’ordre d’
 se lie à la prochaine transaction SMTP correspondante qui atteint `DATA`, et une seule règle
 s’applique à chaque transaction. Sans `to`, tous les destinataires correspondent ; sinon, la
 comparaison ignore la casse dans l’enveloppe SMTP. Si un destinataire correspond dans une
-transaction à plusieurs destinataires, la panne s’applique à toute la transaction. Les listeners
+transaction à plusieurs destinataires, la panne s’applique à toute la transaction. Les écouteurs
 SMTP IPv4 et IPv6 consomment la même file du contrôleur.
 
 | Méthode | Options et limites | Résultat |
@@ -243,15 +244,15 @@ SMTP IPv4 et IPv6 consomment la même file du contrôleur.
 | `delayNext` | `durationMs` entier de `0` à `60000` ; `to` et `times` optionnels | Retient la transaction avant de terminer la livraison |
 | `disconnectNext` | `afterBytes` entier sûr positif ou nul ; `to` et `times` optionnels | Ferme la connexion SMTP après l’observation du seuil |
 | `pauseNext` | `to` optionnel ; `timeoutMs` entier de `0` à `60000`, valant `60000` par défaut ; pas d’option `times` | Renvoie un `SmtpPauseGate` contrôlé indépendamment |
-| `reset` | Aucune option | Abandonne les attentes en file et actives, puis efface leurs timers |
+| `reset` | Aucune option | Abandonne les attentes en file et actives, puis efface leurs minuteries |
 
-`times` doit être un entier de `1` à `100` et vaut `1` par défaut. Les applications de règles
-développées partagent une limite de `100`, en comptant celles en file et celles actives. Un `to`
+`times` doit être un entier de `1` à `100` et vaut `1` par défaut. Les instances de règles après
+expansion de `times` partagent une limite de `100`, en comptant celles en file et celles actives. Un `to`
 fourni doit être une chaîne non vide ; les espaces environnants sont ignorés. Les seuils de
-déconnexion sont observés aux frontières des chunks du flux plutôt qu’exactement à l’octet.
+déconnexion sont observés aux frontières des blocs du flux plutôt qu’exactement à l’octet.
 InboxTap ferme à la fin de `DATA` lorsqu’un message est plus court que `afterBytes`, afin que la
 transaction injectée échoue tout de même. Les livraisons échouées ou déconnectées n’entrent jamais
-dans le store. Les livraisons retardées ou en pause n’apparaissent qu’après la réussite complète de
+dans le stockage. Les livraisons retardées ou en pause n’apparaissent qu’après la réussite complète de
 la livraison SMTP.
 
 `SmtpPauseGate.state` est un `SmtpPauseState` en lecture seule :
@@ -261,13 +262,13 @@ la livraison SMTP.
 | `pending` | La règle est en file et n’a pas atteint de commande `DATA` correspondante |
 | `paused` | Une transaction SMTP correspondante est retenue |
 | `released` | `release()` a annulé une règle en attente ou repris une transaction en pause |
-| `expired` | Le timeout absolu s’est écoulé ; une transaction active reçoit SMTP `451` et n’est pas capturée |
-| `aborted` | `reset()` ou l’arrêt du serveur a annulé le portail |
+| `expired` | Le délai d’expiration absolu s’est écoulé ; une transaction active reçoit SMTP `451` et n’est pas capturée |
+| `aborted` | `reset()` ou l’arrêt du serveur a annulé la barrière |
 
-Le timeout commence à l’appel de `pauseNext()` et borne donc à la fois le temps en file et la durée
-de la pause active. Le portail passe à `paused` après que le corps du message a réussi l’analyse et
+Le délai d’expiration commence à l’appel de `pauseNext()` et borne donc à la fois le temps en file et la durée
+de la pause active. La barrière passe à `paused` après que le corps du message a réussi l’analyse et
 la validation de taille, puis entre dans l’attente. `waitUntilPaused()` se résout alors et reste
-résolue si le portail se termine ensuite. La méthode rejette si le portail atteint un état terminal
+résolue si la barrière se termine ensuite. La méthode rejette si la barrière atteint un état terminal
 avant la pause. `release()` est idempotente et peut être appelée pendant `pending` ; cela retire la
 règle de la file afin qu’une transaction ultérieure ne soit pas affectée.
 
@@ -286,8 +287,8 @@ await delivery;
 ```
 
 `reset()` n’efface pas les messages capturés. L’arrêt du serveur assure le même nettoyage borné des
-portails : ceux en file ou actifs passent à `aborted`, et les timers sont effacés. Le contrôle des
-pannes est uniquement programmatique : il n’existe ni routes HTTP, ni drapeaux CLI, ni historique,
+barrières : celles en file ou actives passent à `aborted`, et les minuteries sont effacées. Le contrôle des
+pannes est uniquement programmatique : il n’existe ni routes HTTP, ni options CLI, ni historique,
 ni statistiques pour les pannes.
 
 ## Méthodes de TestInbox
@@ -343,5 +344,6 @@ interface CapturedEmail {
 
 ## Erreurs
 
-Les requêtes échouées et les timeouts d’extraction lèvent `InboxTapError`. Sa propriété `status`
-contient le statut de type HTTP, dont `408` pour un timeout et `404` pour un message introuvable.
+Les requêtes échouées et les expirations de délai d’extraction lèvent `InboxTapError`. Sa propriété
+`status` contient le code d’état HTTP, dont `408` pour une expiration de délai et `404` pour un
+message introuvable.

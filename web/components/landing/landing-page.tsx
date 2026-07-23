@@ -11,28 +11,42 @@ import { Reveal } from "./reveal";
 import { StoryScene } from "./story-scene";
 import { StoryStacked } from "./story-stacked";
 
-const terminalJson = `{
+function terminalJson(subject: string): string {
+  return `{
   "email": {
-    "subject": "Verify your account",
+    "subject": "${subject}",
     "codes": ["482910"],
-    "links": ["https://app.test/verify?…"]
+    "links": ["https://app.test/verification?…"]
   }
 }`;
+}
 
-const signupSpec = `import { InboxTapClient } from "inboxtap/client";
+function signupSpec({
+  alias,
+  button,
+  emailLabel,
+  matcher,
+}: {
+  alias: string;
+  button: string;
+  emailLabel: string;
+  matcher: string;
+}): string {
+  return `import { InboxTapClient } from "inboxtap/client";
 
 const inboxTap = new InboxTapClient();
-const inbox = await inboxTap.createInbox({ alias: "signup" });
+const inbox = await inboxTap.createInbox({ alias: "${alias}" });
 
-await page.getByLabel("Email").fill(inbox.address);
-await page.getByRole("button", { name: "Create account" }).click();
+await page.getByLabel("${emailLabel}").fill(inbox.address);
+await page.getByRole("button", { name: "${button}" }).click();
 
 const verificationUrl = await inbox.waitForLink({
-  subject: /verify your email/i,
-  contains: "/verify",
+  subject: /${matcher}/i,
+  contains: "/verification",
 });
 
 await page.goto(verificationUrl);`;
+}
 
 export function LandingPage({ locale }: { locale: Locale }) {
   const dictionary = getDictionary(locale);
@@ -81,8 +95,10 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <b>$</b> npx inboxtap
                 <span className="cursor" />
               </p>
-              <p className="terminal-comment">GET /api/emails/latest?to=signup%40local.test</p>
-              <HighlightedCode code={terminalJson} lang="json" />
+              <p className="terminal-comment">
+                GET /api/emails/latest?to={encodeURIComponent(`${t.demo.alias}@local.test`)}
+              </p>
+              <HighlightedCode code={terminalJson(t.demo.subject)} lang="json" />
             </div>
           </Reveal>
         </section>
@@ -116,8 +132,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <p className="section-lede">{t.codeLede}</p>
           </Reveal>
           <Reveal className="code-window">
-            <div className="code-label">signup.spec.ts</div>
-            <HighlightedCode code={signupSpec} lang="typescript" />
+            <div className="code-label">{t.demo.fileName}</div>
+            <HighlightedCode code={signupSpec(t.demo)} lang="typescript" />
           </Reveal>
         </section>
 
@@ -145,14 +161,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <a className="button button-ghost" href={GITHUB_URL}>
                 {t.closingCta}
               </a>
-              <a className="bmc-button" href={BUY_ME_A_COFFEE_URL}>
-                {/* biome-ignore lint/performance/noImgElement: Static export serves this local SVG as-is; next/image adds nothing here. */}
-                <img
-                  alt={dictionary.chrome.supportLabel}
-                  height={44}
-                  src="/buy-me-a-coffee-button.svg"
-                  width={157}
-                />
+              <a className="button button-coffee" href={BUY_ME_A_COFFEE_URL}>
+                {dictionary.chrome.supportLabel} ☕
               </a>
             </div>
           </Reveal>

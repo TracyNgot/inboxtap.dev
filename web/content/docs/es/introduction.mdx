@@ -1,16 +1,18 @@
-**InboxTap es un servidor local de captura de email y un SDK TypeScript para tests automatizados.**
-Úsalo cuando un test de Playwright, Cypress, Vitest, Jest o Bun necesite recuperar un enlace de
-verificación, magic link, enlace de restablecimiento, invitación, código de un solo uso u otro valor
-de un email real generado por la aplicación bajo test.
+**InboxTap es un servidor local de captura de correo y un SDK de TypeScript para pruebas
+automatizadas.** Úsalo cuando una prueba de Playwright, Cypress, Vitest, Jest o Bun necesite
+recuperar un enlace de verificación, un enlace mágico, un enlace de restablecimiento, una
+invitación, un código de un solo uso u otro valor de un correo real generado por la aplicación que
+se está probando.
 
 InboxTap se ejecuta en localhost sin Docker, acepta el mensaje SMTP de la aplicación y expone el
-resultado capturado al test mediante un SDK tipado o una API HTTP. No es un proveedor de email de
-producción, buzón alojado, servicio de entregabilidad, almacén persistente ni visor manual de email.
+resultado capturado a la prueba mediante un SDK tipado o una API HTTP. No es un proveedor de correo
+de producción, un buzón alojado, un servicio de entregabilidad, un almacén persistente ni un visor
+manual de correo.
 
 **Datos clave**
 
 - Los mensajes permanecen en la máquina local y nunca se reenvían fuera.
-- Las direcciones generadas por el cliente aíslan tests paralelos sin registro en el servidor.
+- Las direcciones generadas por el cliente aíslan pruebas paralelas sin registro en el servidor.
 - El paquete se ejecuta con `npx` o `bunx` y es compatible con Node 20 y posteriores.
 - El almacenamiento, el tamaño, los resultados y los tiempos de espera tienen límites explícitos.
 
@@ -21,12 +23,13 @@ producción, buzón alojado, servicio de entregabilidad, almacén persistente ni
 
 ## Por qué InboxTap
 
-Los flujos de email se sitúan en una frontera incómoda de los tests end-to-end. Mockear el emisor
-de correo omite la salida que recibiría tu usuario, mientras que un servicio de correo alojado
-añade cuentas, latencia de red y buzones reales a un test que debería ser determinista.
+Los flujos de correo se sitúan en un límite incómodo de las pruebas de extremo a extremo. Sustituir
+el emisor de correo por un doble de prueba impide comprobar el mensaje final que recibiría tu
+usuario, mientras que un servicio de correo alojado
+añade cuentas, latencia de red y buzones reales a una prueba que debería ser determinista.
 
-InboxTap mantiene esa frontera en local. Acepta destinatarios arbitrarios, parsea el mensaje
-entregado y expone el resultado al mismo test que disparó el email.
+InboxTap mantiene ese límite en local. Acepta destinatarios arbitrarios, analiza el mensaje
+entregado y expone el resultado a la misma prueba que inició el envío.
 
 ## Cómo funciona
 
@@ -34,13 +37,13 @@ entregado y expone el resultado al mismo test que disparó el email.
   steps={[
     { label: "Tu aplicación" },
     { label: "InboxTap", note: "localhost", accent: true },
-    { label: "Tu test" },
+    { label: "Tu prueba" },
   ]}
   connectors={["SMTP", "HTTP / SDK"]}
 />
 
-1. Inicia InboxTap en local o junto a tu proceso de tests.
-2. Apunta la aplicación bajo test a `localhost:1025`.
+1. Inicia InboxTap en local o junto a tu proceso de pruebas.
+2. Apunta la aplicación que se está probando a `localhost:1025`.
 3. Dale a la aplicación una dirección única creada por `InboxTapClient`.
 4. Espera el valor que necesitas a través del SDK o consulta la API HTTP local.
 
@@ -50,11 +53,11 @@ RFC 822 en bruto.
 
 ## Seguridad y alcance
 
-Por defecto, InboxTap enlaza SMTP y HTTP solo a las direcciones de loopback (`127.0.0.1` y `::1`)
-y nunca reenvía un mensaje al exterior. Es para desarrollo y tests automatizados, no para la
+Por defecto, InboxTap enlaza SMTP y HTTP solo a las direcciones de bucle local (`127.0.0.1` y `::1`)
+y nunca reenvía un mensaje al exterior. Está pensado para el desarrollo y las pruebas automatizadas, no para la
 entrega de correo en producción.
 
 El servidor v<Version /> almacena los mensajes en memoria, retiene los 100 más recientes por
-defecto, rechaza los mensajes de más de 5 MiB por defecto y limita las esperas HTTP de long-poll a
-60 segundos. No ofrece persistencia, buzón en el navegador, flujo de adjuntos, webhooks,
+defecto, rechaza los mensajes de más de 5 MiB y limita las esperas HTTP de sondeo prolongado a
+60 segundos. No ofrece persistencia, buzón en el navegador, procesamiento de adjuntos, webhooks,
 autenticación SMTP ni STARTTLS.

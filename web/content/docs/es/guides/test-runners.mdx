@@ -1,11 +1,12 @@
-InboxTap incluye fixtures opcionales y nativas para Bun test, Vitest y Playwright. Cada fixture
-inicia los listeners SMTP y HTTP locales en puertos seleccionados automáticamente, crea un
-transport de Nodemailer listo para usar y garantiza la limpieza.
+InboxTap incluye recursos de prueba nativos y opcionales para Bun, Vitest y Playwright. Cada
+recurso inicia los procesos de escucha SMTP y HTTP locales en puertos seleccionados
+automáticamente, crea un transporte de Nodemailer listo para usar y garantiza la limpieza.
 
 ## Instalar las dependencias opcionales
 
-Instala solo el adaptador del runner que use tu proyecto. Nodemailer 9 es necesario para todas las
-fixtures; Vitest 4.1 y Playwright 1.61 son dependencias opcionales de sus respectivos subpaths.
+Instala solo el adaptador del ejecutor de pruebas que use tu proyecto. Nodemailer 9 es necesario
+para todos los recursos; Vitest 4.1 y Playwright 1.61 son dependencias opcionales de sus
+respectivas rutas secundarias.
 
 ```bash
 bun add --dev inboxtap nodemailer
@@ -14,14 +15,14 @@ bun add --dev vitest
 bun add --dev @playwright/test
 ```
 
-Las dependencias de las fixtures permanecen detrás de subpaths de paquete aislados. Importar
+Las dependencias de los recursos de prueba permanecen en rutas secundarias aisladas del paquete. Importar
 `inboxtap` o `inboxtap/client` no requiere Nodemailer, Vitest ni Playwright.
 
-## Fixture compartida
+## Recurso de prueba compartido
 
-Usa `startInboxTapFixture()` cuando un runner tenga su propio modelo de ciclo de vida. Ambos puertos
+Usa `startInboxTapFixture()` cuando un ejecutor tenga su propio modelo de ciclo de vida. Ambos puertos
 usan `0` por defecto, por lo que el sistema operativo elige puertos libres. El arranque verifica el
-transport de Nodemailer antes de devolver el control, limpia los fallos parciales y permite llamar
+transporte de Nodemailer antes de devolver el control, limpia los fallos parciales y permite llamar
 a `close()` más de una vez de forma segura.
 
 ```ts
@@ -47,10 +48,11 @@ try {
 El objeto devuelto también expone `server`, `client` y los datos de conexión `smtp` para las
 aplicaciones que necesitan arrancar con los puertos seleccionados.
 
-## Bun test
+## Pruebas con Bun
 
-`setupInboxTap()` registra los hooks asíncronos de preparación y limpieza de Bun. Bun no inyecta un
-contexto de fixture personalizado, así que crea explícitamente un buzón nuevo dentro de cada test.
+`setupInboxTap()` registra las funciones asíncronas de preparación y limpieza del ciclo de vida de
+Bun. Bun no inyecta un contexto personalizado para los recursos de prueba, así que crea
+explícitamente un buzón nuevo dentro de cada prueba.
 
 ```ts
 import { expect, test } from "bun:test";
@@ -74,9 +76,9 @@ test("captures one email", async () => {
 
 ## Vitest
 
-`extendInboxTap()` añade a un test base de Vitest una fixture `inboxTap` con alcance de archivo y
-una fixture `inbox` con alcance de test. Cada test recibe una dirección nueva mientras el archivo
-reutiliza un único servidor y transport verificados.
+`extendInboxTap()` añade a una prueba base de Vitest un recurso `inboxTap` con alcance de archivo y
+un recurso `inbox` con alcance de prueba. Cada prueba recibe una dirección nueva, mientras el
+archivo reutiliza un único servidor y un transporte ya verificados.
 
 ```ts
 import { expect, test as base } from "vitest";
@@ -99,9 +101,9 @@ test("captures one email", async ({ inboxTap, inbox }) => {
 
 ## Playwright
 
-El adaptador de Playwright proporciona una fixture `inboxTap` con alcance de worker y una fixture
-`inbox` con alcance de test. Cada worker obtiene sus propios puertos dinámicos y cada test su propia
-dirección de destinatario.
+El adaptador de Playwright proporciona un recurso `inboxTap` con alcance de proceso de trabajo y
+un recurso `inbox` con alcance de prueba. Cada proceso de trabajo obtiene sus propios puertos
+dinámicos y cada prueba recibe su propia dirección de destinatario.
 
 ```ts
 import { expect, test as base } from "@playwright/test";
@@ -122,16 +124,17 @@ test("captures a verification link", async ({ inboxTap, inbox }) => {
 });
 ```
 
-Si la aplicación necesita el puerto SMTP dinámico, iníciala como otra fixture de worker que dependa
-de `inboxTap` y lee `inboxTap.smtp` al arrancar el proceso. El `webServer` de Playwright se inicia
-antes que las fixtures de test, por lo que un `webServer` ya iniciado no puede consumir un puerto
-que la fixture de worker de InboxTap seleccione después.
+Si la aplicación necesita el puerto SMTP dinámico, iníciala como otro recurso con alcance de
+proceso de trabajo que dependa de `inboxTap` y lee `inboxTap.smtp` al iniciar el proceso. El
+`webServer` de Playwright se inicia antes que los recursos de prueba, por lo que un `webServer` ya
+iniciado no puede usar un puerto que el recurso de InboxTap seleccione después.
 
-## Matchers nativos de los runners
+## Comparadores nativos de los ejecutores
 
-InboxTap mantiene las implementaciones de los matchers en el subpath sin peers
-`inboxtap/matchers` y publica adaptadores tipados para cada runner. Inyecta el `expect` del runner
-en `extendInboxTapExpect()`. Bun y Vitest amplían ese objeto en el mismo lugar:
+InboxTap mantiene las implementaciones de los comparadores en la ruta secundaria
+`inboxtap/matchers`, que no requiere dependencias opcionales, y publica adaptadores tipados para
+cada ejecutor. Inyecta el objeto `expect` del ejecutor en `extendInboxTapExpect()`. Bun y Vitest
+amplían ese objeto en el mismo lugar:
 
 ```ts
 import { expect } from "vitest";
@@ -142,7 +145,7 @@ extendInboxTapExpect(expect);
 
 La configuración de Bun sigue el mismo patrón con `bun:test` e `inboxtap/matchers/bun`. El
 `expect.extend()` nativo de Playwright devuelve un objeto nuevo, así que exporta el valor devuelto
-junto con tu fixture de test extendida:
+junto con tu recurso de prueba ampliado:
 
 ```ts
 import { expect as baseExpect, test as baseTest } from "@playwright/test";
@@ -153,7 +156,7 @@ export const test = extendInboxTap(baseTest);
 export const expect = extendInboxTapExpect(baseExpect);
 ```
 
-Los matchers funcionan con el buzón propio del test y los mensajes capturados:
+Los comparadores funcionan con el buzón propio de la prueba y los mensajes capturados:
 
 ```ts
 await expect(inbox).toHaveDeliveredOnce({
@@ -172,17 +175,17 @@ capturados y no espera a la primera entrega. `quietMs` es una ventana de observa
 solo comienza cuando la instantánea inicial contiene exactamente un mensaje coincidente. Puede
 detectar un reintento durante esa ventana, pero no demuestra que no llegue otro más tarde.
 
-Usa `inboxTapMatchers` directamente con otro `expect` compatible al estilo Jest, o crea un conjunto
-nuevo con `createInboxTapMatchers({ recorder })`. Esos exports no importan ningún runner. El
-recorder recibe observaciones estructuradas sin contenido sensible; los diagnósticos de los
-matchers también omiten cuerpos, valores de destinatario, enlaces, patrones con tokens y cabeceras
-en bruto.
+Usa `inboxTapMatchers` directamente con otro objeto `expect` compatible con el estilo de Jest, o
+crea un conjunto nuevo con `createInboxTapMatchers({ recorder })`. Esas exportaciones no importan
+ningún ejecutor. El recopilador recibe observaciones estructuradas sin contenido sensible; los
+diagnósticos de los comparadores también omiten cuerpos, valores de destinatario, enlaces,
+patrones con tokens y cabeceras en bruto.
 
-## Escribir un informe de prueba redactado
+## Escribir un informe de prueba con datos sensibles ocultos
 
-`InboxTapReport`, desde `inboxtap/reports`, funciona como recorder de matchers y como recopilador de
-mensajes capturados y aserciones de la aplicación. Para un flujo de informes de Vitest no
-concurrente, amplía el `expect` vinculado a la prueba actual:
+`InboxTapReport`, de `inboxtap/reports`, recopila las observaciones de los comparadores, los
+mensajes capturados y las aserciones de la aplicación. Para un flujo de informes de Vitest que no
+sea concurrente, amplía el objeto `expect` vinculado a la prueba actual:
 
 ```ts
 import { test as base } from "vitest";
@@ -219,41 +222,42 @@ test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
 });
 ```
 
-Escribir desde `finally` conserva la evidencia más reciente cuando falla un matcher o una aserción
+Escribir desde `finally` conserva la evidencia más reciente cuando falla un comparador o una aserción
 de la aplicación.
 
-La misma entrada ordenada produce JSON determinista y versionado o HTML estático y autocontenido.
+La misma entrada ordenada produce JSON determinista y con versión, o HTML estático y autónomo.
 `write()` infiere el formato a partir de `.json` o `.html` y crea los directorios padre que falten.
 El informe predeterminado excluye la fuente RFC en bruto, asigna seudónimos coherentes a las
-direcciones de correo, redacta superficies secretas habituales, escapa el HTML capturado y nunca
+direcciones de correo, oculta los secretos en las ubicaciones habituales, escapa el HTML capturado y nunca
 carga recursos remotos. La recopilación se detiene al alcanzar 100 mensajes y 1.000 aserciones;
-cada artefacto renderizado tiene un máximo de 10 MiB y registra el truncamiento de forma explícita.
+cada artefacto generado tiene un máximo de 10 MiB y registra el truncamiento de forma explícita.
 El conteo de bytes omitidos distingue los valores exactos de los límites inferiores medidos.
 
-El ámbito del recorder sigue al `expect` ampliado. No conectes repetidamente recopiladores por
-prueba a un mismo `expect` compartido de Bun o Vitest durante una ejecución concurrente; registra
+El ámbito del recopilador sigue al objeto `expect` ampliado. No conectes repetidamente
+recopiladores por prueba a un mismo objeto `expect` compartido de Bun o Vitest durante una
+ejecución concurrente; registra
 explícitamente los mensajes y las aserciones de la aplicación, o produce de forma deliberada un
-único artefacto para la suite. Playwright puede crear un nuevo `expect` devuelto para cada informe.
-La redacción sigue siendo un esfuerzo de protección: revisa los artefactos antes de compartirlos.
-`includeRaw: true` es una opción de mayor riesgo porque conserva una copia redactada con el mismo
-criterio de esfuerzo de la fuente RFC en bruto.
+único artefacto para el conjunto de pruebas. Playwright puede crear un nuevo objeto `expect` para
+cada informe. La ocultación de datos sensibles reduce el riesgo, pero no ofrece una garantía
+absoluta: revisa los artefactos antes de compartirlos. `includeRaw: true` es una opción de mayor
+riesgo porque conserva una copia de la fuente RFC en bruto a la que se aplica la misma protección.
 
 ## Aislamiento y limpieza
 
 Comparte el servidor solo en el alcance definido por el adaptador. Nunca crees un único `TestInbox`
-global para toda la suite: llama a `createInbox()` dentro de cada test de Bun o usa el `inbox`
-inyectado en Vitest y Playwright. Los destinatarios de sobre únicos mantienen aislados los tests
-concurrentes sin borrar los mensajes de otro test.
+global para todo el conjunto de pruebas: llama a `createInbox()` dentro de cada prueba de Bun o usa
+el objeto `inbox` inyectado en Vitest y Playwright. Los destinatarios únicos del sobre mantienen
+aisladas las pruebas concurrentes sin borrar los mensajes de otra prueba.
 
-Todos los adaptadores detienen el servidor y cierran el transport cuando termina su alcance nativo.
+Todos los adaptadores detienen el servidor y cierran el transporte cuando termina su alcance nativo.
 Puedes pasar opciones del servidor a `setupInboxTap(options)` o
 `extendInboxTap(baseTest, options)` cuando necesites ajustar los valores por defecto; los puertos
 SMTP y API omitidos siguen siendo dinámicos.
 
 ## Probar rutas de fallo
 
-Usa el controlador de fallos del servidor de la fixture para probar los reintentos de la
-aplicación en el límite SMTP real. Dirige cada regla al destinatario de sobre único del test para
+Usa el controlador de fallos del servidor del recurso de prueba para probar los reintentos de la
+aplicación en el límite SMTP real. Dirige cada regla al destinatario único del sobre de la prueba para
 que una transacción concurrente no pueda consumirla. Registra la regla justo antes de activar la
 aplicación.
 
@@ -279,34 +283,35 @@ test("retries a transient SMTP failure", async ({ inboxTap, inbox }) => {
 });
 ```
 
-Una respuesta `451` sirve para rutas de reintento y backoff; usa una respuesta `550` para manejar
-fallos permanentes. `delayNext()` ejercita los timeouts de la aplicación y `disconnectNext()` la
+Una respuesta `451` sirve para probar los reintentos y la espera incremental; usa una respuesta
+`550` para gestionar fallos permanentes. `delayNext()` prueba los tiempos de espera de la aplicación
+y `disconnectNext()` la
 recuperación de una sesión SMTP interrumpida. Los intentos fallidos o desconectados nunca producen
 mensajes capturados parciales.
 
 Para la concurrencia, usa `pauseNext()` como compuerta explícita en vez de introducir esperas.
 Espera a `gate.waitUntilPaused()` antes de lanzar la acción competidora y llama a la función
-idempotente `gate.release()` en un bloque `finally`. El timeout absoluto predeterminado de 60
+idempotente `gate.release()` en un bloque `finally`. El tiempo de espera absoluto predeterminado de 60
 segundos sigue acotando una coincidencia o liberación omitida; si una pausa activa caduca, SMTP
 devuelve `451` y el mensaje no se captura. La limpieza aborta las compuertas restantes; evita llamar
-a `reset()` desde un test concurrente porque afecta a las demás reglas del servidor compartido.
+a `reset()` desde una prueba concurrente porque afecta a las demás reglas del servidor compartido.
 
 Solo se aplica una regla de fallo a cada transacción. Usa `times` cuando varios intentos
 consecutivos deban recibir el mismo fallo, o registra la regla siguiente después de observar el
 intento anterior. InboxTap controla el comportamiento de entrega SMTP; la persistencia, la
-idempotencia y la deduplicación de negocio siguen siendo aserciones propias de los tests de la
+idempotencia y la deduplicación de negocio siguen siendo aserciones propias de las pruebas de la
 aplicación.
 
-## Elegir el helper adecuado
+## Elegir la función auxiliar adecuada
 
-- Usa `waitForLink()` para URLs de verificación, restablecimiento de contraseña y magic links.
-- Usa `waitForCode()` para OTPs numéricos; pasa `pattern` para un formato no predeterminado.
-- Usa `waitForMatch()` para una API key u otro valor incrustado en el cuerpo.
+- Usa `waitForLink()` para URL de verificación, restablecimiento de contraseña y enlaces mágicos.
+- Usa `waitForCode()` para códigos OTP numéricos; pasa `pattern` para un formato no predeterminado.
+- Usa `waitForMatch()` para una clave de API u otro valor incrustado en el cuerpo.
 - Usa `waitForMessage()` cuando la aserción necesite cabeceras, destinatarios, HTML o la fuente en
   bruto.
-- Usa `messages()` cuando el email pueda haber llegado ya y necesites inspeccionar el conjunto
+- Usa `messages()` cuando el correo pueda haber llegado ya y necesites inspeccionar el conjunto
   actual.
 
-Todos los helpers de espera están acotados. Configura `timeoutMs` lo bastante alto para el flujo
-de la aplicación, pero mantenlo por debajo del timeout propio del runner para que los fallos
-informen primero del contexto de InboxTap.
+Todas las funciones auxiliares de espera están acotadas. Configura `timeoutMs` con un valor
+suficiente para el flujo de la aplicación, pero mantenlo por debajo del tiempo de espera propio
+del ejecutor para que los fallos informen primero del contexto de InboxTap.

@@ -1,6 +1,6 @@
-Cypress exécute le code des specs dans le navigateur, donc le SDK Node ne peut pas être importé
-dans un fichier de spec. Enregistrez plutôt quelques handlers `cy.task` dans `setupNodeEvents` :
-les tasks détiennent le SDK dans le processus Node de la config, et les specs les appellent avec
+Cypress exécute le code des fichiers de test dans le navigateur, donc le SDK Node ne peut pas être importé
+dans un fichier de test. Enregistrez plutôt quelques gestionnaires `cy.task()` dans `setupNodeEvents` :
+les tâches détiennent le SDK dans le processus Node de la configuration, et les fichiers de test les appellent avec
 des valeurs simples.
 
 ## Démarrer les services
@@ -15,7 +15,7 @@ npx cypress run
 
 Configurez l’application testée pour envoyer le SMTP vers `localhost:1025`.
 
-## Enregistrer les tasks
+## Enregistrer les tâches
 
 ```ts
 // cypress.config.ts
@@ -48,11 +48,11 @@ export default defineConfig({
 });
 ```
 
-La task de création renvoie l’adresse de la boîte sous forme de chaîne, et chaque task d’attente
+La tâche de création renvoie l’adresse de la boîte sous forme de chaîne, et chaque tâche d’attente
 reconstruit un `TestInbox` à partir de l’adresse qu’elle reçoit.
 
 <Callout title="Frontière JSON">
-  Les arguments et résultats des tasks doivent être sérialisables en JSON. Passez les sujets et les
+  Les arguments et résultats des tâches doivent être sérialisables en JSON. Passez les sujets et les
   motifs de code comme chaînes — un sujet chaîne correspond comme sous-chaîne insensible à la
   casse, et un motif chaîne est compilé en expression régulière — mais ne passez jamais un objet
   RegExp à travers la frontière.
@@ -82,21 +82,21 @@ describe("sign up", () => {
 ```
 
 Donnez à l’option `timeout` de Cypress plus de temps qu’à `timeoutMs`, afin qu’un email lent
-échoue dans la task avec le message d’erreur d’InboxTap plutôt que comme un timeout de task
-générique. Utilisez la task `inboxtap:waitForCode` quand l’application demande un OTP au lieu d’un
+échoue dans la tâche avec le message d’erreur d’InboxTap plutôt que par une expiration générique
+du délai. Utilisez la tâche `inboxtap:waitForCode` quand l’application demande un OTP au lieu d’un
 lien.
 
 ## Isolation parallèle
 
-Créez la boîte dans chaque test, jamais une seule fois pour toute la suite. Chaque appel de task
-génère une adresse destinataire fraîche, donc les specs parallèles peuvent partager un seul serveur
+Créez la boîte dans chaque test, jamais une seule fois pour toute la suite. Chaque appel de tâche
+génère une adresse destinataire fraîche, donc les fichiers de test parallèles peuvent partager un seul serveur
 InboxTap sans lire les messages des autres. Le stockage borné évince les anciens messages de
-lui-même ; n’ajoutez une task de vidage que si un nettoyage immédiat aide au débogage local.
+lui-même ; n’ajoutez une tâche de vidage que si un nettoyage immédiat aide au débogage local.
 
 ## Accès HTTP direct
 
 `cy.request` s’exécute depuis le proxy côté Node de Cypress, il peut donc atteindre directement
-l’API loopback sans enregistrer de task :
+l’API sur l’interface de bouclage sans enregistrer de tâche :
 
 ```ts
 cy.request(
@@ -107,5 +107,5 @@ cy.request(
 ```
 
 Vous perdez en échange le balayage multi-messages et l’extraction de valeurs du SDK, donc préférez
-les tasks pour tout ce qui dépasse une vérification ponctuelle. La liste complète des endpoints se
+les tâches pour tout ce qui dépasse une vérification ponctuelle. La liste complète des points de terminaison se
 trouve dans la [référence de l'API HTTP](/fr/docs/reference/api-http).

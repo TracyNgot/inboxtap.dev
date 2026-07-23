@@ -18,6 +18,6 @@ const contentByLocale: Record<Locale, Record<CoreDocKey, DocContent>> = {
 
 export function getDocContent(locale: Locale, key: DocKey): DocContent {
   if (key === "examples") return examplesLandingContent(locale);
-  if (isExampleDocKey(key)) return getExampleByKey(key).Content;
+  if (isExampleDocKey(key)) return getExampleByKey(key).content[locale];
   return contentByLocale[locale][key as CoreDocKey];
 }

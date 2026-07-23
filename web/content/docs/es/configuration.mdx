@@ -1,4 +1,4 @@
-InboxTap tiene flags de CLI explícitos y opciones de servidor programáticas. No lee ningún archivo
+InboxTap ofrece opciones explícitas en la CLI y opciones programáticas para el servidor. No lee ningún archivo
 de configuración en v<Version />.
 
 ## Valores por defecto
@@ -28,9 +28,10 @@ de configuración en v<Version />.
 La palabra opcional `start` se acepta, así que `inboxtap` e `inboxtap start` son equivalentes.
 
 <Callout title="Frontera de red">
-  Por defecto ambos listeners enlazan solo las direcciones de loopback; si IPv6 no está disponible,
-  el servidor recurre únicamente a `127.0.0.1`. Cambiar cualquiera de los hosts fuera de loopback
-  expone un servicio de test sin autenticación. Hazlo solo en un entorno aislado que controles.
+  Por defecto, ambos procesos de escucha se enlazan solo a las direcciones de bucle local; si IPv6
+  no está disponible, el servidor recurre únicamente a `127.0.0.1`. Cambiar cualquiera de los
+  hosts por una dirección que no sea de bucle local expone un servicio de pruebas sin
+  autenticación. Hazlo solo en un entorno aislado que controles.
 </Callout>
 
 ## Varias instancias
@@ -50,7 +51,7 @@ const inboxTap = new InboxTapClient({ baseUrl: "http://localhost:9025" });
 
 ## Servidor programático
 
-Los tests pueden importar el servidor y solicitar puertos efímeros con `0`:
+Las pruebas pueden importar el servidor y solicitar puertos efímeros con `0`:
 
 ```ts
 import { InboxTapServer } from "inboxtap";
@@ -65,5 +66,5 @@ console.log(server.apiUrl);
 await server.stop();
 ```
 
-Los puertos enlazados están disponibles en `server.apiPort` y `server.smtpPort` después de que
-`start()` se resuelva.
+Los puertos enlazados están disponibles en `server.apiPort` y `server.smtpPort` una vez resuelta la
+promesa devuelta por `start()`.

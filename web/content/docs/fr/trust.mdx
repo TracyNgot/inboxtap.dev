@@ -1,4 +1,4 @@
-InboxTap est un outil open source dont le comportement peut être vérifié dans le code, les tests,
+InboxTap est un outil libre dont le comportement peut être vérifié dans le code, les tests,
 les métadonnées du paquet et l'historique des versions publics. Cette page rassemble les preuves
 principales qui soutiennent la documentation et explique le traitement des corrections.
 
@@ -6,12 +6,12 @@ principales qui soutiennent la documentation et explique le traitement des corre
 
 - [Code source](https://github.com/TracyNgot/inboxtap.dev) — le serveur SMTP, l'API HTTP, le SDK
   TypeScript, la CLI, le site et les tests automatisés sont développés publiquement.
-- [Paquet npm](https://www.npmjs.com/package/inboxtap) — versions publiées, runtime Node pris en
+- [Paquet npm](https://www.npmjs.com/package/inboxtap) — versions publiées, environnement d’exécution Node pris en
   charge, contenu du paquet et commande d'installation.
 - [Historique des versions](https://inboxtap.dev/fr/docs/changelog/) — changements versionnés avec
-  des liens vers les pull requests et les comparaisons Git complètes.
+  des liens vers les demandes de fusion et les comparaisons Git complètes.
 - [Exécutions CI](https://github.com/TracyNgot/inboxtap.dev/actions/workflows/ci.yml) — formatage,
-  lint, types, tests, builds, imports ESM/CJS, CLI Node et export statique du site.
+  analyse du code, types, tests, compilations, imports ESM/CJS, CLI Node et export statique du site.
 
 Le paquet est sous licence MIT. InboxTap capture les emails localement et ne contient aucun client
 SMTP sortant : l'affirmation d'absence de relais peut donc être vérifiée directement dans le code et
@@ -21,10 +21,10 @@ les tests d'intégration.
 
 Les correctifs de sécurité couvrent la dernière version stable. Signalez les vulnérabilités
 présumées via le [processus de sécurité privé](https://github.com/TracyNgot/inboxtap.dev/security/policy),
-et non dans une issue publique. Le dépôt exécute CodeQL et utilise Dependabot pour le workspace Bun,
+et non dans un ticket public. Le dépôt exécute CodeQL et utilise Dependabot pour l’espace de travail Bun,
 les exemples autonomes et GitHub Actions.
 
-InboxTap prend en charge Node 20 et les versions suivantes. Le changelog est la source de vérité
+InboxTap prend en charge Node 20 et les versions suivantes. Le journal des modifications est la source de vérité
 pour l'activité des versions, les dépréciations, les correctifs et les changements publics.
 
 ## Documentation et corrections
@@ -32,12 +32,12 @@ pour l'activité des versions, les dépréciations, les correctifs et les change
 Les affirmations de la documentation doivent correspondre à l'implémentation, aux types TypeScript
 exportés, aux exemples exécutables et aux tests automatisés. Si une page est inexacte ou obsolète,
 ouvrez une
-[issue de documentation](https://github.com/TracyNgot/inboxtap.dev/issues/new?template=documentation.yml)
-ou proposez une pull request.
+[ticket de documentation](https://github.com/TracyNgot/inboxtap.dev/issues/new?template=documentation.yml)
+ou proposez une demande de fusion.
 
 Les corrections sont vérifiées contre le code et les tests. La date de mise à jour est visible dans
 l'en-tête de chaque page, Git conserve l'historique des modifications et les corrections qui
-affectent une version apparaissent aussi dans le changelog.
+affectent une version apparaissent aussi dans le journal des modifications.
 
 ## Limites de recommandation
 

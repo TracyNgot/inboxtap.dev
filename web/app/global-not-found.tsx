@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { RootDocument } from "@/components/shared/root-document";
 import { getDictionary } from "@/lib/i18n";
-import { docPath, homePath, withTrailingSlash } from "@/lib/i18n/config";
+import { docPath, homePath, locales, withTrailingSlash } from "@/lib/i18n/config";
+import { notFoundLocaleBootstrap } from "@/lib/i18n/not-found";
 import { siteViewport } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
@@ -12,32 +13,37 @@ export const metadata: Metadata = {
 export const viewport = siteViewport;
 
 export default function GlobalNotFound() {
-  const en = getDictionary("en").notFound;
-  const fr = getDictionary("fr").notFound;
-  const es = getDictionary("es").notFound;
-
   return (
-    <RootDocument lang="en">
+    <RootDocument
+      bootstrapScript={notFoundLocaleBootstrap}
+      htmlAttributes={{ "data-not-found-locale": "en" }}
+      lang="en"
+    >
       <main className="not-found-page">
-        <p className="eyebrow">{en.eyebrow}</p>
-        <h1>{en.title}</h1>
-        <p>{en.text}</p>
-        <div>
-          <a className="button button-primary" href="/">
-            {en.goHome}
-          </a>
-          <a className="button button-ghost" href={withTrailingSlash(docPath("en", ""))}>
-            {en.readDocs}
-          </a>
-        </div>
-        <p lang="fr">
-          {fr.title} <a href={withTrailingSlash(homePath("fr"))}>{fr.goHome}</a> ·{" "}
-          <a href={withTrailingSlash(docPath("fr", ""))}>{fr.readDocs}</a>
-        </p>
-        <p lang="es">
-          {es.title} <a href={withTrailingSlash(homePath("es"))}>{es.goHome}</a> ·{" "}
-          <a href={withTrailingSlash(docPath("es", ""))}>{es.readDocs}</a>
-        </p>
+        {locales.map((locale) => {
+          const t = getDictionary(locale).notFound;
+          return (
+            <section
+              aria-labelledby={`not-found-title-${locale}`}
+              className="not-found-localized"
+              data-locale={locale}
+              key={locale}
+              lang={locale}
+            >
+              <p className="eyebrow">{t.eyebrow}</p>
+              <h1 id={`not-found-title-${locale}`}>{t.title}</h1>
+              <p>{t.text}</p>
+              <div>
+                <a className="button button-primary" href={withTrailingSlash(homePath(locale))}>
+                  {t.goHome}
+                </a>
+                <a className="button button-ghost" href={withTrailingSlash(docPath(locale, ""))}>
+                  {t.readDocs}
+                </a>
+              </div>
+            </section>
+          );
+        })}
       </main>
     </RootDocument>
   );

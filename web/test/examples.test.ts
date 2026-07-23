@@ -66,6 +66,14 @@ function headingId(heading: string): string {
     .replace(/\s+/g, "-");
 }
 
+function readmeName(locale: (typeof locales)[number]): string {
+  return locale === "en" ? "README.md" : `README.${locale}.md`;
+}
+
+function codeFences(source: string): string[] {
+  return source.match(/```[\s\S]*?```/g) ?? [];
+}
+
 describe("example README registry", () => {
   test("registers every example README exactly once", () => {
     const directories = readdirSync(examplesRoot, { withFileTypes: true })
@@ -77,22 +85,49 @@ describe("example README registry", () => {
 
     expect(new Set(registered).size).toBe(registered.length);
     expect(registered).toEqual(directories);
+    for (const directory of directories) {
+      for (const locale of locales) {
+        expect(
+          existsSync(join(examplesRoot, directory, readmeName(locale))),
+          `${directory} is missing ${readmeName(locale)}`,
+        ).toBe(true);
+      }
+    }
   });
 
   for (const example of exampleReadmes) {
-    test(`${example.directory} has one H1, resolvable anchors, and no relative links`, () => {
-      const source = readFileSync(join(examplesRoot, example.directory, "README.md"), "utf8");
-      const h1s = source.match(/^# [^#].*$/gm) ?? [];
-      const headingIds = (source.match(/^## .+$/gm) ?? []).map((heading) =>
-        headingId(heading.slice(3)),
-      );
+    test(`${example.directory} has complete localized README pages`, () => {
+      const english = readFileSync(join(examplesRoot, example.directory, "README.md"), "utf8");
 
-      expect(h1s).toHaveLength(1);
-      expect(example.toc.en.map<string>((item) => item.id)).toEqual(headingIds);
-      expect(
-        unresolvedReadmeTargets(source),
-        `Unresolved relative README links in ${example.directory}`,
-      ).toEqual([]);
+      for (const locale of locales) {
+        const source = readFileSync(
+          join(examplesRoot, example.directory, readmeName(locale)),
+          "utf8",
+        );
+        const h1s = source.match(/^# [^#].*$/gm) ?? [];
+        const headingIds = (source.match(/^## .+$/gm) ?? []).map((heading) =>
+          headingId(heading.slice(3)),
+        );
+
+        expect(h1s, `${locale}/${example.directory} H1`).toHaveLength(1);
+        expect(h1s[0]?.slice(2), `${locale}/${example.directory} H1 metadata parity`).toBe(
+          example.strings[locale].title,
+        );
+        expect(headingIds, `${locale}/${example.directory} headings`).toEqual(
+          example.toc[locale].map<string>((item) => item.id),
+        );
+        expect(
+          unresolvedReadmeTargets(source),
+          `Unresolved relative README links in ${locale}/${example.directory}`,
+        ).toEqual([]);
+        expect(codeFences(source), `${locale}/${example.directory} code fences`).toEqual(
+          codeFences(english),
+        );
+        if (locale !== "en") {
+          expect(source, `${locale}/${example.directory} translation`).not.toBe(english);
+          expect(example.content[locale]).not.toBe(example.content.en);
+        }
+      }
     });
   }
 
@@ -131,13 +166,13 @@ describe("example README registry", () => {
         const doc = getLocalizedDoc(locale, key);
         expect(doc.slug).toBe(`${examplesLanding[locale].slug}/${example.directory}`);
         expect(doc).toMatchObject(getExampleDocStrings(locale, key));
-        expect(doc.toc.map((item) => item.id)).toEqual(example.toc.en.map((item) => item.id));
+        expect(doc.toc.map((item) => item.id)).toEqual(example.toc[locale].map((item) => item.id));
         if (locale !== "en") {
           expect(doc.toc.map((item) => item.label)).not.toEqual(
             example.toc.en.map((item) => item.label),
           );
         }
-        expect(JSON.stringify(docJsonLd(locale, key))).toContain('"inLanguage":"en"');
+        expect(JSON.stringify(docJsonLd(locale, key))).toContain(`"inLanguage":"${locale}"`);
       }
     }
   });

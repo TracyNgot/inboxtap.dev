@@ -22,12 +22,12 @@ interface manuelle de prévisualisation.
 
 ## Pourquoi InboxTap
 
-Les flux d’email se situent à une frontière inconfortable des tests de bout en bout. Mocker
-l’expéditeur de mail escamote la sortie que votre utilisateur recevrait, tandis qu’un service de
+Les flux d’email se situent à une frontière inconfortable des tests de bout en bout. Simuler
+l’expéditeur de mail masque le message que votre utilisateur recevrait, tandis qu’un service de
 mail hébergé ajoute des comptes, de la latence réseau et de vraies boîtes de réception à un test qui
 devrait être déterministe.
 
-InboxTap garde cette frontière en local. Il accepte des destinataires arbitraires, parse le message
+InboxTap garde cette frontière en local. Il accepte des destinataires arbitraires, analyse le message
 délivré et expose le résultat au test même qui a déclenché l’email.
 
 ## Comment ça marche
@@ -52,11 +52,11 @@ brute.
 
 ## Sécurité et périmètre
 
-Par défaut, InboxTap ne lie SMTP et HTTP qu’aux adresses de loopback (`127.0.0.1` et `::1`) et ne
+Par défaut, InboxTap ne lie SMTP et HTTP qu’aux adresses de bouclage (`127.0.0.1` et `::1`) et ne
 relaie jamais un message vers l’extérieur. Il est destiné au développement et aux tests
 automatisés, pas à la livraison de mail en production.
 
 Le serveur v<Version /> stocke les messages en mémoire, conserve les 100 plus récents par défaut,
-rejette par défaut les messages de plus de 5 Mio et plafonne les attentes HTTP en long-poll à 60
+rejette par défaut les messages de plus de 5 Mio et plafonne les requêtes HTTP avec attente prolongée à 60
 secondes. Il ne fournit ni persistance, ni boîte de réception dans le navigateur, ni gestion des
 pièces jointes, ni webhooks, ni authentification SMTP, ni STARTTLS.
