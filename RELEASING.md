@@ -1,10 +1,12 @@
 # Releasing InboxTap
 
 InboxTap publishes its public, unscoped package to the npm registry. Merging a
-pull request into `main` normally performs the complete release automatically.
-The release commit and tag use gitmoji, GitHub labels generate categorized
-release notes, and every release is recorded in `CHANGELOG.md` and rendered on
-the website at <https://inboxtap.dev/docs/changelog>.
+pull request that changes the published library into `main` performs the
+complete release automatically. Documentation, website, example, test-only, and
+release-tooling changes wait for the next library release. The release commit
+and tag use gitmoji, GitHub labels generate categorized release notes, and every
+release is recorded in `CHANGELOG.md` and rendered on the website at
+<https://inboxtap.dev/docs/changelog>.
 
 ## npm authentication
 
@@ -15,11 +17,12 @@ manual fallback below publishes with your own logged-in npm account instead.
 
 ## Release notes, labels, and the changelog
 
-Release notes are generated from the pull requests merged since the previous
-tag and categorized by the labels in `.github/release.yml`: `breaking`,
-`enhancement`/`feature`, `bug`, `security`, `documentation`, `dependencies`,
-`testing`, and `maintenance`, with `skip-changelog` excluding a pull request
-entirely.
+Release notes are generated from all pull requests merged since the previous
+tag, including documentation and website changes that did not trigger their own
+release. They are categorized by the labels in `.github/release.yml`:
+`breaking`, `enhancement`/`feature`, `bug`, `security`, `documentation`,
+`dependencies`, `testing`, and `maintenance`, with `skip-changelog` excluding a
+pull request entirely.
 
 `.github/workflows/label-pr.yml` applies the matching label automatically from
 the source branch prefix when a pull request opens, for example `feat/` →
@@ -32,7 +35,9 @@ and the website changelog always agree.
 
 ## Automated release flow
 
-Source branch prefixes map to version bumps:
+The workflow runs for a merged pull request only when it changes `src/`,
+`LICENSE`, `package.json`, `tsconfig.json`, or `tsup.config.ts`. Source branch
+prefixes on those library-changing pull requests map to version bumps:
 
 | Branch prefix | Version bump |
 | --- | --- |
@@ -40,13 +45,16 @@ Source branch prefixes map to version bumps:
 | `feat/` | Minor |
 | Any other prefix | Patch |
 
-The workflow applies the highest bump among all pull requests merged into
-`main` since the last release tag, so rapid merges that collapse into a single
-run cannot drop a queued minor or major release. A major bump additionally
-requires the `breaking` label on a contributing pull request; the run fails
-until the label is added and the run is retried.
+The workflow applies the highest bump among all library-changing pull requests
+merged into `main` since the last release tag, so rapid merges that collapse
+into a single run cannot drop a queued minor or major release. Documentation,
+website, and other deferred pull requests do not affect the version bump but
+remain in the generated release notes. A major bump additionally requires the
+`breaking` label on a contributing library pull request; the run fails until
+the label is added and the run is retried.
 
-After a pull request merges into `main`, `.github/workflows/release.yml`:
+After an eligible pull request merges into `main`,
+`.github/workflows/release.yml`:
 
 1. Serializes the release with any other pending release.
 2. Checks out trusted `main` and installs the frozen Bun dependency graph.
@@ -56,8 +64,8 @@ After a pull request merges into `main`, `.github/workflows/release.yml`:
 4. Atomically pushes the commit and tag, publishes to npm, and creates a
    GitHub release with generated notes.
 
-Pull requests that are closed without merging, or target a branch other than
-`main`, do not trigger a release.
+Pull requests that do not change the published library, are closed without
+merging, or target a branch other than `main` do not trigger a release.
 
 ## On-demand releases, including v1.0.0
 

@@ -15,7 +15,8 @@ Create a focused branch from `main`:
 git switch -c feat/short-description
 ```
 
-The source branch determines the release created after the pull request merges:
+For pull requests that change the published library, the source branch
+determines the release created after the pull request merges:
 
 | Branch prefix | Release |
 | --- | --- |
@@ -24,9 +25,15 @@ The source branch determines the release created after the pull request merges:
 | `fix/`, `docs/`, `refactor/`, `test/`, `chore/` | Patch |
 
 Unrecognized prefixes also produce a patch release, and when several merges
-release together the highest bump among them wins. A major release additionally
-requires the `breaking` label on the pull request. An issue number may be
-included in the branch name, but is not required.
+release together the highest bump among the library-changing pull requests wins.
+A major release additionally requires the `breaking` label on the pull request.
+An issue number may be included in the branch name, but is not required.
+
+A merge triggers a library release only when it changes `src/`, `LICENSE`,
+`package.json`, `tsconfig.json`, or `tsup.config.ts`. Documentation, website,
+example, test-only, and release-tooling changes wait for the next library
+release. Its release notes still include all merged pull requests since the
+previous tag, so those deferred changes are not omitted.
 
 ## Coding style
 
@@ -89,8 +96,9 @@ Use `Refs #123` in the commit body when helpful. Do not add Linear identifiers.
   to keep a pull request out of the release notes.
 - Complete every section of the pull request template.
 - Run `bun run verify` before requesting review.
-- Expect a successful merge into `main` to publish the corresponding npm
-  release; closing a pull request without merging does not release anything.
+- Expect a successful library-changing merge into `main` to publish the
+  corresponding npm release. Documentation- or website-only merges do not
+  publish, and closing a pull request without merging does not release anything.
 
 ## Security reports
 

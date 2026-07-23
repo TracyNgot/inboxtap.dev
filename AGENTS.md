@@ -62,11 +62,14 @@ ESM/CJS imports, and the compiled Node CLI. Never bypass Lefthook with
 
 - npm is the canonical package registry. Do not publish this unscoped package to
   GitHub Packages.
-- Merging a pull request into `main` runs the serialized npm release workflow.
-  It derives the semantic version bump from the source branches of every pull
+- Merging a pull request into `main` runs the serialized npm release workflow
+  only when the pull request changes the published library. It derives the
+  semantic version bump from the source branches of every library-changing pull
   request merged since the last release tag (a major bump also requires the
-  `breaking` label), verifies the package, pushes the release commit and tag,
-  publishes to npm, and creates the GitHub release.
+  `breaking` label), while release notes include all merged pull requests in
+  that range, including deferred documentation and website changes. It then
+  verifies the package, pushes the release commit and tag, publishes to npm,
+  and creates the GitHub release.
 - Release only from a clean `main` branch after `bun run verify` passes, whether
   the release is automated or manual.
 - Follow [RELEASING.md](./RELEASING.md). Do not publish, push tags, or create a

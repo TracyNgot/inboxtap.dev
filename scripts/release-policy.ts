@@ -1,6 +1,25 @@
 export type ReleaseLevel = "patch" | "minor" | "major";
 
+export const LIBRARY_RELEASE_PATHS = [
+  "LICENSE",
+  "package.json",
+  "src/**",
+  "tsconfig.json",
+  "tsup.config.ts",
+] as const;
+
 const LEVEL_RANK: Record<ReleaseLevel, number> = { patch: 0, minor: 1, major: 2 };
+const LIBRARY_ROOT_FILES = new Set<string>(
+  LIBRARY_RELEASE_PATHS.filter((path) => !path.endsWith("/**")),
+);
+
+export function isLibraryReleasePath(path: string): boolean {
+  return path.startsWith("src/") || LIBRARY_ROOT_FILES.has(path);
+}
+
+export function hasLibraryChanges(paths: string[]): boolean {
+  return paths.some(isLibraryReleasePath);
+}
 
 export function releaseLevelForBranch(branch: string): ReleaseLevel {
   const [prefix] = branch.split("/", 1);
@@ -37,7 +56,13 @@ export function bumpVersion(current: string, level: ReleaseLevel): string {
 }
 
 if (import.meta.main) {
-  const branches = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  if (args[0] === "--has-library-changes") {
+    console.log(hasLibraryChanges(args.slice(1)));
+    process.exit(0);
+  }
+
+  const branches = args;
   if (branches.length === 0)
     throw new Error("Usage: bun scripts/release-policy.ts <branch> [branch...]");
   console.log(maxReleaseLevel(branches));
