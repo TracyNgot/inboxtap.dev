@@ -63,6 +63,7 @@ graph LR
 | `src/client/` | The fetch-based test SDK: `InboxTapClient` plus `TestInbox` with `waitForMessage`/`waitForLink`/`waitForCode`/`waitForMatch` polling helpers and a typed `InboxTapError`. |
 | `src/fixtures/` | Optional runner-native fixtures: the shared starter owns dynamic SMTP/API ports, a verified Nodemailer transport, partial-startup cleanup, and idempotent shutdown; Bun, Vitest, and Playwright adapters map that lifecycle to their native scopes. |
 | `src/matchers/` | Peer-free matcher implementations for delivery count, envelope recipients, extracted links, and raw unsubscribe headers; isolated Bun, Vitest, and Playwright adapters add native `expect` types without loading runner peers from the root package. Matcher observations contain only bounded counts, booleans, matcher state, and message IDs for later redacted reports. |
+| `src/reports/` | Client-side `InboxTapReport` collection and deterministic JSON/static HTML rendering. It accepts matcher observations, explicit application assertions, and captured messages; applies bounded best-effort redaction and pseudonymization; and writes artifacts without adding server routes or remote assets. |
 | `src/cli.ts` | Node/Bun executable that parses the CLI flags, starts `InboxTapServer`, prints connection info, and shuts down on `SIGINT`/`SIGTERM`. |
 | `src/index.ts` | Public server entry point re-exporting `InboxTapServer` and the shared public types. |
 | `src/types.ts` | Shared interfaces (`CapturedEmail`, `EmailFilters`, `HealthResponse`, …) imported by both server and client — the mechanism behind the SDK ↔ API alignment invariant. |
@@ -106,6 +107,14 @@ enforced in code today:
    token-bearing patterns to assertion results. Failures and structured
    recorder observations expose only the minimum counts and boolean states
    needed to diagnose the assertion.
+8. **Bounded, client-side reports** — reports add no server state or control
+   surface. They cap collection at 100 messages and 1,000 assertions, cap each
+   rendered artifact at 10 MiB, record explicit truncation, exclude raw RFC
+   source by default, and render captured HTML as escaped evidence without
+   executing captured scripts or loading captured or remote resources.
+   Omitted-byte accounting identifies exact counts and bounded lower bounds
+   separately. Redaction is documented as best-effort rather than a promise to
+   detect arbitrary personal information.
 
 ## Current scope (v0.1)
 
@@ -122,6 +131,10 @@ Included:
   adapters for one-delivery snapshots, envelope recipients, extracted links,
   and raw `List-Unsubscribe` header shape; matcher observations form the safe
   handoff to client-side reports
+- Client-side, deterministic, versioned JSON and self-contained static HTML
+  reports with matcher observations, application assertions, captured-message
+  evidence, consistent email pseudonyms, best-effort redaction, and explicit
+  truncation markers
 - Server-side extraction of http(s) links and 4–8 digit codes; arbitrary
   regex matching is SDK-side via `waitForMatch` (and `waitForCode` defaults to
   6-digit codes)
@@ -160,8 +173,9 @@ Explicitly excluded:
   `inboxtap/fixtures/playwright`. Pure matchers live at
   `inboxtap/matchers`, with runner-specific adapters at
   `inboxtap/matchers/bun`, `inboxtap/matchers/vitest`, and
-  `inboxtap/matchers/playwright`. Root, client, and pure-matcher imports do not
-  load optional peers.
+  `inboxtap/matchers/playwright`. Client-side reports live at
+  `inboxtap/reports`. Root, client, pure-matcher, and report imports do not load
+  optional peers.
 - Built with tsup; tested with Bun; formatted and linted with Biome;
   pre-commit/push hooks via Lefthook.
 - `examples/` holds standalone integration examples for the docs guides; they

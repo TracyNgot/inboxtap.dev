@@ -98,7 +98,7 @@ export const docsEs: DocsDictionary = {
     },
     "reference/client-sdk": {
       description:
-        "Referencia del SDK cliente, fixtures, matchers, fallos SMTP y mensajes capturados.",
+        "Referencia del SDK cliente, fixtures, matchers, informes redactados, fallos SMTP y mensajes capturados.",
       slug: "referencia/sdk-cliente",
       title: "SDK cliente",
       toc: [
@@ -106,6 +106,7 @@ export const docsEs: DocsDictionary = {
         { id: "crear-un-buzón", label: "Crear un buzón" },
         { id: "puntos-de-entrada-de-fixtures", label: "Puntos de entrada" },
         { id: "puntos-de-entrada-de-matchers", label: "Entrada de matchers" },
+        { id: "informes-de-prueba", label: "Informes de prueba" },
         { id: "controlador-de-fallos-smtp", label: "Controlador de fallos SMTP" },
         { id: "métodos-de-testinbox", label: "Métodos de TestInbox" },
         { id: "métodos-de-bajo-nivel", label: "Métodos de bajo nivel" },
@@ -142,7 +143,7 @@ export const docsEs: DocsDictionary = {
     },
     "guides/test-runners": {
       description:
-        "Usa fixtures, matchers nativos y fallos SMTP con Bun test, Vitest y Playwright.",
+        "Usa fixtures, matchers nativos, informes redactados y fallos SMTP con Bun test, Vitest y Playwright.",
       slug: "guias/ejecutores-de-tests",
       title: "Probar emails con Bun, Vitest y Playwright",
       toc: [
@@ -152,6 +153,10 @@ export const docsEs: DocsDictionary = {
         { id: "vitest", label: "Vitest" },
         { id: "playwright", label: "Playwright" },
         { id: "matchers-nativos-de-los-runners", label: "Matchers nativos" },
+        {
+          id: "escribir-un-informe-de-prueba-redactado",
+          label: "Escribir un informe",
+        },
         { id: "aislamiento-y-limpieza", label: "Aislamiento y limpieza" },
         { id: "probar-rutas-de-fallo", label: "Probar rutas de fallo" },
         { id: "elegir-el-helper-adecuado", label: "Elegir un helper" },

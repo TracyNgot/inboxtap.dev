@@ -25,24 +25,24 @@ async function verifyModuleExports(): Promise<void> {
   await runNode([
     "--input-type=module",
     "--eval",
-    "import { InboxTapServer } from 'inboxtap'; import { InboxTapClient } from 'inboxtap/client'; import { startInboxTapFixture } from 'inboxtap/fixtures'; import { extendInboxTap as extendVitest } from 'inboxtap/fixtures/vitest'; import { extendInboxTap as extendPlaywright } from 'inboxtap/fixtures/playwright'; import { createInboxTapMatchers } from 'inboxtap/matchers'; import { extendInboxTapExpect as extendBunExpect } from 'inboxtap/matchers/bun'; import { extendInboxTapExpect as extendVitestExpect } from 'inboxtap/matchers/vitest'; import { extendInboxTapExpect as extendPlaywrightExpect } from 'inboxtap/matchers/playwright'; if (!InboxTapServer || !InboxTapClient || !startInboxTapFixture || !extendVitest || !extendPlaywright || !createInboxTapMatchers || !extendBunExpect || !extendVitestExpect || !extendPlaywrightExpect) process.exit(1);",
+    "import { InboxTapServer } from 'inboxtap'; import { InboxTapClient } from 'inboxtap/client'; import { startInboxTapFixture } from 'inboxtap/fixtures'; import { extendInboxTap as extendVitest } from 'inboxtap/fixtures/vitest'; import { extendInboxTap as extendPlaywright } from 'inboxtap/fixtures/playwright'; import { createInboxTapMatchers } from 'inboxtap/matchers'; import { extendInboxTapExpect as extendBunExpect } from 'inboxtap/matchers/bun'; import { extendInboxTapExpect as extendVitestExpect } from 'inboxtap/matchers/vitest'; import { extendInboxTapExpect as extendPlaywrightExpect } from 'inboxtap/matchers/playwright'; import { InboxTapReport } from 'inboxtap/reports'; const report = new InboxTapReport(); if (!InboxTapServer || !InboxTapClient || !startInboxTapFixture || !extendVitest || !extendPlaywright || !createInboxTapMatchers || !extendBunExpect || !extendVitestExpect || !extendPlaywrightExpect || typeof report.recordMatcherObservation !== 'function') process.exit(1);",
   ]);
   await runNode([
     "--input-type=commonjs",
     "--eval",
-    "const { InboxTapServer } = require('inboxtap'); const { InboxTapClient } = require('inboxtap/client'); const { startInboxTapFixture } = require('inboxtap/fixtures'); const { extendInboxTap: extendVitest } = require('inboxtap/fixtures/vitest'); const { extendInboxTap: extendPlaywright } = require('inboxtap/fixtures/playwright'); const { createInboxTapMatchers } = require('inboxtap/matchers'); const { extendInboxTapExpect: extendBunExpect } = require('inboxtap/matchers/bun'); const { extendInboxTapExpect: extendVitestExpect } = require('inboxtap/matchers/vitest'); const { extendInboxTapExpect: extendPlaywrightExpect } = require('inboxtap/matchers/playwright'); if (!InboxTapServer || !InboxTapClient || !startInboxTapFixture || !extendVitest || !extendPlaywright || !createInboxTapMatchers || !extendBunExpect || !extendVitestExpect || !extendPlaywrightExpect) process.exit(1);",
+    "const { InboxTapServer } = require('inboxtap'); const { InboxTapClient } = require('inboxtap/client'); const { startInboxTapFixture } = require('inboxtap/fixtures'); const { extendInboxTap: extendVitest } = require('inboxtap/fixtures/vitest'); const { extendInboxTap: extendPlaywright } = require('inboxtap/fixtures/playwright'); const { createInboxTapMatchers } = require('inboxtap/matchers'); const { extendInboxTapExpect: extendBunExpect } = require('inboxtap/matchers/bun'); const { extendInboxTapExpect: extendVitestExpect } = require('inboxtap/matchers/vitest'); const { extendInboxTapExpect: extendPlaywrightExpect } = require('inboxtap/matchers/playwright'); const { InboxTapReport } = require('inboxtap/reports'); const report = new InboxTapReport(); if (!InboxTapServer || !InboxTapClient || !startInboxTapFixture || !extendVitest || !extendPlaywright || !createInboxTapMatchers || !extendBunExpect || !extendVitestExpect || !extendPlaywrightExpect || typeof report.recordMatcherObservation !== 'function') process.exit(1);",
   ]);
   await runNode([
     "--experimental-loader",
     "./smoke/package-consumers/block-fixture-peers-loader.mjs",
     "--input-type=module",
     "--eval",
-    "import { InboxTapServer } from 'inboxtap'; import { InboxTapClient } from 'inboxtap/client'; import { createInboxTapMatchers } from 'inboxtap/matchers'; if (!InboxTapServer || !InboxTapClient || !createInboxTapMatchers) process.exit(1);",
+    "import { InboxTapServer } from 'inboxtap'; import { InboxTapClient } from 'inboxtap/client'; import { createInboxTapMatchers } from 'inboxtap/matchers'; import { InboxTapReport } from 'inboxtap/reports'; const report = new InboxTapReport(); if (!InboxTapServer || !InboxTapClient || !createInboxTapMatchers || typeof report.recordMatcherObservation !== 'function') process.exit(1);",
   ]);
   await runNode([
     "--input-type=commonjs",
     "--eval",
-    "const Module = require('node:module'); const load = Module._load; const blocked = new Set(['@playwright/test', 'nodemailer', 'vitest']); Module._load = function(request, parent, isMain) { if (blocked.has(request)) throw new Error('Unexpected optional peer import: ' + request); return load.call(this, request, parent, isMain); }; const { InboxTapServer } = require('inboxtap'); const { InboxTapClient } = require('inboxtap/client'); const { createInboxTapMatchers } = require('inboxtap/matchers'); if (!InboxTapServer || !InboxTapClient || !createInboxTapMatchers) process.exit(1);",
+    "const Module = require('node:module'); const load = Module._load; const blocked = new Set(['@playwright/test', 'nodemailer', 'vitest']); Module._load = function(request, parent, isMain) { if (blocked.has(request)) throw new Error('Unexpected optional peer import: ' + request); return load.call(this, request, parent, isMain); }; const { InboxTapServer } = require('inboxtap'); const { InboxTapClient } = require('inboxtap/client'); const { createInboxTapMatchers } = require('inboxtap/matchers'); const { InboxTapReport } = require('inboxtap/reports'); const report = new InboxTapReport(); if (!InboxTapServer || !InboxTapClient || !createInboxTapMatchers || typeof report.recordMatcherObservation !== 'function') process.exit(1);",
   ]);
 }
 
@@ -56,7 +56,7 @@ async function verifyIsolatedDeclarations(): Promise<void> {
   const directory = await mkdtemp(join(tmpdir(), "inboxtap-types-"));
   try {
     await copyPackage(directory);
-    await verifyRootClientMatcherTypesWithoutPeers(directory);
+    await verifyRootClientMatcherReportTypesWithoutPeers(directory);
     await copyFixtureTypeDependencies(directory);
     await verifyFixtureTypesWithNodemailer(directory);
   } finally {
@@ -71,12 +71,16 @@ async function copyPackage(directory: string): Promise<void> {
   await copyFile("package.json", join(packageDirectory, "package.json"));
 }
 
-async function verifyRootClientMatcherTypesWithoutPeers(directory: string): Promise<void> {
+async function verifyRootClientMatcherReportTypesWithoutPeers(directory: string): Promise<void> {
   const source = [
     'import { InboxTapServer } from "inboxtap";',
     'import { InboxTapClient } from "inboxtap/client";',
     'import { createInboxTapMatchers } from "inboxtap/matchers";',
-    "void [InboxTapServer, InboxTapClient, createInboxTapMatchers];",
+    'import type { InboxTapMatcherRecorder } from "inboxtap/matchers";',
+    'import { InboxTapReport } from "inboxtap/reports";',
+    "const report = new InboxTapReport();",
+    "const recorder: InboxTapMatcherRecorder = report;",
+    "void [InboxTapServer, InboxTapClient, createInboxTapMatchers, recorder];",
   ].join("\n");
   await writeFile(join(directory, "root-client.mts"), source, "utf8");
   await writeFile(join(directory, "root-client.cts"), source, "utf8");

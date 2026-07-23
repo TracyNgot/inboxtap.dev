@@ -96,7 +96,7 @@ export const docsEn: DocsDictionary = {
     },
     "reference/client-sdk": {
       description:
-        "Reference for the client SDK, runner fixtures, assertion matchers, SMTP faults, and captured messages.",
+        "Reference for the client SDK, runner fixtures, assertion matchers, redacted reports, SMTP faults, and captured messages.",
       slug: "reference/client-sdk",
       title: "Client SDK",
       toc: [
@@ -104,6 +104,7 @@ export const docsEn: DocsDictionary = {
         { id: "create-an-inbox", label: "Create an inbox" },
         { id: "fixture-entry-points", label: "Fixture entry points" },
         { id: "matcher-entry-points", label: "Matcher entry points" },
+        { id: "report-entry-point", label: "Report entry point" },
         { id: "smtp-fault-controller", label: "SMTP fault controller" },
         { id: "testinbox-methods", label: "TestInbox methods" },
         { id: "low-level-client-methods", label: "Low-level methods" },
@@ -139,7 +140,7 @@ export const docsEn: DocsDictionary = {
     },
     "guides/test-runners": {
       description:
-        "Use lifecycle fixtures, native assertion matchers, and SMTP faults with Bun, Vitest, and Playwright.",
+        "Use lifecycle fixtures, native assertion matchers, redacted reports, and SMTP faults with Bun, Vitest, and Playwright.",
       slug: "guides/test-runners",
       title: "Test emails with Bun, Vitest, and Playwright",
       toc: [
@@ -149,6 +150,7 @@ export const docsEn: DocsDictionary = {
         { id: "vitest", label: "Vitest" },
         { id: "playwright", label: "Playwright" },
         { id: "runner-native-matchers", label: "Runner-native matchers" },
+        { id: "write-a-redacted-test-report", label: "Write a redacted report" },
         { id: "isolation-and-cleanup", label: "Isolation and cleanup" },
         { id: "exercise-failure-paths", label: "Exercise failure paths" },
         { id: "choose-the-right-helper", label: "Choose a helper" },

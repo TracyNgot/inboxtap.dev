@@ -114,6 +114,97 @@ optional captured-message ID, and content-safe counts or booleans. It never cont
 recipient, subject, link pattern, header value, or captured body. Pass `matchers` to a compatible
 runner's `expect.extend()`; the runner-specific adapters call the same factory.
 
+## Report entry point
+
+Import `InboxTapReport` from the peer-free `inboxtap/reports` subpath. The collector implements
+`InboxTapMatcherRecorder`, so pass it directly to a runner adapter or to
+`createInboxTapMatchers({ recorder })`. Add captured messages and application-level assertions
+explicitly:
+
+```ts
+import { test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+import { InboxTapReport } from "inboxtap/reports";
+
+const test = extendInboxTap(base);
+
+test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
+  const report = new InboxTapReport({ title: "Signup email" });
+  extendInboxTapExpect(expect, { recorder: report });
+
+  try {
+    await inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify/id-example?next=private",
+    });
+    await expect(inbox).toHaveDeliveredOnce({ subject: /verify/i });
+    const email = await inbox.waitForMessage({ subject: /verify/i });
+
+    report.addAssertion({
+      name: "verification email exposes one link",
+      passed: email.links.length === 1,
+      messageId: email.id,
+    });
+  } finally {
+    for (const email of await inbox.messages()) report.addMessage(email);
+    await report.write("artifacts/signup-email.json");
+    await report.write("artifacts/signup-email.html");
+  }
+});
+```
+
+Writing from `finally` preserves the latest evidence when a matcher or application assertion
+fails.
+
+| Method | Behavior |
+| --- | --- |
+| `addMessage(message)` | Adds one `CapturedEmail`, deduplicated by its ID, and returns the collector for chaining. |
+| `addAssertion({ name, passed, message?, messageId?, details? })` | Adds an application assertion and returns the collector. Optional strings and structured `details` pass through the same bounded redaction pipeline. |
+| `recordMatcherObservation(observation)` | Implements `InboxTapMatcherRecorder`; runner adapters call it for each completed matcher. |
+| `render({ format: "json" \| "html" })` | Returns the deterministic artifact as a string. |
+| `write(filePath, { format? })` | Writes the artifact asynchronously, inferring the format from the extension when omitted. |
+
+`render({ format })` returns deterministic JSON or self-contained static HTML for the same ordered
+inputs. JSON includes a schema version. `write(filePath, { format? })` infers the format from a
+`.json` or `.html` extension when it is omitted and creates missing parent directories. Neither
+operation calls the InboxTap server.
+
+The version 1 JSON document exposes `title`, `protection`, `summary`, `messages`, `assertions`, and
+`truncation`. Truncation records omitted message and assertion counts, shortened-field counts,
+omitted UTF-8 bytes, and the artifact byte limit. `utf8BytesOmittedExact` is `true` when
+`utf8BytesOmitted` is exact. It is `false` when a bounded scan stops early, in which case the byte
+count is a measured lower bound; HTML labels the two cases `exactly` and `at least`.
+
+Recorder scope follows the `expect` object that was extended. The example uses Vitest's
+test-bound `expect`, so each report receives only that test's matcher observations. Do not attach
+different per-test collectors to one shared Bun or Vitest `expect` while tests run concurrently.
+Use explicit `addMessage()` and `addAssertion()` calls in that case, or deliberately collect one
+suite-scoped report. Playwright's adapter returns a new extended `expect`, which can be scoped to
+one report.
+
+The default redaction pipeline:
+
+- excludes raw RFC source;
+- assigns each email address a consistent pseudonym within the report;
+- removes URL credentials and redacts every query value, fragments, secret-like path values,
+  `Authorization`, `Cookie`, `Proxy-Authorization`, `Set-Cookie`, `X-API-Key`, `X-Auth-Token`, and
+  token-like values in text and HTML; and
+- escapes captured HTML instead of rendering it and never executes captured scripts or loads
+  captured or remote images, styles, or tracking pixels.
+
+Use `redaction.patterns` and `redaction.additionalSensitiveHeaders` for project-specific secrets.
+Collection is bounded to 100 messages and 1,000 assertions, and each rendered artifact is capped at
+10 MiB. When a limit is reached, the output records explicit truncation markers instead of growing
+without bound.
+
+Redaction is best-effort and cannot guarantee detection of arbitrary personal or secret data.
+Review an artifact before sharing it. `includeRaw: true` retains a best-effort-redacted copy of the
+raw RFC source and should be used only when the extra diagnostic value justifies the materially
+higher disclosure risk.
+
 ## SMTP fault controller
 
 Every programmatic server exposes a `SmtpFaultController` as `server.faults`; fixture users access

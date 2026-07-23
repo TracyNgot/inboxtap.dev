@@ -181,6 +181,66 @@ runner. Le recorder reçoit des observations structurées sans contenu sensible 
 des matchers omettent également les corps, les valeurs de destinataire, les liens, les motifs
 porteurs de jetons et les en-têtes bruts.
 
+## Écrire un rapport de test expurgé
+
+`InboxTapReport`, depuis `inboxtap/reports`, sert à la fois de recorder de matchers et de collecteur
+pour les messages capturés et les assertions de l’application. Pour un flux de rapport Vitest non
+concurrent, étendez l’`expect` lié au test en cours :
+
+```ts
+import { test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+import { InboxTapReport } from "inboxtap/reports";
+
+const test = extendInboxTap(base);
+
+test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
+  const report = new InboxTapReport({ title: "Signup email" });
+  extendInboxTapExpect(expect, { recorder: report });
+
+  try {
+    await inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify/id-example?next=private",
+    });
+    await expect(inbox).toHaveDeliveredOnce({ subject: /verify/i });
+    const email = await inbox.waitForMessage({ subject: /verify/i });
+
+    report.addAssertion({
+      name: "verification email exposes one link",
+      passed: email.links.length === 1,
+      messageId: email.id,
+    });
+  } finally {
+    for (const email of await inbox.messages()) report.addMessage(email);
+    await report.write("artifacts/signup-email.json");
+    await report.write("artifacts/signup-email.html");
+  }
+});
+```
+
+L’écriture depuis `finally` conserve les preuves les plus récentes lorsqu’un matcher ou une
+assertion de l’application échoue.
+
+Les mêmes entrées ordonnées produisent un JSON déterministe et versionné ou un HTML statique
+autonome. `write()` déduit le format de `.json` ou `.html` et crée les répertoires parents
+manquants. Le rapport exclut par défaut la source RFC brute, attribue des pseudonymes cohérents aux
+adresses e-mail, masque les surfaces secrètes courantes, échappe le HTML capturé et ne charge jamais
+de ressources distantes. La collecte s’arrête à 100 messages et 1 000 assertions ; chaque artefact
+rendu est limité à 10 Mio et consigne explicitement la troncature. Le comptage des octets omis
+distingue les valeurs exactes des limites inférieures mesurées.
+
+La portée du recorder suit l’`expect` étendu. Ne rattachez pas de manière répétée des collecteurs
+propres aux tests à un même `expect` Bun ou Vitest partagé pendant une exécution concurrente ;
+enregistrez explicitement les messages et les assertions de l’application, ou produisez
+délibérément un seul artefact pour la suite. Playwright peut créer un nouvel `expect` renvoyé pour
+chaque rapport. L’expurgation reste une protection au mieux : vérifiez les artefacts avant de les
+partager. `includeRaw: true` est une option plus risquée, car elle conserve une copie expurgée au
+mieux de la source RFC brute.
+
 ## Isolation et nettoyage
 
 Ne partagez le serveur qu’à la portée définie par l’adaptateur. Ne créez jamais un seul `TestInbox`

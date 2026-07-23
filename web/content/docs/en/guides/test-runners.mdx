@@ -175,6 +175,64 @@ with `createInboxTapMatchers({ recorder })`. Those exports do not import a runne
 receives structured, content-safe observations; matcher diagnostics likewise omit bodies,
 recipient values, links, token-bearing patterns, and raw headers.
 
+## Write a redacted test report
+
+`InboxTapReport` from `inboxtap/reports` is both a matcher recorder and a collector for captured
+messages and application-level assertions. For one non-concurrent Vitest reporting workflow,
+extend the `expect` bound to the current test:
+
+```ts
+import { test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+import { InboxTapReport } from "inboxtap/reports";
+
+const test = extendInboxTap(base);
+
+test("writes redacted evidence", async ({ expect, inboxTap, inbox }) => {
+  const report = new InboxTapReport({ title: "Signup email" });
+  extendInboxTapExpect(expect, { recorder: report });
+
+  try {
+    await inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify/id-example?next=private",
+    });
+    await expect(inbox).toHaveDeliveredOnce({ subject: /verify/i });
+    const email = await inbox.waitForMessage({ subject: /verify/i });
+
+    report.addAssertion({
+      name: "verification email exposes one link",
+      passed: email.links.length === 1,
+      messageId: email.id,
+    });
+  } finally {
+    for (const email of await inbox.messages()) report.addMessage(email);
+    await report.write("artifacts/signup-email.json");
+    await report.write("artifacts/signup-email.html");
+  }
+});
+```
+
+Writing from `finally` preserves the latest evidence when a matcher or application assertion
+fails.
+
+The same ordered input produces deterministic, versioned JSON or self-contained static HTML.
+`write()` infers the format from `.json` or `.html` and creates missing parent directories. The
+default report excludes raw RFC source, pseudonymizes email addresses consistently, redacts common
+secret surfaces, escapes captured HTML, and never loads remote assets. Collection stops at 100
+messages and 1,000 assertions; each rendered artifact is capped at 10 MiB and records explicit
+truncation. Omitted-byte accounting distinguishes exact counts from measured lower bounds.
+
+Recorder scope follows the extended `expect`. Do not repeatedly attach per-test collectors to one
+shared Bun or Vitest `expect` during concurrent execution; record messages and application
+assertions explicitly, or deliberately produce one suite-level artifact. Playwright can create a
+fresh returned `expect` for each report. Redaction remains best-effort, so review artifacts before
+sharing them. `includeRaw: true` is a higher-risk opt-in because it retains a
+best-effort-redacted copy of the raw RFC source.
+
 ## Isolation and cleanup
 
 Share the server only at the scope defined by the adapter. Never create one suite-global

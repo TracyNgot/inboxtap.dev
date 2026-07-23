@@ -141,6 +141,16 @@
         "types": "./dist/matchers/vitest.d.cts",
         "default": "./dist/matchers/vitest.cjs"
       }
+    },
+    "./reports": {
+      "import": {
+        "types": "./dist/reports/index.d.ts",
+        "default": "./dist/reports/index.js"
+      },
+      "require": {
+        "types": "./dist/reports/index.d.cts",
+        "default": "./dist/reports/index.cjs"
+      }
     }
   },
   "files": [
