@@ -125,6 +125,45 @@ dynamically selected SMTP port must start as a dependent worker fixture; an
 already-running `webServer` cannot consume a port selected later by a test
 fixture.
 
+### SMTP fault injection
+
+Every programmatic server exposes `server.faults` for deterministic
+delivery-level failure tests; no enable flag is required. Register a rule
+before triggering the application: the next matching SMTP transaction to
+reach `DATA` consumes it.
+
+```ts
+inboxTap.server.faults.failNext({
+  code: 451,
+  message: "Temporary local failure",
+  to: inbox.address,
+});
+
+await expect(triggerEmail(inbox.address)).rejects.toThrow();
+expect(await inbox.messages()).toHaveLength(0);
+```
+
+Use `delayNext({ durationMs, to?, times? })`,
+`disconnectNext({ afterBytes, to?, times? })`, or
+`pauseNext({ to?, timeoutMs? })` to exercise timeouts, interrupted sends, and
+concurrency. A pause gate exposes `state`, `waitUntilPaused()`, and an
+idempotent `release()`:
+
+```ts
+const gate = inboxTap.server.faults.pauseNext({ to: inbox.address });
+const delivery = triggerEmail(inbox.address);
+
+await gate.waitUntilPaused();
+gate.release();
+await delivery;
+```
+
+Recipient filters match the SMTP envelope case-insensitively; any matching
+recipient faults the whole transaction. Only one rule applies to a
+transaction. Failed and disconnected deliveries are not captured, and
+paused or delayed deliveries appear only after successful completion. Fault
+controls are programmatic only—there are no HTTP routes or CLI flags.
+
 ## HTTP API
 
 All endpoints return JSON. Query values are URL encoded.

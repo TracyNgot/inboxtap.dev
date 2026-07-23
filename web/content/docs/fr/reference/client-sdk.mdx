@@ -46,6 +46,83 @@ Créez une nouvelle boîte pour chaque test. Une fixture peut partager le serveu
 transport à sa portée documentée, mais une boîte globale à toute la suite permettrait aux tests
 parallèles de lire le même destinataire.
 
+## Contrôleur de pannes SMTP
+
+Chaque serveur programmatique expose un `SmtpFaultController` sous `server.faults` ; les
+utilisateurs de fixtures y accèdent via `inboxTap.server.faults`. Les types publics du contrôleur,
+des options, du portail et de l’état sont exportés depuis `inboxtap`. Aucun drapeau d’activation
+n’est nécessaire.
+
+```ts
+interface SmtpFaultController {
+  failNext(options: SmtpFailNextOptions): void;
+  delayNext(options: SmtpDelayNextOptions): void;
+  disconnectNext(options: SmtpDisconnectNextOptions): void;
+  pauseNext(options?: SmtpPauseNextOptions): SmtpPauseGate;
+  reset(): void;
+}
+```
+
+Enregistrez une règle avant de déclencher l’application. Dans l’ordre d’enregistrement, une règle
+se lie à la prochaine transaction SMTP correspondante qui atteint `DATA`, et une seule règle
+s’applique à chaque transaction. Sans `to`, tous les destinataires correspondent ; sinon, la
+comparaison ignore la casse dans l’enveloppe SMTP. Si un destinataire correspond dans une
+transaction à plusieurs destinataires, la panne s’applique à toute la transaction. Les listeners
+SMTP IPv4 et IPv6 consomment la même file du contrôleur.
+
+| Méthode | Options et limites | Résultat |
+| --- | --- | --- |
+| `failNext` | `code` entier de `400` à `599` ; `message` sans CR/LF optionnel, valant `Injected SMTP failure` par défaut ; `to` et `times` optionnels | Renvoie l’échec SMTP configuré au lieu de capturer le message |
+| `delayNext` | `durationMs` entier de `0` à `60000` ; `to` et `times` optionnels | Retient la transaction avant de terminer la livraison |
+| `disconnectNext` | `afterBytes` entier sûr positif ou nul ; `to` et `times` optionnels | Ferme la connexion SMTP après l’observation du seuil |
+| `pauseNext` | `to` optionnel ; `timeoutMs` entier de `0` à `60000`, valant `60000` par défaut ; pas d’option `times` | Renvoie un `SmtpPauseGate` contrôlé indépendamment |
+| `reset` | Aucune option | Abandonne les attentes en file et actives, puis efface leurs timers |
+
+`times` doit être un entier de `1` à `100` et vaut `1` par défaut. Les applications de règles
+développées partagent une limite de `100`, en comptant celles en file et celles actives. Un `to`
+fourni doit être une chaîne non vide ; les espaces environnants sont ignorés. Les seuils de
+déconnexion sont observés aux frontières des chunks du flux plutôt qu’exactement à l’octet.
+InboxTap ferme à la fin de `DATA` lorsqu’un message est plus court que `afterBytes`, afin que la
+transaction injectée échoue tout de même. Les livraisons échouées ou déconnectées n’entrent jamais
+dans le store. Les livraisons retardées ou en pause n’apparaissent qu’après la réussite complète de
+la livraison SMTP.
+
+`SmtpPauseGate.state` est un `SmtpPauseState` en lecture seule :
+
+| État | Signification |
+| --- | --- |
+| `pending` | La règle est en file et n’a pas atteint de commande `DATA` correspondante |
+| `paused` | Une transaction SMTP correspondante est retenue |
+| `released` | `release()` a annulé une règle en attente ou repris une transaction en pause |
+| `expired` | Le timeout absolu s’est écoulé ; une transaction active reçoit SMTP `451` et n’est pas capturée |
+| `aborted` | `reset()` ou l’arrêt du serveur a annulé le portail |
+
+Le timeout commence à l’appel de `pauseNext()` et borne donc à la fois le temps en file et la durée
+de la pause active. Le portail passe à `paused` après que le corps du message a réussi l’analyse et
+la validation de taille, puis entre dans l’attente. `waitUntilPaused()` se résout alors et reste
+résolue si le portail se termine ensuite. La méthode rejette si le portail atteint un état terminal
+avant la pause. `release()` est idempotente et peut être appelée pendant `pending` ; cela retire la
+règle de la file afin qu’une transaction ultérieure ne soit pas affectée.
+
+```ts
+const gate = server.faults.pauseNext({
+  to: inbox.address,
+  timeoutMs: 10_000,
+});
+const delivery = triggerEmail(inbox.address);
+
+await gate.waitUntilPaused();
+expect(gate.state).toBe("paused");
+
+gate.release();
+await delivery;
+```
+
+`reset()` n’efface pas les messages capturés. L’arrêt du serveur assure le même nettoyage borné des
+portails : ceux en file ou actifs passent à `aborted`, et les timers sont effacés. Le contrôle des
+pannes est uniquement programmatique : il n’existe ni routes HTTP, ni drapeaux CLI, ni historique,
+ni statistiques pour les pannes.
+
 ## Méthodes de TestInbox
 
 | Méthode | Résout en | Rôle |

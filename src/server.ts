@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import type { Server as HttpServer } from "node:http";
 import type { SMTPServer } from "smtp-server";
 import { createApiHandler } from "./api.js";
+import { createSmtpFaultControllerRuntime } from "./faults/index.js";
+import type { SmtpFaultController, SmtpFaultRuntime } from "./faults/index.js";
 import type { Listener } from "./listen.js";
 import { closeListener, listenDualStack, listenOn, readPort } from "./listen.js";
 import { createSmtpServer } from "./smtp.js";
@@ -20,6 +22,7 @@ export class InboxTapServer {
   apiHost: string;
   apiPort: number;
   readonly domain: string;
+  readonly faults: SmtpFaultController;
   readonly maxMessageSize: number;
   readonly store: EmailStore;
   smtpHost: string;
@@ -27,6 +30,7 @@ export class InboxTapServer {
   readonly #explicitApiHost?: string;
   readonly #explicitSmtpHost?: string;
   readonly #apiServers: HttpServer[];
+  readonly #faultRuntime: SmtpFaultRuntime;
   readonly #smtpServers: SMTPServer[];
   #started = false;
 
@@ -41,8 +45,12 @@ export class InboxTapServer {
     this.smtpHost = options.smtpHost ?? "localhost";
     this.smtpPort = config.smtpPort;
     this.store = new EmailStore(config.maxMessages);
+    const faults = createSmtpFaultControllerRuntime();
+    this.faults = faults.controller;
+    this.#faultRuntime = faults.runtime;
     this.#smtpServers = createInstances(this.#explicitSmtpHost, () =>
       createSmtpServer({
+        faults: this.#faultRuntime,
         maxMessageSize: config.maxMessageSize,
         onEmail: (email) => this.store.add(email),
       }),
@@ -78,7 +86,9 @@ export class InboxTapServer {
 
   async stop(): Promise<void> {
     const listeners = [...this.#smtpServers.map(smtpListener), ...this.#apiServers];
-    await Promise.all(listeners.map(closeListener));
+    const closing = listeners.map(closeListener);
+    this.#faultRuntime.shutdown();
+    await Promise.all(closing);
     this.#started = false;
   }
 

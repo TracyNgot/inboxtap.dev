@@ -9,6 +9,7 @@ await verifyModuleExports();
 await verifyDeclarationExports();
 await verifyIsolatedDeclarations();
 await runBun(["test", "./smoke/package-consumers/bun-fixture.case.js"]);
+await runNode(["./smoke/package-consumers/fault-disconnect.mjs"]);
 const cli = await startCli();
 
 try {

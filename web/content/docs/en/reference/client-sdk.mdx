@@ -45,6 +45,78 @@ those runner-specific subpaths. The `smtp` value contains
 Create a new inbox for every test. A fixture may share the capture server and transport at its
 documented scope, but a suite-global inbox would allow parallel tests to read the same recipient.
 
+## SMTP fault controller
+
+Every programmatic server exposes a `SmtpFaultController` as `server.faults`; fixture users access
+it through `inboxTap.server.faults`. The public controller, options, gate, and state types are
+exported from `inboxtap`. No enable flag is required.
+
+```ts
+interface SmtpFaultController {
+  failNext(options: SmtpFailNextOptions): void;
+  delayNext(options: SmtpDelayNextOptions): void;
+  disconnectNext(options: SmtpDisconnectNextOptions): void;
+  pauseNext(options?: SmtpPauseNextOptions): SmtpPauseGate;
+  reset(): void;
+}
+```
+
+Register a rule before triggering the application. In registration order, a rule binds to the next
+matching SMTP transaction that reaches `DATA`, and only one rule applies to each transaction. An
+omitted `to` matches every recipient; otherwise matching is case-insensitive across the SMTP
+envelope. If any recipient matches in a multi-recipient transaction, the fault applies to the
+whole transaction. Both IPv4 and IPv6 SMTP listeners consume the same controller queue.
+
+| Method | Options and bounds | Result |
+| --- | --- | --- |
+| `failNext` | Integer `code` from `400` through `599`; optional CR/LF-free `message` defaults to `Injected SMTP failure`; optional `to` and `times` | Returns the configured SMTP failure instead of capturing the message |
+| `delayNext` | Integer `durationMs` from `0` through `60000`; optional `to` and `times` | Holds the transaction before completing delivery |
+| `disconnectNext` | Non-negative safe integer `afterBytes`; optional `to` and `times` | Closes the SMTP connection after the threshold is observed |
+| `pauseNext` | Optional `to`; integer `timeoutMs` from `0` through `60000`, default `60000`; no `times` option | Returns one independently controlled `SmtpPauseGate` |
+| `reset` | No options | Aborts queued and active waits and clears their timers |
+
+`times` must be an integer from `1` through `100` and defaults to `1`. Expanded rule applications
+share a cap of `100`, counting queued and active applications. A supplied `to` must be a non-empty
+string; surrounding whitespace is ignored. Disconnect thresholds are observed at stream-chunk
+boundaries rather than byte-exactly. InboxTap closes at the end of `DATA` when a message is shorter
+than `afterBytes`, so the injected transaction still fails. Failed and disconnected deliveries
+never enter the store. Delayed and paused deliveries appear only after SMTP delivery completes
+successfully.
+
+`SmtpPauseGate.state` is a read-only `SmtpPauseState`:
+
+| State | Meaning |
+| --- | --- |
+| `pending` | The rule is queued and has not reached a matching `DATA` command |
+| `paused` | A matching SMTP transaction is being held |
+| `released` | `release()` canceled a pending rule or resumed a paused transaction |
+| `expired` | The absolute timeout elapsed; an active transaction receives SMTP `451` and is not captured |
+| `aborted` | `reset()` or server shutdown canceled the gate |
+
+The timeout starts when `pauseNext()` is called, so it bounds both queue time and active pause time.
+The gate becomes `paused` after the message body passes parsing and size validation and enters the
+hold. `waitUntilPaused()` then resolves and remains resolved after that gate later terminates. It
+rejects if the gate reaches a terminal state before pausing. `release()` is idempotent and may be
+called while `pending`; doing so removes the queued rule so a later transaction is unaffected.
+
+```ts
+const gate = server.faults.pauseNext({
+  to: inbox.address,
+  timeoutMs: 10_000,
+});
+const delivery = triggerEmail(inbox.address);
+
+await gate.waitUntilPaused();
+expect(gate.state).toBe("paused");
+
+gate.release();
+await delivery;
+```
+
+`reset()` does not clear captured messages. Server shutdown provides the same bounded gate cleanup:
+queued or active gates become `aborted`, and timers are cleared. Fault controls are programmatic
+only—there are no fault HTTP routes, CLI flags, history, or statistics.
+
 ## TestInbox methods
 
 | Method | Resolves to | Purpose |

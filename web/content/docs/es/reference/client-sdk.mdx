@@ -46,6 +46,83 @@ Crea un buzón nuevo para cada test. Una fixture puede compartir el servidor de 
 transport en su alcance documentado, pero un buzón global para toda la suite permitiría que los
 tests en paralelo leyeran el mismo destinatario.
 
+## Controlador de fallos SMTP
+
+Cada servidor programático expone un `SmtpFaultController` como `server.faults`; quienes usan
+fixtures acceden a él mediante `inboxTap.server.faults`. Los tipos públicos del controlador, las
+opciones, la compuerta y el estado se exportan desde `inboxtap`. No hace falta ningún flag de
+activación.
+
+```ts
+interface SmtpFaultController {
+  failNext(options: SmtpFailNextOptions): void;
+  delayNext(options: SmtpDelayNextOptions): void;
+  disconnectNext(options: SmtpDisconnectNextOptions): void;
+  pauseNext(options?: SmtpPauseNextOptions): SmtpPauseGate;
+  reset(): void;
+}
+```
+
+Registra una regla antes de activar la aplicación. Por orden de registro, una regla se vincula a la
+siguiente transacción SMTP coincidente que alcance `DATA`, y solo se aplica una regla a cada
+transacción. Si se omite `to`, coincide cualquier destinatario; en caso contrario, la comparación
+no distingue mayúsculas en el sobre SMTP. Si cualquier destinatario coincide en una transacción
+con varios destinatarios, el fallo se aplica a toda la transacción. Los listeners SMTP IPv4 e IPv6
+consumen la misma cola del controlador.
+
+| Método | Opciones y límites | Resultado |
+| --- | --- | --- |
+| `failNext` | `code` entero de `400` a `599`; `message` opcional sin CR/LF, con valor predeterminado `Injected SMTP failure`; `to` y `times` opcionales | Devuelve el fallo SMTP configurado en vez de capturar el mensaje |
+| `delayNext` | `durationMs` entero de `0` a `60000`; `to` y `times` opcionales | Retiene la transacción antes de completar la entrega |
+| `disconnectNext` | `afterBytes` entero seguro no negativo; `to` y `times` opcionales | Cierra la conexión SMTP después de observar el umbral |
+| `pauseNext` | `to` opcional; `timeoutMs` entero de `0` a `60000`, con valor predeterminado `60000`; sin opción `times` | Devuelve un `SmtpPauseGate` controlado de forma independiente |
+| `reset` | Sin opciones | Aborta las esperas en cola y activas, y limpia sus temporizadores |
+
+`times` debe ser un entero de `1` a `100` y tiene por defecto `1`. Las aplicaciones expandidas de
+las reglas comparten un límite de `100`, contando las que están en cola y las activas. Un `to`
+proporcionado debe ser una cadena no vacía; se ignoran los espacios alrededor. Los umbrales de
+desconexión se observan en los límites de chunks del stream en vez de byte por byte. InboxTap cierra
+al final de `DATA` cuando un mensaje es más corto que `afterBytes`, para que la transacción
+inyectada falle de todos modos. Las entregas fallidas o desconectadas nunca entran en el almacén.
+Las entregas retrasadas o pausadas solo aparecen después de completar correctamente la entrega
+SMTP.
+
+`SmtpPauseGate.state` es un `SmtpPauseState` de solo lectura:
+
+| Estado | Significado |
+| --- | --- |
+| `pending` | La regla está en cola y no ha alcanzado un comando `DATA` coincidente |
+| `paused` | Una transacción SMTP coincidente está retenida |
+| `released` | `release()` canceló una regla pendiente o reanudó una transacción pausada |
+| `expired` | El timeout absoluto terminó; una transacción activa recibe SMTP `451` y no se captura |
+| `aborted` | `reset()` o la parada del servidor canceló la compuerta |
+
+El timeout empieza al llamar a `pauseNext()`, por lo que acota tanto el tiempo en cola como el de
+pausa activa. La compuerta pasa a `paused` después de que el cuerpo del mensaje supere el análisis
+y la validación de tamaño y entre en la espera. `waitUntilPaused()` se resuelve entonces y
+permanece resuelta aunque la compuerta termine después. Rechaza si la compuerta alcanza un estado
+terminal antes de pausarse. `release()` es idempotente y puede llamarse durante `pending`; al
+hacerlo, elimina la regla en cola para que una transacción posterior no resulte afectada.
+
+```ts
+const gate = server.faults.pauseNext({
+  to: inbox.address,
+  timeoutMs: 10_000,
+});
+const delivery = triggerEmail(inbox.address);
+
+await gate.waitUntilPaused();
+expect(gate.state).toBe("paused");
+
+gate.release();
+await delivery;
+```
+
+`reset()` no borra los mensajes capturados. La parada del servidor proporciona la misma limpieza
+acotada de las compuertas: las que están en cola o activas pasan a `aborted` y se limpian sus
+temporizadores. Los controles de fallos son solo programáticos: no existen rutas HTTP, flags de
+CLI, historial ni estadísticas de fallos.
+
 ## Métodos de TestInbox
 
 | Método | Se resuelve a | Propósito |

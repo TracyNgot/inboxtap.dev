@@ -139,6 +139,53 @@ Puedes pasar opciones del servidor a `setupInboxTap(options)` o
 `extendInboxTap(baseTest, options)` cuando necesites ajustar los valores por defecto; los puertos
 SMTP y API omitidos siguen siendo dinámicos.
 
+## Probar rutas de fallo
+
+Usa el controlador de fallos del servidor de la fixture para probar los reintentos de la
+aplicación en el límite SMTP real. Dirige cada regla al destinatario de sobre único del test para
+que una transacción concurrente no pueda consumirla. Registra la regla justo antes de activar la
+aplicación.
+
+```ts
+test("retries a transient SMTP failure", async ({ inboxTap, inbox }) => {
+  const send = () =>
+    inboxTap.transport.sendMail({
+      from: "app@local.test",
+      to: inbox.address,
+      subject: "Verify your account",
+      text: "Open https://app.local.test/verify?id=example",
+    });
+
+  inboxTap.server.faults.failNext({
+    code: 451,
+    to: inbox.address,
+  });
+
+  await expect(send()).rejects.toThrow();
+  await expect(send()).resolves.toBeDefined();
+
+  expect(await inbox.messages()).toHaveLength(1);
+});
+```
+
+Una respuesta `451` sirve para rutas de reintento y backoff; usa una respuesta `550` para manejar
+fallos permanentes. `delayNext()` ejercita los timeouts de la aplicación y `disconnectNext()` la
+recuperación de una sesión SMTP interrumpida. Los intentos fallidos o desconectados nunca producen
+mensajes capturados parciales.
+
+Para la concurrencia, usa `pauseNext()` como compuerta explícita en vez de introducir esperas.
+Espera a `gate.waitUntilPaused()` antes de lanzar la acción competidora y llama a la función
+idempotente `gate.release()` en un bloque `finally`. El timeout absoluto predeterminado de 60
+segundos sigue acotando una coincidencia o liberación omitida; si una pausa activa caduca, SMTP
+devuelve `451` y el mensaje no se captura. La limpieza aborta las compuertas restantes; evita llamar
+a `reset()` desde un test concurrente porque afecta a las demás reglas del servidor compartido.
+
+Solo se aplica una regla de fallo a cada transacción. Usa `times` cuando varios intentos
+consecutivos deban recibir el mismo fallo, o registra la regla siguiente después de observar el
+intento anterior. InboxTap controla el comportamiento de entrega SMTP; la persistencia, la
+idempotencia y la deduplicación de negocio siguen siendo aserciones propias de los tests de la
+aplicación.
+
 ## Elegir el helper adecuado
 
 - Usa `waitForLink()` para URLs de verificación, restablecimiento de contraseña y magic links.
