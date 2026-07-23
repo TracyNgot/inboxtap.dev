@@ -83,6 +83,48 @@ await inbox.clear();
 
 `waitForLink`, `waitForCode`, and `waitForMatch` resolve to the extracted string. `waitForMessage` resolves to the complete captured email.
 
+### Runner-native fixtures
+
+InboxTap provides isolated fixture subpaths for Bun test, Vitest, and
+Playwright. The shared fixture starts both listeners on dynamic ports by
+default, creates and verifies a plain Nodemailer transport, cleans up partial
+startup failures, and exposes an idempotent `close()`.
+
+Install Nodemailer 9 with InboxTap, plus the runner adapter your project uses:
+
+```bash
+bun add --dev inboxtap nodemailer vitest
+```
+
+Extend a Vitest base test to share one InboxTap server per file while creating
+a fresh inbox for every test:
+
+```ts
+import { expect, test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+
+const test = extendInboxTap(base);
+
+test("captures an account email", async ({ inboxTap, inbox }) => {
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  const message = await inbox.waitForMessage({ subject: /verify your account/i });
+  expect(message.envelope.to).toContain(inbox.address);
+});
+```
+
+Use `startInboxTapFixture()` from `inboxtap/fixtures` for an explicit lifecycle,
+`setupInboxTap()` from `inboxtap/fixtures/bun`, or `extendInboxTap()` from
+`inboxtap/fixtures/playwright`. Playwright applications that need the
+dynamically selected SMTP port must start as a dependent worker fixture; an
+already-running `webServer` cannot consume a port selected later by a test
+fixture.
+
 ## HTTP API
 
 All endpoints return JSON. Query values are URL encoded.

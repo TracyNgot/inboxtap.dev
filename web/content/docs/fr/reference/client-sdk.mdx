@@ -24,6 +24,28 @@ console.log(inbox.address);
 L’alias est normalisé en lettres minuscules, chiffres et tirets, puis un suffixe aléatoire de
 12 caractères est ajouté. L’alias par défaut est `test`.
 
+## Fixtures disponibles
+
+Les fixtures des runners sont publiées derrière des sous-chemins isolés afin que le serveur racine
+et le SDK client ne chargent pas les dépendances de test optionnelles.
+
+| Import | Export principal | Cycle de vie |
+| --- | --- | --- |
+| `inboxtap/fixtures` | `startInboxTapFixture()` | Démarrage explicite et `close()` idempotent |
+| `inboxtap/fixtures/bun` | `setupInboxTap()` | Configuration et nettoyage du fichier via les hooks Bun |
+| `inboxtap/fixtures/vitest` | `extendInboxTap()` | Serveur par fichier, boîte par test |
+| `inboxtap/fixtures/playwright` | `extendInboxTap()` | Serveur par worker, boîte par test |
+
+`startInboxTapFixture()` affecte `0` aux deux ports par défaut et renvoie `server`, `client`, un
+`transport` Nodemailer vérifié, les informations de connexion `smtp`, `createInbox()` et `close()`.
+Chaque adaptateur utilise le même objet fixture. Installez Nodemailer 9, ainsi que Vitest 4.1 ou
+Playwright 1.61 lors de l’utilisation de leurs sous-chemins spécifiques. La valeur `smtp` contient
+`{ host, port, secure: false, ignoreTLS: true }` pour configurer l’application testée.
+
+Créez une nouvelle boîte pour chaque test. Une fixture peut partager le serveur de capture et le
+transport à sa portée documentée, mais une boîte globale à toute la suite permettrait aux tests
+parallèles de lire le même destinataire.
+
 ## Méthodes de TestInbox
 
 | Méthode | Résout en | Rôle |

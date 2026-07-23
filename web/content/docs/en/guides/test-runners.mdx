@@ -1,40 +1,140 @@
-The SDK has no dependency on a particular test runner. It works anywhere the published package can
-use Node 20's `fetch`, including Bun test, Vitest, and Jest.
+InboxTap ships optional, runner-native fixtures for Bun test, Vitest, and Playwright. Each fixture
+starts the local SMTP and HTTP listeners on automatically selected ports, creates a ready-to-use
+Nodemailer transport, and guarantees cleanup.
 
-## Runner-agnostic setup
+## Install optional peers
 
-You can start the CLI as a separate service, or own the server lifecycle directly from a global test
-setup. Programmatic startup is useful when the runner needs isolated, automatically selected ports.
+Install only the runner adapter that your project uses. Nodemailer 9 is required by every fixture;
+Vitest 4.1 and Playwright 1.61 are optional peers of their respective subpaths.
 
-## Start and stop in tests
+```bash
+bun add --dev inboxtap nodemailer
+bun add --dev vitest
+# or
+bun add --dev @playwright/test
+```
 
-Adapt the lifecycle hooks to your runner:
+The fixture dependencies stay behind isolated package subpaths. Importing `inboxtap` or
+`inboxtap/client` does not require Nodemailer, Vitest, or Playwright.
+
+## Shared fixture
+
+Use `startInboxTapFixture()` when a runner has its own lifecycle model. Both ports default to `0`,
+so the operating system chooses free ports. Startup verifies the Nodemailer transport before
+returning, partial failures are cleaned up, and `close()` is safe to call more than once.
 
 ```ts
-import { afterAll, beforeAll } from "vitest";
-import { InboxTapServer } from "inboxtap";
-import { InboxTapClient } from "inboxtap/client";
+import { startInboxTapFixture } from "inboxtap/fixtures";
 
-let server: InboxTapServer;
-let inboxTap: InboxTapClient;
+const inboxTap = await startInboxTapFixture();
 
-beforeAll(async () => {
-  server = await new InboxTapServer({ apiPort: 0, smtpPort: 0 }).start();
-  inboxTap = new InboxTapClient({
-    baseUrl: server.apiUrl,
-    domain: server.domain,
+try {
+  const inbox = await inboxTap.createInbox({ alias: "signup" });
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
   });
 
-  // Configure the application under test with server.smtpHost and server.smtpPort.
-});
+  await inbox.waitForMessage({ subject: /verify your account/i });
+} finally {
+  await inboxTap.close();
+}
+```
 
-afterAll(async () => {
-  await server.stop();
+The returned object also exposes `server`, `client`, and `smtp` connection details for applications
+that need to start against the selected ports.
+
+## Bun test
+
+`setupInboxTap()` registers Bun's asynchronous setup and teardown hooks. Bun does not inject custom
+fixture context, so create a fresh inbox explicitly inside every test.
+
+```ts
+import { expect, test } from "bun:test";
+import { setupInboxTap } from "inboxtap/fixtures/bun";
+
+const inboxTap = setupInboxTap();
+
+test("captures one email", async () => {
+  const inbox = await inboxTap.createInbox({ alias: "signup" });
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  const message = await inbox.waitForMessage({ subject: /verify your account/i });
+  expect(message.envelope.to).toContain(inbox.address);
 });
 ```
 
-For Bun test, import the hooks from `bun:test`. For Jest, use its global `beforeAll` and `afterAll`.
-The InboxTap calls remain the same.
+## Vitest
+
+`extendInboxTap()` adds a file-scoped `inboxTap` fixture and a test-scoped `inbox` fixture to a
+Vitest base test. Every test receives a new address while the file reuses one verified server and
+transport.
+
+```ts
+import { expect, test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+
+const test = extendInboxTap(base);
+
+test("captures one email", async ({ inboxTap, inbox }) => {
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  const message = await inbox.waitForMessage({ subject: /verify your account/i });
+  expect(message.envelope.to).toContain(inbox.address);
+});
+```
+
+## Playwright
+
+The Playwright adapter provides a worker-scoped `inboxTap` fixture and a test-scoped `inbox`
+fixture. Each worker gets its own dynamic ports, and each test gets its own recipient address.
+
+```ts
+import { expect, test as base } from "@playwright/test";
+import { extendInboxTap } from "inboxtap/fixtures/playwright";
+
+const test = extendInboxTap(base);
+
+test("captures a verification link", async ({ inboxTap, inbox }) => {
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  const link = await inbox.waitForLink({ subject: /verify your account/i });
+  expect(link).toContain("/verify");
+});
+```
+
+If the application needs the dynamic SMTP port, start it as another worker fixture that depends on
+`inboxTap`, then read `inboxTap.smtp` while starting the process. Playwright's `webServer` starts
+before test fixtures, so an already-started `webServer` cannot consume a port selected later by the
+InboxTap worker fixture.
+
+## Isolation and cleanup
+
+Share the server only at the scope defined by the adapter. Never create one suite-global
+`TestInbox`: call `createInbox()` inside each Bun test, or use the injected `inbox` in Vitest and
+Playwright. Unique envelope recipients keep concurrent tests isolated without clearing another
+test's messages.
+
+All adapters stop the server and close the transport when their native scope ends. You can pass
+server options to `setupInboxTap(options)` or `extendInboxTap(baseTest, options)` when the defaults
+need adjustment; omitted SMTP and API ports remain dynamic.
 
 ## Choose the right helper
 

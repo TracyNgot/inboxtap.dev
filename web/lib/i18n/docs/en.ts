@@ -95,12 +95,14 @@ export const docsEn: DocsDictionary = {
       ],
     },
     "reference/client-sdk": {
-      description: "Reference for InboxTapClient, TestInbox, filters, and captured messages.",
+      description:
+        "Reference for InboxTapClient, TestInbox, runner fixtures, filters, and captured messages.",
       slug: "reference/client-sdk",
       title: "Client SDK",
       toc: [
         { id: "create-a-client", label: "Create a client" },
         { id: "create-an-inbox", label: "Create an inbox" },
+        { id: "fixture-entry-points", label: "Fixture entry points" },
         { id: "testinbox-methods", label: "TestInbox methods" },
         { id: "low-level-client-methods", label: "Low-level methods" },
         { id: "capturedemail", label: "CapturedEmail" },
@@ -134,12 +136,17 @@ export const docsEn: DocsDictionary = {
       ],
     },
     "guides/test-runners": {
-      description: "Run InboxTap programmatically with Bun test, Vitest, Jest, or another runner.",
+      description:
+        "Start InboxTap on dynamic ports with lifecycle fixtures for Bun test, Vitest, and Playwright.",
       slug: "guides/test-runners",
-      title: "Test emails with Bun, Vitest, and Jest",
+      title: "Test emails with Bun, Vitest, and Playwright",
       toc: [
-        { id: "runner-agnostic-setup", label: "Runner-agnostic setup" },
-        { id: "start-and-stop-in-tests", label: "Test lifecycle" },
+        { id: "install-optional-peers", label: "Install optional peers" },
+        { id: "shared-fixture", label: "Shared fixture" },
+        { id: "bun-test", label: "Bun test" },
+        { id: "vitest", label: "Vitest" },
+        { id: "playwright", label: "Playwright" },
+        { id: "isolation-and-cleanup", label: "Isolation and cleanup" },
         { id: "choose-the-right-helper", label: "Choose a helper" },
       ],
     },
