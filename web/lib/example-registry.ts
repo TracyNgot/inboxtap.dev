@@ -8,6 +8,9 @@ import ExpressNodemailerEn from "../../examples/express-nodemailer/README.md";
 import FaultInjectionVitestEs from "../../examples/fault-injection-vitest/README.es.md";
 import FaultInjectionVitestFr from "../../examples/fault-injection-vitest/README.fr.md";
 import FaultInjectionVitestEn from "../../examples/fault-injection-vitest/README.md";
+import ScheduledEmailVitestEs from "../../examples/scheduled-email-vitest/README.es.md";
+import ScheduledEmailVitestFr from "../../examples/scheduled-email-vitest/README.fr.md";
+import ScheduledEmailVitestEn from "../../examples/scheduled-email-vitest/README.md";
 import TestFixtureBunEs from "../../examples/test-fixture-bun/README.es.md";
 import TestFixtureBunFr from "../../examples/test-fixture-bun/README.fr.md";
 import TestFixtureBunEn from "../../examples/test-fixture-bun/README.md";
@@ -186,6 +189,48 @@ const testReportingToc = {
     { id: "écrire-les-fichiers-html-et-json", label: "Écrire les fichiers HTML et JSON" },
     { id: "limites-de-lexpurgation", label: "Limites de l’expurgation" },
     { id: "cycle-de-vie-des-artefacts", label: "Cycle de vie des artefacts" },
+    { id: "dépannage", label: "Dépannage" },
+  ],
+} as const satisfies Record<Locale, readonly TocItem[]>;
+
+const scheduledDeliveryToc = {
+  en: [
+    { id: "prerequisites", label: "Prerequisites" },
+    { id: "setup", label: "Setup" },
+    { id: "run-the-tests", label: "Run the tests" },
+    { id: "what-the-example-proves", label: "What the example proves" },
+    { id: "provider-contract", label: "Provider contract" },
+    { id: "virtual-clock", label: "Virtual clock" },
+    {
+      id: "exactly-once-delivery-and-cancellation",
+      label: "Exactly-once delivery and cancellation",
+    },
+    { id: "ownership-boundaries", label: "Ownership boundaries" },
+    { id: "troubleshooting", label: "Troubleshooting" },
+  ],
+  es: [
+    { id: "requisitos-previos", label: "Requisitos previos" },
+    { id: "configuración", label: "Configuración" },
+    { id: "ejecutar-las-pruebas", label: "Ejecutar las pruebas" },
+    { id: "qué-demuestra-el-ejemplo", label: "Qué demuestra el ejemplo" },
+    { id: "contrato-del-proveedor", label: "Contrato del proveedor" },
+    { id: "reloj-virtual", label: "Reloj virtual" },
+    { id: "entrega-única-y-cancelación", label: "Entrega única y cancelación" },
+    { id: "límites-de-responsabilidad", label: "Límites de responsabilidad" },
+    { id: "solución-de-problemas", label: "Solución de problemas" },
+  ],
+  fr: [
+    { id: "prérequis", label: "Prérequis" },
+    { id: "configuration", label: "Configuration" },
+    { id: "lancer-les-tests", label: "Lancer les tests" },
+    { id: "ce-que-démontre-lexemple", label: "Ce que démontre l’exemple" },
+    { id: "contrat-du-fournisseur", label: "Contrat du fournisseur" },
+    { id: "horloge-virtuelle", label: "Horloge virtuelle" },
+    {
+      id: "livraison-unique-et-annulation",
+      label: "Livraison unique et annulation",
+    },
+    { id: "limites-de-responsabilité", label: "Limites de responsabilité" },
     { id: "dépannage", label: "Dépannage" },
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
@@ -397,6 +442,32 @@ export const exampleReadmes = [
       },
     },
     toc: testReportingToc,
+  },
+  {
+    content: {
+      en: ScheduledEmailVitestEn,
+      es: ScheduledEmailVitestEs,
+      fr: ScheduledEmailVitestFr,
+    },
+    directory: "scheduled-email-vitest",
+    strings: {
+      en: {
+        description:
+          "Test immediate sends, scheduled delivery, cancellation, and deterministic ordering with a bounded provider fake and an injected virtual clock.",
+        title: "Scheduled email delivery with Vitest",
+      },
+      es: {
+        description:
+          "Prueba los envíos inmediatos, la entrega programada, la cancelación y el orden determinista con un doble de prueba del proveedor de capacidad limitada y un reloj virtual inyectado.",
+        title: "Entrega programada de correos con Vitest",
+      },
+      fr: {
+        description:
+          "Testez les envois immédiats, la livraison programmée, l’annulation et l’ordre déterministe avec un simulateur de fournisseur à capacité bornée et une horloge virtuelle injectée.",
+        title: "Envoi programmé d’e-mails avec Vitest",
+      },
+    },
+    toc: scheduledDeliveryToc,
   },
 ] as const satisfies readonly {
   content: Record<Locale, ComponentType>;

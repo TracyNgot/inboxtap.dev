@@ -186,6 +186,10 @@ Explicitly excluded:
   Verification fails for unregistered examples, missing locale variants,
   multiple H1s, mismatched localized section anchors, changed code fences, or
   unresolved relative file and image links.
+- Scheduled delivery remains an application-level example rather than a public
+  InboxTap API. The example owns a bounded provider fake and injected virtual
+  clock, then delivers due messages through Nodemailer into InboxTap because
+  SMTP itself has no `scheduledAt` or cancellation operation.
 
 See [README.md](../README.md) for usage, [AGENTS.md](../AGENTS.md) for the
 agent and contributor contract, [STYLE_GUIDE.md](../STYLE_GUIDE.md) for
