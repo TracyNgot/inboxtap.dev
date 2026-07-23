@@ -4,6 +4,22 @@ Release history for the `inboxtap` npm package. Sections are generated from
 merged pull requests by the release workflow; each version also appears on
 [GitHub Releases](https://github.com/TracyNgot/inboxtap.dev/releases).
 
+## v1.4.1 — 2026-07-23
+
+### 🐛 Fixes
+* 🔒 fix: preserve URL redaction with custom patterns by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/52
+### 📦 Maintenance
+* build(deps): bump the actions-minor-and-patch group with 2 updates by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/28
+* build(deps): bump actions/setup-node from 6.5.0 to 7.0.0 by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/29
+* build(deps): bump actions/checkout from 6.1.0 to 7.0.1 by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/30
+* build(deps-dev): bump @types/node from 24.13.3 to 26.1.1 in /examples/express-nodemailer by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/31
+* build(deps-dev): bump typescript from 5.9.3 to 7.0.2 in /examples/express-nodemailer by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/32
+* build(deps-dev): bump @types/node from 24.13.3 to 26.1.1 in /examples/better-auth-nextjs by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/37
+* build(deps): bump the better-auth-example-minor-and-patch group across 1 directory with 4 updates by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/41
+* build(deps): bump inboxtap from 0.2.5 to 1.4.0 in /examples/better-auth-nextjs by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/38
+
+**Full Changelog**: https://github.com/TracyNgot/inboxtap.dev/compare/v1.4.0...v1.4.1
+
 ## v1.4.0 — 2026-07-23
 
 ### ✨ Features
