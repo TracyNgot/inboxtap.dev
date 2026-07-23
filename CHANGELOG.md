@@ -4,6 +4,28 @@ Release history for the `inboxtap` npm package. Sections are generated from
 merged pull requests by the release workflow; each version also appears on
 [GitHub Releases](https://github.com/TracyNgot/inboxtap.dev/releases).
 
+## v1.1.0 — 2026-07-23
+
+### ✨ Features
+* ✨ feat: add test-runner fixtures by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/44
+### 🐛 Fixes
+* 🚀 ci: release only for source changes by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/24
+* 🔒 fix: override vulnerable Sharp dependency by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/42
+* 🐛 fix: resolve release tags from package version by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/45
+### 🔒 Security
+* build(deps): bump the bun-minor-and-patch group with 5 updates by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/39
+* build(deps): bump next from 16.2.10 to 16.2.11 in /examples/better-auth-nextjs by @dependabot[bot] in https://github.com/TracyNgot/inboxtap.dev/pull/25
+### 📝 Documentation
+* 📝 Improve AI discovery readiness by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/27
+* 📝 docs: render example READMEs in web docs by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/43
+### 📦 Maintenance
+* 📦 chore: configure Context7 indexing by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/26
+
+### New Contributors
+* @dependabot[bot] made their first contribution in https://github.com/TracyNgot/inboxtap.dev/pull/39
+
+**Full Changelog**: https://github.com/TracyNgot/inboxtap.dev/compare/v1.0.6...v1.1.0
+
 ## v1.0.6 — 2026-07-22
 
 ### 🐛 Fixes
