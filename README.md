@@ -319,6 +319,7 @@ Runnable end-to-end projects live in [`examples/`](examples/):
 - [`examples/better-auth-nextjs`](examples/better-auth-nextjs) — Next.js + Better Auth email verification, magic links, and OTP, tested with Playwright.
 - [`examples/express-nodemailer`](examples/express-nodemailer) — Express + Nodemailer transactional email, tested with Vitest.
 - [`examples/fault-injection-vitest`](examples/fault-injection-vitest) — SMTP retries, pauses, latency, recipient targeting, and disconnect recovery with Vitest.
+- [`examples/test-reporting-vitest`](examples/test-reporting-vitest) — Redacted HTML and JSON CI artifacts from matcher observations, captured mail, and application assertions.
 - [`examples/test-fixture-bun`](examples/test-fixture-bun) — Bun lifecycle hooks with an explicit fresh inbox per test.
 - [`examples/test-fixture-vitest`](examples/test-fixture-vitest) — File-scoped Vitest setup with concurrent, isolated inboxes.
 - [`examples/test-fixture-playwright`](examples/test-fixture-playwright) — Playwright worker-fixture composition using a dynamic SMTP port.
