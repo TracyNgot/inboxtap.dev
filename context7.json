@@ -1,0 +1,19 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "InboxTap",
+  "description": "A local-only SMTP capture server and TypeScript test SDK for deterministic email-flow tests.",
+  "folders": ["web/content/docs/en"],
+  "excludeFiles": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "RELEASING.md",
+    "SECURITY.md",
+    "STYLE_GUIDE.md"
+  ],
+  "rules": [
+    "Use InboxTap only for local development and automated tests, never as a production mail server or outbound relay.",
+    "Import the test client from inboxtap/client.",
+    "Use a unique TestInbox per test to isolate parallel email flows."
+  ]
+}
