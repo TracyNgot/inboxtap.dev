@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "better-auth": "^1.6",
-    "better-sqlite3": "^12.0",
+    "better-sqlite3": "^13.0",
     "inboxtap": "^0.2.4",
     "next": "^16.2",
     "nodemailer": "^9.0",
