@@ -5,7 +5,7 @@ export async function resolve(specifier, context, nextResolve) {
     specifier === "nodemailer" ||
     blockedPackages.some((name) => specifier === name || specifier.startsWith(`${name}/`));
   if (blocked) {
-    throw new Error(`Unexpected optional fixture peer import: ${specifier}`);
+    throw new Error(`Unexpected optional peer import: ${specifier}`);
   }
   return nextResolve(specifier, context);
 }

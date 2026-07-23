@@ -45,6 +45,75 @@ those runner-specific subpaths. The `smtp` value contains
 Create a new inbox for every test. A fixture may share the capture server and transport at its
 documented scope, but a suite-global inbox would allow parallel tests to read the same recipient.
 
+## Matcher entry points
+
+Assertion matchers are published separately from the server, client, and fixtures:
+
+| Import | Main exports | Behavior |
+| --- | --- | --- |
+| `inboxtap/matchers` | `inboxTapMatchers`, `createInboxTapMatchers()` | Peer-free matcher implementations and public observation types |
+| `inboxtap/matchers/bun` | `extendInboxTapExpect(expect)` | Extends Bun's injected `expect` in place |
+| `inboxtap/matchers/vitest` | `extendInboxTapExpect(expect)` | Extends Vitest's injected `expect` in place |
+| `inboxtap/matchers/playwright` | `extendInboxTapExpect(expect)` | Returns a new typed Playwright `expect` |
+
+Importing `inboxtap`, `inboxtap/client`, or `inboxtap/matchers` does not require Nodemailer,
+Vitest, or Playwright. Only a runner-specific adapter needs that runner's optional peer.
+
+```ts
+import { expect } from "vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+
+extendInboxTapExpect(expect);
+
+await expect(inbox).toHaveDeliveredOnce({
+  subject: /password reset/i,
+  quietMs: 100,
+});
+
+const email = await inbox.waitForMessage({ subject: /password reset/i });
+expect(email).toHaveRecipient(inbox.address);
+expect(email).toContainLink("/reset-password");
+expect(email).toHaveUnsubscribeHeader({ oneClick: true });
+```
+
+| Matcher | Semantics |
+| --- | --- |
+| `toHaveDeliveredOnce({ subject?, quietMs? })` | Takes an immediate inbox snapshot and requires exactly one matching message. A subject string is a case-insensitive substring; a regular expression is tested without changing its `lastIndex`. `quietMs` is an integer from `0` through `60000` and defaults to `0`. |
+| `toHaveRecipient(address)` | Matches the SMTP envelope recipients exactly and case-insensitively; it does not use the parsed display-address field. |
+| `toContainLink(stringOrRegex)` | Checks extracted HTTP(S) links. A string is a substring, while a cloned regular expression leaves caller state unchanged. |
+| `toHaveUnsubscribeHeader({ oneClick? })` | Parses only the raw top-level RFC headers, including case-varied names and folded values. By default it requires a non-empty `List-Unsubscribe`; `oneClick: true` also requires an angle-bracketed HTTPS target and an exact, case-insensitive `List-Unsubscribe-Post: List-Unsubscribe=One-Click`. |
+
+`toHaveDeliveredOnce()` does not poll for an initial message. When its first snapshot is valid,
+`quietMs` observes only that following interval; it is not proof that a later retry cannot happen.
+The one-click matcher checks RFC 8058 header shape only. It does not verify DKIM signatures,
+signature coverage, or the behavior of the unsubscribe endpoint.
+
+Matcher results deliberately omit `actual`, `expected`, message bodies, recipient and link values,
+token-bearing patterns, and raw headers. Failures expose only safe counts and boolean states.
+
+For report collection, pass a synchronous recorder to the pure factory:
+
+```ts
+import {
+  createInboxTapMatchers,
+  type InboxTapMatcherObservation,
+} from "inboxtap/matchers";
+
+const observations: InboxTapMatcherObservation[] = [];
+const matchers = createInboxTapMatchers({
+  recorder: {
+    recordMatcherObservation(observation) {
+      observations.push(observation);
+    },
+  },
+});
+```
+
+Each observation is schema-versioned and records the matcher name, negation and pass state,
+optional captured-message ID, and content-safe counts or booleans. It never contains the expected
+recipient, subject, link pattern, header value, or captured body. Pass `matchers` to a compatible
+runner's `expect.extend()`; the runner-specific adapters call the same factory.
+
 ## SMTP fault controller
 
 Every programmatic server exposes a `SmtpFaultController` as `server.faults`; fixture users access

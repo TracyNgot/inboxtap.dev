@@ -127,6 +127,57 @@ de `inboxTap` y lee `inboxTap.smtp` al arrancar el proceso. El `webServer` de Pl
 antes que las fixtures de test, por lo que un `webServer` ya iniciado no puede consumir un puerto
 que la fixture de worker de InboxTap seleccione después.
 
+## Matchers nativos de los runners
+
+InboxTap mantiene las implementaciones de los matchers en el subpath sin peers
+`inboxtap/matchers` y publica adaptadores tipados para cada runner. Inyecta el `expect` del runner
+en `extendInboxTapExpect()`. Bun y Vitest amplían ese objeto en el mismo lugar:
+
+```ts
+import { expect } from "vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+
+extendInboxTapExpect(expect);
+```
+
+La configuración de Bun sigue el mismo patrón con `bun:test` e `inboxtap/matchers/bun`. El
+`expect.extend()` nativo de Playwright devuelve un objeto nuevo, así que exporta el valor devuelto
+junto con tu fixture de test extendida:
+
+```ts
+import { expect as baseExpect, test as baseTest } from "@playwright/test";
+import { extendInboxTap } from "inboxtap/fixtures/playwright";
+import { extendInboxTapExpect } from "inboxtap/matchers/playwright";
+
+export const test = extendInboxTap(baseTest);
+export const expect = extendInboxTapExpect(baseExpect);
+```
+
+Los matchers funcionan con el buzón propio del test y los mensajes capturados:
+
+```ts
+await expect(inbox).toHaveDeliveredOnce({
+  subject: /verify your account/i,
+  quietMs: 100,
+});
+
+const email = await inbox.waitForMessage({ subject: /verify your account/i });
+expect(email).toHaveRecipient(inbox.address);
+expect(email).toContainLink("/verify");
+expect(email).toHaveUnsubscribeHeader({ oneClick: true });
+```
+
+`toHaveDeliveredOnce()` es una aserción sobre una instantánea: comprueba los mensajes ya
+capturados y no espera a la primera entrega. `quietMs` es una ventana de observación opcional que
+solo comienza cuando la instantánea inicial contiene exactamente un mensaje coincidente. Puede
+detectar un reintento durante esa ventana, pero no demuestra que no llegue otro más tarde.
+
+Usa `inboxTapMatchers` directamente con otro `expect` compatible al estilo Jest, o crea un conjunto
+nuevo con `createInboxTapMatchers({ recorder })`. Esos exports no importan ningún runner. El
+recorder recibe observaciones estructuradas sin contenido sensible; los diagnósticos de los
+matchers también omiten cuerpos, valores de destinatario, enlaces, patrones con tokens y cabeceras
+en bruto.
+
 ## Aislamiento y limpieza
 
 Comparte el servidor solo en el alcance definido por el adaptador. Nunca crees un único `TestInbox`

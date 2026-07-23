@@ -101,6 +101,46 @@
         "types": "./dist/fixtures/vitest.d.cts",
         "default": "./dist/fixtures/vitest.cjs"
       }
+    },
+    "./matchers": {
+      "import": {
+        "types": "./dist/matchers/index.d.ts",
+        "default": "./dist/matchers/index.js"
+      },
+      "require": {
+        "types": "./dist/matchers/index.d.cts",
+        "default": "./dist/matchers/index.cjs"
+      }
+    },
+    "./matchers/bun": {
+      "import": {
+        "types": "./dist/matchers/bun.d.ts",
+        "default": "./dist/matchers/bun.js"
+      },
+      "require": {
+        "types": "./dist/matchers/bun.d.cts",
+        "default": "./dist/matchers/bun.cjs"
+      }
+    },
+    "./matchers/playwright": {
+      "import": {
+        "types": "./dist/matchers/playwright.d.ts",
+        "default": "./dist/matchers/playwright.js"
+      },
+      "require": {
+        "types": "./dist/matchers/playwright.d.cts",
+        "default": "./dist/matchers/playwright.cjs"
+      }
+    },
+    "./matchers/vitest": {
+      "import": {
+        "types": "./dist/matchers/vitest.d.ts",
+        "default": "./dist/matchers/vitest.js"
+      },
+      "require": {
+        "types": "./dist/matchers/vitest.d.cts",
+        "default": "./dist/matchers/vitest.cjs"
+      }
     }
   },
   "files": [

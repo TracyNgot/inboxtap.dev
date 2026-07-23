@@ -46,6 +46,77 @@ Crea un buzón nuevo para cada test. Una fixture puede compartir el servidor de 
 transport en su alcance documentado, pero un buzón global para toda la suite permitiría que los
 tests en paralelo leyeran el mismo destinatario.
 
+## Puntos de entrada de matchers
+
+Los matchers de aserción se publican por separado del servidor, el cliente y las fixtures:
+
+| Import | Exports principales | Comportamiento |
+| --- | --- | --- |
+| `inboxtap/matchers` | `inboxTapMatchers`, `createInboxTapMatchers()` | Implementaciones sin peers y tipos públicos de observación |
+| `inboxtap/matchers/bun` | `extendInboxTapExpect(expect)` | Amplía en el mismo lugar el `expect` inyectado por Bun |
+| `inboxtap/matchers/vitest` | `extendInboxTapExpect(expect)` | Amplía en el mismo lugar el `expect` inyectado por Vitest |
+| `inboxtap/matchers/playwright` | `extendInboxTapExpect(expect)` | Devuelve un nuevo `expect` tipado de Playwright |
+
+Importar `inboxtap`, `inboxtap/client` o `inboxtap/matchers` no requiere Nodemailer, Vitest ni
+Playwright. Solo un adaptador específico de runner necesita el peer correspondiente.
+
+```ts
+import { expect } from "vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+
+extendInboxTapExpect(expect);
+
+await expect(inbox).toHaveDeliveredOnce({
+  subject: /password reset/i,
+  quietMs: 100,
+});
+
+const email = await inbox.waitForMessage({ subject: /password reset/i });
+expect(email).toHaveRecipient(inbox.address);
+expect(email).toContainLink("/reset-password");
+expect(email).toHaveUnsubscribeHeader({ oneClick: true });
+```
+
+| Matcher | Semántica |
+| --- | --- |
+| `toHaveDeliveredOnce({ subject?, quietMs? })` | Toma una instantánea inmediata del buzón y exige exactamente un mensaje coincidente. Un string `subject` es una subcadena que no distingue mayúsculas; una expresión regular se prueba sin cambiar su `lastIndex`. `quietMs` es un entero de `0` a `60000` y su valor predeterminado es `0`. |
+| `toHaveRecipient(address)` | Compara de forma exacta y sin distinguir mayúsculas los destinatarios del sobre SMTP; no usa el campo de dirección de presentación analizado. |
+| `toContainLink(stringOrRegex)` | Comprueba los enlaces HTTP(S) extraídos. Un string es una subcadena; una expresión regular clonada mantiene intacto el estado del llamador. |
+| `toHaveUnsubscribeHeader({ oneClick? })` | Analiza solo las cabeceras RFC en bruto de nivel superior, incluidos nombres con distintas mayúsculas y valores plegados. Por defecto exige un `List-Unsubscribe` no vacío; con `oneClick: true`, también exige un destino HTTPS entre corchetes angulares y el valor exacto, sin distinguir mayúsculas, `List-Unsubscribe-Post: List-Unsubscribe=One-Click`. |
+
+`toHaveDeliveredOnce()` no espera un mensaje inicial. Cuando su primera instantánea es válida,
+`quietMs` observa solo el intervalo siguiente; no demuestra que sea imposible un reintento
+posterior. El matcher one-click solo comprueba la forma de las cabeceras RFC 8058. No verifica
+firmas DKIM, la cobertura de la firma ni el comportamiento del endpoint de baja.
+
+Los resultados de los matchers omiten deliberadamente `actual`, `expected`, los cuerpos del
+mensaje, los valores de destinatario y enlace, los patrones con tokens y las cabeceras en bruto.
+Los fallos solo exponen conteos y estados booleanos seguros.
+
+Para recopilar un informe, pasa un recorder síncrono a la fábrica pura:
+
+```ts
+import {
+  createInboxTapMatchers,
+  type InboxTapMatcherObservation,
+} from "inboxtap/matchers";
+
+const observations: InboxTapMatcherObservation[] = [];
+const matchers = createInboxTapMatchers({
+  recorder: {
+    recordMatcherObservation(observation) {
+      observations.push(observation);
+    },
+  },
+});
+```
+
+Cada observación tiene versión de esquema y registra el nombre del matcher, la negación y el
+estado de éxito, el ID opcional del mensaje capturado y conteos o booleanos sin contenido sensible.
+Nunca contiene el destinatario esperado, el asunto, el patrón del enlace, el valor de una cabecera
+ni el cuerpo capturado. Pasa `matchers` al `expect.extend()` de un runner compatible; los
+adaptadores específicos de runner llaman a la misma fábrica.
+
 ## Controlador de fallos SMTP
 
 Cada servidor programático expone un `SmtpFaultController` como `server.faults`; quienes usan

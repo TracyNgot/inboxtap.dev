@@ -125,6 +125,56 @@ If the application needs the dynamic SMTP port, start it as another worker fixtu
 before test fixtures, so an already-started `webServer` cannot consume a port selected later by the
 InboxTap worker fixture.
 
+## Runner-native matchers
+
+InboxTap keeps its matcher implementations in the peer-free `inboxtap/matchers` subpath and
+publishes typed adapters for each runner. Inject the runner's `expect` into
+`extendInboxTapExpect()`. Bun and Vitest extend that object in place:
+
+```ts
+import { expect } from "vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+
+extendInboxTapExpect(expect);
+```
+
+The Bun setup uses the same pattern with `bun:test` and `inboxtap/matchers/bun`. Playwright's
+native `expect.extend()` returns a new object, so export the returned value alongside your extended
+test fixture:
+
+```ts
+import { expect as baseExpect, test as baseTest } from "@playwright/test";
+import { extendInboxTap } from "inboxtap/fixtures/playwright";
+import { extendInboxTapExpect } from "inboxtap/matchers/playwright";
+
+export const test = extendInboxTap(baseTest);
+export const expect = extendInboxTapExpect(baseExpect);
+```
+
+The matchers work with the fixture's test-scoped inbox and captured messages:
+
+```ts
+await expect(inbox).toHaveDeliveredOnce({
+  subject: /verify your account/i,
+  quietMs: 100,
+});
+
+const email = await inbox.waitForMessage({ subject: /verify your account/i });
+expect(email).toHaveRecipient(inbox.address);
+expect(email).toContainLink("/verify");
+expect(email).toHaveUnsubscribeHeader({ oneClick: true });
+```
+
+`toHaveDeliveredOnce()` is a snapshot assertion: it checks the messages already captured and does
+not wait for the first delivery. `quietMs` is an optional observation window that starts only after
+the initial snapshot contains exactly one matching message. It can catch a retry during that
+window, but it cannot prove that no later retry will arrive.
+
+Use `inboxTapMatchers` directly with another compatible Jest-style `expect`, or create a fresh set
+with `createInboxTapMatchers({ recorder })`. Those exports do not import a runner. The recorder
+receives structured, content-safe observations; matcher diagnostics likewise omit bodies,
+recipient values, links, token-bearing patterns, and raw headers.
+
 ## Isolation and cleanup
 
 Share the server only at the scope defined by the adapter. Never create one suite-global

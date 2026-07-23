@@ -125,6 +125,60 @@ dynamically selected SMTP port must start as a dependent worker fixture; an
 already-running `webServer` cannot consume a port selected later by a test
 fixture.
 
+### Assertion matchers
+
+Matcher implementations and runner adapters use isolated subpaths. Inject the
+runner's `expect` into its adapter; Bun and Vitest extend that object in place,
+while Playwright returns a new typed `expect`:
+
+```ts
+import { expect, test as base } from "vitest";
+import { extendInboxTap } from "inboxtap/fixtures/vitest";
+import { extendInboxTapExpect } from "inboxtap/matchers/vitest";
+
+extendInboxTapExpect(expect);
+const test = extendInboxTap(base);
+
+test("delivers one verification email", async ({ inboxTap, inbox }) => {
+  await inboxTap.transport.sendMail({
+    from: "app@local.test",
+    to: inbox.address,
+    subject: "Verify your account",
+    text: "Open https://app.local.test/verify?id=example",
+  });
+
+  await expect(inbox).toHaveDeliveredOnce({
+    subject: /verify your account/i,
+    quietMs: 100,
+  });
+
+  const email = await inbox.waitForMessage({ subject: /verify your account/i });
+  expect(email).toHaveRecipient(inbox.address);
+  expect(email).toContainLink("/verify");
+});
+```
+
+`toHaveDeliveredOnce()` checks the messages that already exist; it does not
+wait for the first delivery. An optional `quietMs` observes only the interval
+after a valid one-message snapshot and cannot prove that no later retry will
+arrive. Recipient matching uses the SMTP envelope, link strings are
+substrings, and regular expressions are tested without changing their
+`lastIndex`.
+
+`toHaveUnsubscribeHeader({ oneClick: true })` reads the raw, unfolded RFC
+headers and requires an HTTPS `List-Unsubscribe` target plus
+`List-Unsubscribe-Post: List-Unsubscribe=One-Click`. It checks header shape,
+not DKIM validity or the remote endpoint.
+
+Use `inboxTapMatchers` or
+`createInboxTapMatchers({ recorder })` from the peer-free
+`inboxtap/matchers` subpath when integrating another compatible `expect`
+implementation. Matcher diagnostics report only safe counts and states; they
+do not echo message bodies, recipient values, links, tokens, or raw headers.
+The recorder receives the same content-safe, structured observations for
+later report collection. Importing `inboxtap`, `inboxtap/client`, or
+`inboxtap/matchers` does not load Nodemailer, Vitest, or Playwright.
+
 ### SMTP fault injection
 
 Every programmatic server exposes `server.faults` for deterministic

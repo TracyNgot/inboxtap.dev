@@ -62,6 +62,7 @@ graph LR
 | `src/api.ts` | Dependency-free `node:http` JSON handler for `/health` and `/api/emails` routes, validating filters and capping waits at 60 s and list limits at 100. |
 | `src/client/` | The fetch-based test SDK: `InboxTapClient` plus `TestInbox` with `waitForMessage`/`waitForLink`/`waitForCode`/`waitForMatch` polling helpers and a typed `InboxTapError`. |
 | `src/fixtures/` | Optional runner-native fixtures: the shared starter owns dynamic SMTP/API ports, a verified Nodemailer transport, partial-startup cleanup, and idempotent shutdown; Bun, Vitest, and Playwright adapters map that lifecycle to their native scopes. |
+| `src/matchers/` | Peer-free matcher implementations for delivery count, envelope recipients, extracted links, and raw unsubscribe headers; isolated Bun, Vitest, and Playwright adapters add native `expect` types without loading runner peers from the root package. Matcher observations contain only bounded counts, booleans, matcher state, and message IDs for later redacted reports. |
 | `src/cli.ts` | Node/Bun executable that parses the CLI flags, starts `InboxTapServer`, prints connection info, and shuts down on `SIGINT`/`SIGTERM`. |
 | `src/index.ts` | Public server entry point re-exporting `InboxTapServer` and the shared public types. |
 | `src/types.ts` | Shared interfaces (`CapturedEmail`, `EmailFilters`, `HealthResponse`, …) imported by both server and client — the mechanism behind the SDK ↔ API alignment invariant. |
@@ -91,13 +92,20 @@ enforced in code today:
    worker scope (Playwright). Bun keeps per-test creation explicit. SMTP fault
    rules are programmatic, bounded, and consumed by the next matching
    transaction at `DATA`, so failure-path tests remain deterministic without
-   exposing a remote control surface.
+   exposing a remote control surface. `toHaveDeliveredOnce` starts from an
+   immediate inbox snapshot; its optional, bounded quiet window observes only
+   that interval rather than claiming that no later retry is possible.
 5. **Dual-format output** — ships ESM, CJS, type declarations, and a compiled
    Node 20 CLI (`exports`/`bin` in `package.json`, `tsup.config.ts`, smoke-
    tested by `scripts/test-package.ts`).
 6. **SDK ↔ API alignment** — HTTP response shapes and SDK return types stay in
    lockstep because both sides import the same `src/types.ts` definitions,
    backed by integration tests.
+7. **Content-safe matcher diagnostics** — custom matchers never attach
+   captured bodies, raw headers, recipient arguments, link values, or
+   token-bearing patterns to assertion results. Failures and structured
+   recorder observations expose only the minimum counts and boolean states
+   needed to diagnose the assertion.
 
 ## Current scope (v0.1)
 
@@ -110,6 +118,10 @@ Included:
 - Programmatic SMTP fault injection for bounded failure, delay, disconnect, and
   pause/release scenarios; rules can target a unique envelope recipient and
   failed or disconnected messages never reach the store
+- Pure assertion matchers plus isolated Bun, Vitest, and Playwright `expect`
+  adapters for one-delivery snapshots, envelope recipients, extracted links,
+  and raw `List-Unsubscribe` header shape; matcher observations form the safe
+  handoff to client-side reports
 - Server-side extraction of http(s) links and 4–8 digit codes; arbitrary
   regex matching is SDK-side via `waitForMatch` (and `waitForCode` defaults to
   6-digit codes)
@@ -145,8 +157,11 @@ Explicitly excluded:
 - Importable as a library: `import { InboxTapClient } from "inboxtap/client"`.
   Runner integrations live behind `inboxtap/fixtures`,
   `inboxtap/fixtures/bun`, `inboxtap/fixtures/vitest`, and
-  `inboxtap/fixtures/playwright`, so root and client imports do not load
-  optional peers.
+  `inboxtap/fixtures/playwright`. Pure matchers live at
+  `inboxtap/matchers`, with runner-specific adapters at
+  `inboxtap/matchers/bun`, `inboxtap/matchers/vitest`, and
+  `inboxtap/matchers/playwright`. Root, client, and pure-matcher imports do not
+  load optional peers.
 - Built with tsup; tested with Bun; formatted and linted with Biome;
   pre-commit/push hooks via Lefthook.
 - `examples/` holds standalone integration examples for the docs guides; they
