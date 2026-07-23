@@ -1,4 +1,9 @@
-import { type DocGroup, type DocKey, docs } from "../docs-config";
+import { type CoreDocKey, type DocGroup, type DocKey, docs } from "../docs-config";
+import {
+  getExampleDocStrings,
+  getExamplesLandingStrings,
+  isExampleDocKey,
+} from "../example-registry";
 import { docPath, homePath, type Locale, locales } from "./config";
 import { en } from "./dictionaries/en";
 import { es } from "./dictionaries/es";
@@ -25,7 +30,12 @@ export interface LocalizedDoc {
 function buildLocalizedDocs(locale: Locale): readonly LocalizedDoc[] {
   const dictionary = docsDictionaries[locale];
   return docs.map(({ group, key }) => {
-    const strings = dictionary.entries[key];
+    const strings =
+      key === "examples"
+        ? getExamplesLandingStrings(locale)
+        : isExampleDocKey(key)
+          ? getExampleDocStrings(locale, key)
+          : dictionary.entries[key as CoreDocKey];
     return {
       description: strings.description,
       group,

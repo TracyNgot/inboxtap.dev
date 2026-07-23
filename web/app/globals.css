@@ -959,12 +959,17 @@ a {
 .docs-prose > p,
 .docs-prose > ul,
 .docs-prose > ol,
-.docs-prose > table {
+.docs-prose > table,
+.docs-example-readme > div > p,
+.docs-example-readme > div > ul,
+.docs-example-readme > div > ol,
+.docs-example-readme > div > table {
   margin-bottom: 24px;
   margin-top: 0;
 }
 
 .docs-prose > p,
+.docs-example-readme > div > p,
 .docs-prose li {
   color: var(--muted);
 }
@@ -981,6 +986,14 @@ a {
   line-height: 1.2;
   margin: 54px 0 22px;
   padding-bottom: 10px;
+}
+
+.docs-prose h1 {
+  font-size: clamp(2.35rem, 5vw, 3.65rem);
+  font-weight: 700;
+  letter-spacing: -0.048em;
+  line-height: 1.02;
+  margin: 0 0 28px;
 }
 
 .docs-prose h3 {
@@ -1032,6 +1045,55 @@ a {
 
 .docs-prose td {
   color: var(--muted);
+}
+
+.docs-example-readme > .docs-example-notice {
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  margin-bottom: 34px;
+  padding: 12px 16px;
+}
+
+.examples-list {
+  display: grid;
+  gap: 14px;
+  list-style: none;
+  padding-left: 0;
+}
+
+.examples-list li {
+  margin: 0;
+  padding: 0;
+}
+
+.examples-list a {
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.examples-list a:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.examples-list strong {
+  font-size: 1.05rem;
+}
+
+.examples-list span {
+  color: var(--muted);
+}
+
+.examples-list small {
+  color: var(--accent-text);
+  font-weight: 700;
 }
 
 .flow-diagram {

@@ -1,3 +1,4 @@
+import { isExampleDocKey } from "../lib/example-registry";
 import { docAlternatePaths, getLocalizedDocs } from "../lib/i18n";
 import { homePath, type Locale, locales, ogLocales, withTrailingSlash } from "../lib/i18n/config";
 import { SITE_ORIGIN } from "../lib/site-config";
@@ -9,7 +10,7 @@ export interface ExpectedRoute {
   canonical: string;
   hreflangs: Record<Locale | "x-default", string>;
   htmlLang: Locale;
-  kind: "home" | "doc";
+  kind: "home" | "doc" | "example";
   ogLocale: string;
   tocIds: readonly string[];
   jsonLdTypes: readonly string[];
@@ -54,7 +55,7 @@ export function expectedRoutes(): ExpectedRoute[] {
         hreflangs: hreflangsFor(docAlternatePaths(doc.key)),
         htmlLang: locale,
         jsonLdTypes: ["TechArticle", "Organization", "BreadcrumbList"],
-        kind: "doc",
+        kind: isExampleDocKey(doc.key) ? "example" : "doc",
         locale,
         ogLocale: ogLocales[locale],
         path: doc.path,

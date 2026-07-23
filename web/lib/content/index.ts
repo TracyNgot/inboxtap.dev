@@ -1,6 +1,8 @@
 import type { MDXComponents } from "mdx/types";
 import type { ComponentType } from "react";
-import type { DocKey } from "../docs-config";
+import { examplesLandingContent } from "@/components/docs/examples-landing";
+import type { CoreDocKey, DocKey } from "../docs-config";
+import { getExampleByKey, isExampleDocKey } from "../example-registry";
 import type { Locale } from "../i18n/config";
 import { contentEn } from "./en";
 import { contentEs } from "./es";
@@ -8,12 +10,14 @@ import { contentFr } from "./fr";
 
 export type DocContent = ComponentType<{ components?: MDXComponents }>;
 
-const contentByLocale: Record<Locale, Record<DocKey, DocContent>> = {
+const contentByLocale: Record<Locale, Record<CoreDocKey, DocContent>> = {
   en: contentEn,
   es: contentEs,
   fr: contentFr,
 };
 
 export function getDocContent(locale: Locale, key: DocKey): DocContent {
-  return contentByLocale[locale][key];
+  if (key === "examples") return examplesLandingContent(locale);
+  if (isExampleDocKey(key)) return getExampleByKey(key).Content;
+  return contentByLocale[locale][key as CoreDocKey];
 }

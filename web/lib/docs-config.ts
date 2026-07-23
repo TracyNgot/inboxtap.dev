@@ -1,8 +1,10 @@
-export const docGroups = ["getting-started", "reference", "guides"] as const;
+import { exampleReadmes } from "./example-registry";
+
+export const docGroups = ["getting-started", "reference", "guides", "examples"] as const;
 
 export type DocGroup = (typeof docGroups)[number];
 
-export const docs = [
+export const coreDocs = [
   { group: "getting-started", key: "" },
   { group: "getting-started", key: "installation" },
   { group: "getting-started", key: "quick-start" },
@@ -19,6 +21,17 @@ export const docs = [
   { group: "guides", key: "guides/ci" },
   { group: "guides", key: "guides/troubleshooting" },
   { group: "reference", key: "changelog" },
+] as const satisfies readonly { group: Exclude<DocGroup, "examples">; key: string }[];
+
+export type CoreDocKey = (typeof coreDocs)[number]["key"];
+
+export const docs = [
+  ...coreDocs,
+  { group: "examples", key: "examples" },
+  ...exampleReadmes.map((example) => ({
+    group: "examples" as const,
+    key: `examples/${example.directory}` as const,
+  })),
 ] as const satisfies readonly { group: DocGroup; key: string }[];
 
 export type DocKey = (typeof docs)[number]["key"];
