@@ -4,7 +4,7 @@
   "workspaces": [
     "web"
   ],
-  "description": "A local SMTP inbox for deterministic email-flow tests.",
+  "description": "A local email capture server and TypeScript SDK for testing verification links, magic links, OTPs, invitations, and password-reset emails.",
   "keywords": [
     "smtp",
     "smtp-server",
@@ -17,7 +17,16 @@
     "capture",
     "testing",
     "e2e",
-    "development"
+    "development",
+    "typescript",
+    "playwright",
+    "cypress",
+    "vitest",
+    "jest",
+    "otp",
+    "magic-link",
+    "password-reset",
+    "no-docker"
   ],
   "license": "MIT",
   "homepage": "https://inboxtap.dev",

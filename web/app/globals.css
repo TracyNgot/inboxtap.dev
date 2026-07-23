@@ -937,6 +937,20 @@ a {
   max-width: 60ch;
 }
 
+.docs-article-header .docs-article-meta {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.docs-article-meta a {
+  color: var(--text);
+}
+
 .docs-prose {
   font-size: 1rem;
   line-height: 1.78;

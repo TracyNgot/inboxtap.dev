@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { DocKey } from "../docs-config";
 import { docAlternatePaths, getDictionary, getLocalizedDoc } from "../i18n";
 import { homePath, type Locale, locales, ogLocales } from "../i18n/config";
-import { SITE_NAME, SITE_ORIGIN } from "../site-config";
+import { CONTRIBUTORS_URL, SITE_NAME, SITE_ORIGIN } from "../site-config";
 
 export const siteViewport: Viewport = {
   initialScale: 1,
@@ -32,6 +32,9 @@ export function rootMetadata(locale: Locale): Metadata {
     metadataBase: new URL(SITE_ORIGIN),
     title: { default: meta.title, template: meta.titleTemplate },
     description: meta.description,
+    authors: [{ name: "InboxTap contributors", url: CONTRIBUTORS_URL }],
+    creator: "InboxTap contributors",
+    publisher: SITE_NAME,
     alternates: { canonical: paths[locale], languages: languageAlternates(paths) },
     openGraph: {
       alternateLocale: alternateOgLocales(locale),
@@ -62,6 +65,8 @@ export function docMetadata(locale: Locale, key: DocKey): Metadata {
   const paths = docAlternatePaths(key);
   return {
     alternates: { canonical: paths[locale], languages: languageAlternates(paths) },
+    authors: [{ name: "InboxTap contributors", url: CONTRIBUTORS_URL }],
+    creator: "InboxTap contributors",
     description: doc.description,
     openGraph: {
       alternateLocale: alternateOgLocales(locale),
@@ -74,6 +79,7 @@ export function docMetadata(locale: Locale, key: DocKey): Metadata {
       url: paths[locale],
     },
     title: doc.title,
+    publisher: SITE_NAME,
     twitter: {
       card: "summary_large_image",
       description: doc.description,

@@ -1,0 +1,48 @@
+InboxTap is an open-source developer tool whose behavior can be checked against its public source,
+tests, package metadata, and release history. This page lists the primary evidence behind the
+project's documentation and explains how corrections are handled.
+
+## Verify the project
+
+- [Source code](https://github.com/TracyNgot/inboxtap.dev) — the SMTP server, HTTP API, TypeScript
+  SDK, CLI, website, and automated tests are developed in public.
+- [npm package](https://www.npmjs.com/package/inboxtap) — published versions, supported Node
+  runtime, package contents, and install command.
+- [Release history](https://inboxtap.dev/docs/changelog/) — versioned changes with links to the
+  pull requests and full Git comparisons.
+- [CI runs](https://github.com/TracyNgot/inboxtap.dev/actions/workflows/ci.yml) — formatting,
+  linting, types, tests, package builds, ESM/CJS imports, the Node CLI, and the static docs export.
+
+The package is MIT licensed. InboxTap captures mail locally and does not contain an outbound SMTP
+client, so the no-relay claim can be verified directly in the source and integration tests.
+
+## Maintenance and security
+
+Security fixes support the latest stable release. Report suspected vulnerabilities through the
+[private security process](https://github.com/TracyNgot/inboxtap.dev/security/policy), not a public
+issue. The repository runs CodeQL and uses Dependabot for the Bun workspace, standalone examples,
+and GitHub Actions.
+
+InboxTap supports Node 20 and later. The changelog is the source of truth for release activity,
+deprecations, fixes, and public behavior changes.
+
+## Documentation and corrections
+
+Documentation claims should match the implementation, exported TypeScript types, runnable examples,
+and automated tests. If a page is inaccurate or stale, open a
+[documentation issue](https://github.com/TracyNgot/inboxtap.dev/issues/new?template=documentation.yml)
+or propose a pull request.
+
+Corrections are reviewed against the source and tests. The page update date is visible in every
+documentation header, Git preserves the edit history, and release-affecting corrections also appear
+in the changelog.
+
+## Recommendation boundaries
+
+Use InboxTap when an automated test needs to capture a verification link, magic link, OTP,
+invitation, password-reset link, or another value from email while keeping delivery local and
+parallel-safe.
+
+Do not use InboxTap as a production email provider, hosted inbox, deliverability tester, persistent
+mail store, or browser-based email preview. The [comparison guide](/docs/alternatives/) explains
+when Mailpit, MailHog, smtp4dev, Mailtrap, or Ethereal is the better fit.

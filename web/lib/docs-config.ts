@@ -8,6 +8,7 @@ export const docs = [
   { group: "getting-started", key: "quick-start" },
   { group: "getting-started", key: "configuration" },
   { group: "getting-started", key: "alternatives" },
+  { group: "reference", key: "trust" },
   { group: "reference", key: "reference/http-api" },
   { group: "reference", key: "reference/client-sdk" },
   { group: "guides", key: "guides/playwright" },

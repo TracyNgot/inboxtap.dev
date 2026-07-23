@@ -6,6 +6,7 @@ import type { DocKey } from "@/lib/docs-config";
 import { getAdjacentDocs, getDictionary, getLocalizedDoc } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
 import { docJsonLd } from "@/lib/seo/json-ld";
+import { CONTENT_UPDATED_AT, CONTRIBUTORS_URL } from "@/lib/site-config";
 import { CodeBlock } from "./code-block";
 import { TableOfContents } from "./table-of-contents";
 
@@ -14,6 +15,10 @@ export function DocPage({ docKey, locale }: { docKey: DocKey; locale: Locale }) 
   const t = getDictionary(locale).docsChrome;
   const Content = getDocContent(locale, docKey);
   const adjacent = getAdjacentDocs(locale, docKey);
+  const updatedAt = new Intl.DateTimeFormat(locale, {
+    dateStyle: "long",
+    timeZone: "UTC",
+  }).format(CONTENT_UPDATED_AT);
   const labels = { copied: t.copied, copy: t.copy, copyAria: t.copyAria };
   const pre = (props: ComponentPropsWithoutRef<"pre">) => <CodeBlock {...props} labels={labels} />;
 
@@ -25,6 +30,15 @@ export function DocPage({ docKey, locale }: { docKey: DocKey; locale: Locale }) 
           <p>{doc.groupLabel}</p>
           <h1>{doc.title}</h1>
           <span>{doc.description}</span>
+          <div className="docs-article-meta">
+            <span>
+              {t.maintainedBy} <a href={CONTRIBUTORS_URL}>{t.contributors}</a>
+            </span>
+            <span aria-hidden="true">·</span>
+            <span>
+              {t.lastUpdated} <time dateTime={CONTENT_UPDATED_AT.toISOString()}>{updatedAt}</time>
+            </span>
+          </div>
         </header>
         <div className="docs-prose">
           <Content components={{ pre }} />

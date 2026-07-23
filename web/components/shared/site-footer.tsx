@@ -1,7 +1,9 @@
 import type { Dictionary } from "@/lib/i18n/types";
-import { BUY_ME_A_COFFEE_URL, GITHUB_URL } from "@/lib/site-config";
+import { getLocalizedDoc } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/config";
+import { BUY_ME_A_COFFEE_URL, GITHUB_URL, NPM_URL } from "@/lib/site-config";
 
-export function SiteFooter({ t }: { t: Dictionary["chrome"] }) {
+export function SiteFooter({ locale, t }: { locale: Locale; t: Dictionary["chrome"] }) {
   return (
     <footer className="site-footer">
       <div className="site-footer-inner">
@@ -13,6 +15,8 @@ export function SiteFooter({ t }: { t: Dictionary["chrome"] }) {
         </span>
         <span>{t.footerTagline}</span>
         <span className="site-footer-links">
+          <a href={getLocalizedDoc(locale, "trust").path}>{t.trustLabel}</a>
+          <a href={NPM_URL}>{t.npmLabel} ↗</a>
           <a href={BUY_ME_A_COFFEE_URL}>{t.supportLabel} ☕</a>
           <a aria-label={t.footerGitHubAria} href={GITHUB_URL}>
             GitHub ↗
