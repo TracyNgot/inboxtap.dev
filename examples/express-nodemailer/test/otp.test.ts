@@ -15,7 +15,9 @@ afterAll(async () => {
 describe("one-time codes", () => {
   it("rejects a wrong code and accepts the emailed one", async () => {
     const inbox = await stack.inboxTap.createInbox({ alias: "otp" });
-    await postJson(`${stack.baseUrl}/otp/request`, { email: inbox.address });
+    const request = await postJson(`${stack.baseUrl}/otp/request`, { email: inbox.address });
+    expect(request.status).toBe(200);
+    await expect(inbox).toHaveDeliveredOnce({ subject: /sign-in code/i });
 
     const code = await inbox.waitForCode();
     const wrongCode = code === "000000" ? "000001" : "000000";
@@ -38,9 +40,10 @@ describe("one-time codes", () => {
     await postJson(`${stack.baseUrl}/otp/request`, { email: inboxA.address });
     await inboxA.waitForCode();
 
-    expect(await inboxB.messages()).toHaveLength(0);
+    await expect(inboxA).toHaveDeliveredOnce({ subject: /sign-in code/i });
+    await expect(inboxB).not.toHaveDeliveredOnce();
 
     expect(await inboxA.clear()).toBe(1);
-    expect(await inboxA.messages()).toHaveLength(0);
+    await expect(inboxA).not.toHaveDeliveredOnce();
   });
 });

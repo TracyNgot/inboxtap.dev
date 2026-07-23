@@ -18,6 +18,7 @@ describe("invites", () => {
 
     const invite = await postJson(`${stack.baseUrl}/invites`, { email: inbox.address });
     expect(invite.status).toBe(201);
+    await expect(inbox).toHaveDeliveredOnce({ subject: "invited" });
 
     const token = await inbox.waitForMatch({ pattern: /invite_[a-f0-9]{12}/ });
 
