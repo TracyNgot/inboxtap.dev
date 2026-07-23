@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { JsonLd } from "@/components/shared/json-ld";
 import { getDocContent } from "@/lib/content";
 import type { DocKey } from "@/lib/docs-config";
+import { examplesLanding, isExampleDocKey } from "@/lib/example-registry";
 import { getAdjacentDocs, getDictionary, getLocalizedDoc } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
 import { docJsonLd } from "@/lib/seo/json-ld";
@@ -21,6 +22,7 @@ export function DocPage({ docKey, locale }: { docKey: DocKey; locale: Locale }) 
   }).format(CONTENT_UPDATED_AT);
   const labels = { copied: t.copied, copy: t.copy, copyAria: t.copyAria };
   const pre = (props: ComponentPropsWithoutRef<"pre">) => <CodeBlock {...props} labels={labels} />;
+  const isExample = isExampleDocKey(docKey);
 
   return (
     <div className="docs-page-grid">
@@ -28,7 +30,7 @@ export function DocPage({ docKey, locale }: { docKey: DocKey; locale: Locale }) 
       <article className="docs-article">
         <header className="docs-article-header">
           <p>{doc.groupLabel}</p>
-          <h1>{doc.title}</h1>
+          {isExample ? null : <h1>{doc.title}</h1>}
           <span>{doc.description}</span>
           <div className="docs-article-meta">
             <span>
@@ -40,8 +42,19 @@ export function DocPage({ docKey, locale }: { docKey: DocKey; locale: Locale }) 
             </span>
           </div>
         </header>
-        <div className="docs-prose">
-          <Content components={{ pre }} />
+        <div className={`docs-prose${isExample ? " docs-example-readme" : ""}`}>
+          {isExample ? (
+            <>
+              <p className="docs-example-notice" lang={locale}>
+                {examplesLanding[locale].notice}
+              </p>
+              <div lang="en">
+                <Content components={{ pre }} />
+              </div>
+            </>
+          ) : (
+            <Content components={{ pre }} />
+          )}
         </div>
         <nav aria-label={t.pagerAria} className="docs-pager">
           {adjacent.previous ? (

@@ -15,7 +15,7 @@ import QuickStart from "@/content/docs/es/quick-start.mdx";
 import ClientSdk from "@/content/docs/es/reference/client-sdk.mdx";
 import HttpApi from "@/content/docs/es/reference/http-api.mdx";
 import Trust from "@/content/docs/es/trust.mdx";
-import type { DocKey } from "../docs-config";
+import type { CoreDocKey } from "../docs-config";
 import { es } from "../i18n/dictionaries/es";
 
 export const contentEs = {
@@ -38,4 +38,4 @@ export const contentEs = {
   "reference/client-sdk": ClientSdk,
   "reference/http-api": HttpApi,
   trust: Trust,
-} satisfies Record<DocKey, ComponentType>;
+} satisfies Record<CoreDocKey, ComponentType>;

@@ -1,6 +1,9 @@
+import { createRequire } from "node:module";
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 import rootPackage from "../package.json";
+
+const require = createRequire(import.meta.url);
 
 const nextConfig: NextConfig = {
   env: {
@@ -14,11 +17,12 @@ const nextConfig: NextConfig = {
 };
 
 const withMDX = createMDX({
+  extension: /\.(md|mdx)$/,
   options: {
     rehypePlugins: [
-      "rehype-slug",
+      require.resolve("rehype-slug"),
       [
-        "@shikijs/rehype",
+        require.resolve("@shikijs/rehype"),
         {
           defaultColor: false,
           themes: {
@@ -28,7 +32,7 @@ const withMDX = createMDX({
         },
       ],
     ],
-    remarkPlugins: ["remark-gfm"],
+    remarkPlugins: [require.resolve("remark-gfm")],
   },
 });
 

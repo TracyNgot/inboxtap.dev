@@ -133,6 +133,13 @@ Explicitly excluded:
   pre-commit/push hooks via Lefthook.
 - `examples/` holds standalone integration examples for the docs guides; they
   are not part of the published package or the root verify gate.
+- The website imports every `examples/<directory>/README.md` through the
+  explicit `web/lib/example-registry.ts` registry and publishes it under the
+  localized Examples routes. Unlike the translated guides in
+  `web/content/docs/{en,fr,es}/`, README bodies stay in English and are marked
+  `lang="en"` below localized chrome and an availability notice. Verification
+  fails for unregistered READMEs, missing registered READMEs, multiple H1s,
+  mismatched section anchors, or unresolved relative file and image links.
 
 See [README.md](../README.md) for usage, [AGENTS.md](../AGENTS.md) for the
 agent and contributor contract, [STYLE_GUIDE.md](../STYLE_GUIDE.md) for

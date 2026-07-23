@@ -1,4 +1,5 @@
 import type { DocKey } from "../docs-config";
+import { isExampleDocKey } from "../example-registry";
 import { getDictionary, getLocalizedDoc } from "../i18n";
 import { docPath, homePath, type Locale, withTrailingSlash } from "../i18n/config";
 import {
@@ -64,7 +65,7 @@ export function docJsonLd(locale: Locale, key: DocKey): object {
         dateModified: CONTENT_UPDATED_AT.toISOString(),
         description: doc.description,
         headline: doc.title,
-        inLanguage: locale,
+        inLanguage: isExampleDocKey(key) ? "en" : locale,
         isAccessibleForFree: true,
         license: `${GITHUB_URL}/blob/main/LICENSE`,
         mainEntityOfPage: url,

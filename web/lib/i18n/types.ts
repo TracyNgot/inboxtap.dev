@@ -1,4 +1,4 @@
-import type { DocGroup, DocKey } from "../docs-config";
+import type { CoreDocKey, DocGroup } from "../docs-config";
 
 export interface TocItem {
   id: string;
@@ -14,7 +14,7 @@ export interface DocStrings {
 
 export interface DocsDictionary {
   groups: Record<DocGroup, string>;
-  entries: Record<DocKey, DocStrings>;
+  entries: Record<CoreDocKey, DocStrings>;
 }
 
 export interface StoryAct {

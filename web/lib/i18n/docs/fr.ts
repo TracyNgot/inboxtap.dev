@@ -2,6 +2,7 @@ import type { DocsDictionary } from "../types";
 
 export const docsFr: DocsDictionary = {
   groups: {
+    examples: "Exemples",
     "getting-started": "Premiers pas",
     guides: "Guides",
     reference: "Référence",

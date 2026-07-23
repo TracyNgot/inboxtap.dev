@@ -76,6 +76,15 @@ for (const route of routes) {
       requireTag(html, marker, route.path, "landing story");
     }
   }
+  if (route.kind === "example") {
+    const h1Count = html.match(/<h1(?:\s|>)/g)?.length ?? 0;
+    if (h1Count !== 1) {
+      throw new Error(`Example page ${route.path} has ${h1Count} H1 elements instead of one`);
+    }
+    requireTag(html, '<div lang="en">', route.path, "English README language");
+    requireTag(html, 'class="shiki', route.path, "highlighted README code fence");
+    requireTag(html, '"inLanguage":"en"', route.path, "English TechArticle language");
+  }
   for (const id of route.tocIds) {
     if (!html.includes(`id="${id}"`)) {
       throw new Error(`Missing table-of-contents anchor #${id} in ${route.path}`);

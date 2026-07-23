@@ -31,6 +31,13 @@ the other locales use localized URL slugs (for example `/fr/docs/demarrage-rapid
 - UI strings and page metadata live in `lib/i18n/dictionaries/`; docs titles, descriptions,
   localized slugs, and table-of-contents anchors live in `lib/i18n/docs/`.
 - Docs bodies live in `content/docs/{en,fr,es}/` with identical filenames per locale.
+- Example detail pages are the exception: one explicit registry in
+  `lib/example-registry.ts` imports each `examples/<directory>/README.md` directly. The
+  README body remains English on every locale route and is marked with `lang="en"` beneath
+  localized page chrome, descriptions, URLs, navigation, and an availability notice.
+- Every example directory with a README must be registered. `test/examples.test.ts` checks
+  registry completeness, one README H1, matching table-of-contents anchors, and rejects
+  unresolved relative file or image links. Anchor links and absolute URLs remain valid.
 - Any change to an English doc or UI string must update the French and Spanish counterparts
   in the same pull request. The `Record<DocKey, …>` dictionary types and the parity tests
   keep the structure complete; keeping the translated content current is on the author.
