@@ -200,7 +200,9 @@ La canalización de redacción predeterminada:
   imágenes, estilos o píxeles de seguimiento capturados o remotos.
 
 Usa `redaction.patterns` y `redaction.additionalSensitiveHeaders` para secretos específicos del
-proyecto. La recopilación está limitada a 100 mensajes y 1.000 aserciones, y cada artefacto
+proyecto. Si un patrón personalizado se solapa con una URL, InboxTap sustituye la URL completa para
+que una mutación mediante expresiones regulares no exponga valores adyacentes de consulta o
+fragmento. La recopilación está limitada a 100 mensajes y 1.000 aserciones, y cada artefacto
 renderizado tiene un máximo de 10 MiB. Cuando se alcanza un límite, la salida registra marcadores de
 truncamiento explícitos en vez de crecer sin límite.
 
