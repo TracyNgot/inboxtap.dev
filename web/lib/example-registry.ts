@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import BetterAuthNextjs from "../../examples/better-auth-nextjs/README.md";
 import ExpressNodemailer from "../../examples/express-nodemailer/README.md";
+import FaultInjectionVitest from "../../examples/fault-injection-vitest/README.md";
 import TestFixtureBun from "../../examples/test-fixture-bun/README.md";
 import TestFixturePlaywright from "../../examples/test-fixture-playwright/README.md";
 import TestFixtureVitest from "../../examples/test-fixture-vitest/README.md";
@@ -94,6 +95,36 @@ const fixtureToc = {
   ],
 } as const satisfies Record<Locale, readonly TocItem[]>;
 
+const faultInjectionToc = {
+  en: [
+    ...sharedToc.en,
+    { id: "what-the-example-proves", label: "What the example proves" },
+    { id: "transient-retry", label: "Transient retry" },
+    { id: "pause-and-release", label: "Pause and release" },
+    { id: "disconnect-recovery", label: "Disconnect recovery" },
+    { id: "ownership-boundaries", label: "Ownership boundaries" },
+    { id: "troubleshooting", label: "Troubleshooting" },
+  ],
+  es: [
+    ...sharedToc.es,
+    { id: "what-the-example-proves", label: "Qué demuestra el ejemplo" },
+    { id: "transient-retry", label: "Reintento transitorio" },
+    { id: "pause-and-release", label: "Pausa y liberación" },
+    { id: "disconnect-recovery", label: "Recuperación tras desconexión" },
+    { id: "ownership-boundaries", label: "Límites de responsabilidad" },
+    { id: "troubleshooting", label: "Solución de problemas" },
+  ],
+  fr: [
+    ...sharedToc.fr,
+    { id: "what-the-example-proves", label: "Ce que démontre l’exemple" },
+    { id: "transient-retry", label: "Nouvelle tentative transitoire" },
+    { id: "pause-and-release", label: "Pause et libération" },
+    { id: "disconnect-recovery", label: "Reprise après déconnexion" },
+    { id: "ownership-boundaries", label: "Limites de responsabilité" },
+    { id: "troubleshooting", label: "Dépannage" },
+  ],
+} as const satisfies Record<Locale, readonly TocItem[]>;
+
 export const exampleReadmes = [
   {
     Content: BetterAuthNextjs,
@@ -176,6 +207,28 @@ export const exampleReadmes = [
         { id: "troubleshooting", label: "Dépannage" },
       ],
     },
+  },
+  {
+    Content: FaultInjectionVitest,
+    directory: "fault-injection-vitest",
+    strings: {
+      en: {
+        description:
+          "Test transient SMTP failures, paused deliveries, and connection recovery with Vitest.",
+        title: "SMTP fault injection + Vitest",
+      },
+      es: {
+        description:
+          "Prueba fallos SMTP transitorios, entregas en pausa y recuperación de conexión con Vitest.",
+        title: "Inyección de fallos SMTP + Vitest",
+      },
+      fr: {
+        description:
+          "Testez les erreurs SMTP transitoires, les livraisons en pause et la reprise de connexion avec Vitest.",
+        title: "Injection de pannes SMTP + Vitest",
+      },
+    },
+    toc: faultInjectionToc,
   },
   {
     Content: TestFixtureBun,
