@@ -4,6 +4,15 @@ Release history for the `inboxtap` npm package. Sections are generated from
 merged pull requests by the release workflow; each version also appears on
 [GitHub Releases](https://github.com/TracyNgot/inboxtap.dev/releases).
 
+## v1.2.0 — 2026-07-23
+
+### ✨ Features
+* ✨ feat: add SMTP fault injection by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/47
+### 📝 Documentation
+* 📝 docs: add test-runner fixture examples by @TracyNgot in https://github.com/TracyNgot/inboxtap.dev/pull/46
+
+**Full Changelog**: https://github.com/TracyNgot/inboxtap.dev/compare/v1.1.0...v1.2.0
+
 ## v1.1.0 — 2026-07-23
 
 ### ✨ Features
