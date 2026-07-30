@@ -10,14 +10,14 @@
   "dependencies": {
     "better-auth": "^1.6",
     "better-sqlite3": "^12.0",
-    "inboxtap": "^1.4.0",
+    "inboxtap": "^1.4.1",
     "next": "^16.2",
     "nodemailer": "^9.0",
     "react": "^19",
     "react-dom": "^19"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61",
+    "@playwright/test": "^1.62",
     "@types/better-sqlite3": "^7.6",
     "@types/node": "^26",
     "@types/nodemailer": "^8.0",
