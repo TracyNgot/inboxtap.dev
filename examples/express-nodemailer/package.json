@@ -10,13 +10,13 @@
   "dependencies": {
     "express": "^5.2.1",
     "inboxtap": "1.4.1",
-    "nodemailer": "^9.0.3"
+    "nodemailer": "^9.0.5"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "@types/nodemailer": "^8.0.1",
-    "tsx": "^4.20.0",
+    "tsx": "^4.23.11",
     "typescript": "^7.0.2",
     "vitest": "^4.1.0"
   }
