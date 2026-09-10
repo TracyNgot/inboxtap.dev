@@ -9,6 +9,6 @@
     "@playwright/test": "^1.61.0",
     "@types/nodemailer": "^8.0.1",
     "inboxtap": "1.1.0",
-    "nodemailer": "^9.0.0"
+    "nodemailer": "^9.1.1"
   }
 }
