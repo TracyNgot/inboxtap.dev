@@ -18,6 +18,6 @@
     "@types/nodemailer": "^8.0.1",
     "tsx": "^4.20.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   }
 }
