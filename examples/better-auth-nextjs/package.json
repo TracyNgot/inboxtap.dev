@@ -11,7 +11,7 @@
     "better-auth": "^1.6",
     "better-sqlite3": "^12.0",
     "inboxtap": "^1.4.1",
-    "next": "^16.2",
+    "next": "^16.4",
     "nodemailer": "^9.0",
     "react": "^19",
     "react-dom": "^19"
