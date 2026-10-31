@@ -10,7 +10,7 @@
   "dependencies": {
     "express": "^5.2.1",
     "inboxtap": "1.4.1",
-    "nodemailer": "^9.0.3"
+    "nodemailer": "^10.1.4"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
