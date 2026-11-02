@@ -8,7 +8,7 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "better-auth": "^1.6",
+    "better-auth": "^1.7",
     "better-sqlite3": "^12.0",
     "inboxtap": "^1.4.1",
     "next": "^16.2",
@@ -23,7 +23,7 @@
     "@types/nodemailer": "^8.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "auth": "^1.6",
+    "auth": "^1.7",
     "typescript": "^5"
   },
   "overrides": {
